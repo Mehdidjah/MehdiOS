@@ -194,12 +194,4 @@ This project is open source and available under the [MIT License](LICENSE).
 - GitHub: [@Mehdidjah](https://github.com/Mehdidjah)
 - Portfolio: [MehdiOS](https://github.com/Mehdidjah/MehdiOS)
 
-## 🙏 Acknowledgments
-
-- Inspired by macOS design language
-- Built with love using Next.js and React
-- Icons from [Tabler Icons](https://tabler.io/icons) and [React Icons](https://react-icons.github.io/react-icons/)
-
----
-
 ⭐ If you like this project, please give it a star on GitHub!
