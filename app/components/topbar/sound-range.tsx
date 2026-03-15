@@ -6,7 +6,7 @@ import musicIcon from '@/public/assets/icons/Music.png'
 import Image from 'next/image'
 import { FaForward, FaPause, FaPlay } from 'react-icons/fa'
 
-export function SoundRange({ audio }: { audio?: HTMLAudioElement }) {
+export function SoundRange({ audio }: { audio?: HTMLAudioElement | null }) {
   const soundThumb = useRef<HTMLButtonElement>(null)
   const soundLabel = useRef<HTMLDivElement>(null)
   const soundTrack = useRef<HTMLDivElement>(null)

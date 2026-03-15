@@ -28,7 +28,7 @@ export function CalculatorFrame({
   const minimizeTL = useRef<gsap.core.Timeline>(gsap.timeline())
   const { zIndex } = useSelector((state) => state.settings)
   const [isFocused, setIsFocused] = useState(true)
-  const dragRef = useRef<globalThis.Draggable[]>()
+  const dragRef = useRef<globalThis.Draggable[] | null>(null)
 
   const { contextSafe } = useGSAP(() => {
     const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1920
@@ -135,11 +135,11 @@ export function CalculatorFrame({
       className={`absolute rounded-[21.33px] bg-light-background shadow-2xl dark:bg-dark-foreground ${isFocused ? 'brightness-100' : 'brightness-90'} ${status === 'minimize' ? 'hidden' : ''}`}
     >
       <div className="relative h-full">
-        <div ref={frameHeader} className="!cursor-custom-auto">
+        <div ref={frameHeader} className="cursor-custom-auto!">
           <div className="group flex items-center p-3">
             <button
               onClick={onClose}
-              className="!cursor-custom-auto p-1"
+              className="cursor-custom-auto! p-1"
               type="button"
             >
               <div className="size-3 rounded-full bg-rose-500">
@@ -148,14 +148,14 @@ export function CalculatorFrame({
             </button>
             <button
               onClick={onMinimize}
-              className="!cursor-custom-auto p-1"
+              className="cursor-custom-auto! p-1"
               type="button"
             >
               <div className="size-3 rounded-full bg-yellow-500">
                 <IconMinus className="size-full text-black opacity-0 group-hover:opacity-100" />
               </div>
             </button>
-            <button className="!cursor-custom-auto p-1" type="button">
+            <button className="cursor-custom-auto! p-1" type="button">
               <div className="size-3 rounded-full bg-gray-500"></div>
             </button>
           </div>

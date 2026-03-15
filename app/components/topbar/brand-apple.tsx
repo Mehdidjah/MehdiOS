@@ -27,7 +27,7 @@ export function BrandApple() {
       </button>
       {isOpen && (
         <LiquidGlassShell
-          className="absolute left-0 top-[calc(100%+0.35rem)] z-[1000]"
+          className="absolute left-0 top-[calc(100%+0.35rem)] z-1000"
           contentClassName="mac-tahoe-menu-overlay w-56 overflow-hidden rounded-2xl p-2 text-white"
           displacementScale={42}
           blurAmount={0.2}
@@ -50,7 +50,7 @@ export function BrandApple() {
                     {item.label}
                   </button>
                   <div className="px-4">
-                    <span className="my-1 block h-px w-full bg-[var(--mac-tahoe-menu-separator)]" />
+                    <span className="my-1 block h-px w-full bg-(--mac-tahoe-menu-separator)" />
                   </div>
                 </Fragment>
               )

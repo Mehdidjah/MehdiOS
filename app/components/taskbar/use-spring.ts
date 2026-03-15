@@ -16,7 +16,7 @@ export function useSpring(
 ): number {
   const [value, setValue] = useState(target)
   const velocityRef = useRef(0)
-  const rafRef = useRef<number>()
+  const rafRef = useRef<number | null>(null)
 
   useEffect(() => {
     const animate = () => {
@@ -42,7 +42,7 @@ export function useSpring(
     rafRef.current = requestAnimationFrame(animate)
 
     return () => {
-      if (rafRef.current) {
+      if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current)
       }
     }
@@ -50,4 +50,3 @@ export function useSpring(
 
   return value
 }
-

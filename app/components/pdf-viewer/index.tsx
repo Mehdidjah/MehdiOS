@@ -1,39 +1,28 @@
-"use client";
+'use client'
 
-import { Viewer, Worker } from "@react-pdf-viewer/core";
-import "@react-pdf-viewer/core/lib/styles/index.css";
-import { getFilePlugin } from "@react-pdf-viewer/get-file";
-import { RenderDownloadProps } from "@react-pdf-viewer/get-file";
-import { IconDownload } from "@tabler/icons-react";
+import { IconDownload } from '@tabler/icons-react'
 
 export function PDFViewer({ id }: { id: string }) {
-    const getFilePluginInstance = getFilePlugin();
-    const { Download } = getFilePluginInstance;
+  const pdfUrl = `/assets/pdf/${id}.pdf`
 
-    return (
-        <div className="relative max-h-full overflow-y-auto">
-            {/* Download Button */}
-            <div className="flex justify-end dark:bg-dark-background bg-light-background">
-                <Download>
-                    {(props: RenderDownloadProps) => (
-                        <button
-                            className="flex items-center gap-2 px-4 py-2 font-medium"
-                            onClick={props.onClick}
-                        >
-                            <IconDownload stroke={2} />
-                            <span>Download</span>
-                        </button>
-                    )}
-                </Download>
-            </div>
+  return (
+    <div className="relative flex h-full max-h-full flex-col overflow-hidden">
+      <div className="flex justify-end bg-light-background dark:bg-dark-background">
+        <a
+          className="flex items-center gap-2 px-4 py-2 font-medium"
+          download={`${id}.pdf`}
+          href={pdfUrl}
+        >
+          <IconDownload stroke={2} />
+          <span>Download</span>
+        </a>
+      </div>
 
-            {/* PDF Viewer */}
-            <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
-                <Viewer
-                    plugins={[getFilePluginInstance]}
-                    fileUrl={`/assets/pdf/${id}.pdf`}
-                />
-            </Worker>
-        </div>
-    );
+      <iframe
+        className="h-full w-full flex-1 border-0 bg-light-background dark:bg-dark-background"
+        src={pdfUrl}
+        title={`${id} PDF preview`}
+      />
+    </div>
+  )
 }

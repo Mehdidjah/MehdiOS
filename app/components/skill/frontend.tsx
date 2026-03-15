@@ -12,19 +12,20 @@ import gsap from 'gsap'
 
 export function Frontend() {
   const skillContainer = useRef<HTMLDivElement>(null)
-  const timeline = useRef<gsap.core.Timeline>()
+  const timeline = useRef<gsap.core.Timeline | null>(null)
 
   useGSAP(
     () => {
-      timeline.current = gsap.timeline()
-      timeline.current.from('.skillCard', {
+      const skillTimeline = gsap.timeline()
+      timeline.current = skillTimeline
+      skillTimeline.from('.skillCard', {
         y: 100,
         opacity: 0,
         stagger: 0.2,
         ease: 'power1.inOut',
         duration: 0.5,
       })
-      timeline.current.eventCallback('onComplete', () => {
+      skillTimeline.eventCallback('onComplete', () => {
         gsap.to('.react', { width: '85%', duration: 1.5, ease: 'back.inOut' })
         gsap.to('.nextjs', { width: '80%', duration: 1.5, ease: 'back.inOut' })
         gsap.to('.tailwind', {

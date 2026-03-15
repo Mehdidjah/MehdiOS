@@ -100,17 +100,17 @@ export function Calculator() {
           <input
             value={history || ''}
             readOnly
-            className="h-8 w-[220px] !cursor-custom-auto overflow-y-hidden bg-transparent text-right text-2xl text-gray-400 focus:outline-none"
+            className="h-8 w-[220px] cursor-custom-auto! overflow-y-hidden bg-transparent text-right text-2xl text-gray-400 focus:outline-hidden"
           />
           <input
             ref={inputRef}
             value={expression || 0}
             readOnly
-            className="w-[220px] !cursor-custom-auto bg-transparent text-right text-4xl focus:outline-none"
+            className="w-[220px] cursor-custom-auto! bg-transparent text-right text-4xl focus:outline-hidden"
           />
         </div>
       </div>
-      <div className="grid grid-cols-[auto,auto,auto,auto] gap-2">
+      <div className="grid grid-cols-[auto_auto_auto_auto] gap-2">
         {mode === 'typing' ? (
           <CalcButton onPress={onBackspace}>
             <IconBackspace stroke={2} />

@@ -60,7 +60,7 @@ export function Wallpaper() {
               setTheme(e.target.value)
             }}
             value={theme}
-            className="bg-light-background dark:bg-dark-background px-2 py-[2px] focus:outline-none"
+            className="bg-light-background dark:bg-dark-background px-2 py-[2px] focus:outline-hidden"
           >
             <option value="system">Automatic</option>
             <option value="dark">Dark</option>

@@ -8,22 +8,20 @@ export function Weather() {
   const [condition, setCondition] = useState<{
     WeatherText: string
     Temperature: number
-  }>()
+  } | null>(null)
+  const [isUnavailable, setIsUnavailable] = useState(false)
 
   useEffect(() => {
     let ignore = false
 
     if (!navigator.geolocation) {
+      setIsUnavailable(true)
       return
     }
 
-    const handleError = (error: GeolocationPositionError) => {
+    const handleError = () => {
       if (!ignore) {
-        console.error('Geolocation error:', error)
-        setCondition({
-          WeatherText: 'Location unavailable',
-          Temperature: 0,
-        })
+        setIsUnavailable(true)
       }
     }
 
@@ -32,6 +30,7 @@ export function Weather() {
         if (ignore) return
 
         try {
+          setIsUnavailable(false)
           const res = await getCurrentConditions({
             lat: position.coords.latitude,
             lon: position.coords.longitude,
@@ -44,10 +43,15 @@ export function Weather() {
                 'Unknown Condition',
               Temperature: res.current.temperature2m,
             })
+            return
           }
-        } catch (error) {
+
           if (!ignore) {
-            console.error('Weather fetch error:', error)
+            setIsUnavailable(true)
+          }
+        } catch {
+          if (!ignore) {
+            setIsUnavailable(true)
           }
         }
       },
@@ -65,7 +69,9 @@ export function Weather() {
       <span>
         {condition
           ? `${condition.Temperature.toFixed(1)} °C`
-          : 'Loading...'}
+          : isUnavailable
+            ? '-- °C'
+            : 'Loading...'}
       </span>
     </div>
   )

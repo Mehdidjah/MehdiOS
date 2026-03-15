@@ -8,7 +8,7 @@ export function TrashBin() {
   const dispatch = useDispatch()
 
   return (
-    <div className="grid h-full grid-cols-1 sm:grid-cols-[200px,1fr] lg:grid-cols-[250px,1fr]">
+    <div className="grid h-full grid-cols-1 sm:grid-cols-[200px_1fr] lg:grid-cols-[250px_1fr]">
       <div className="max-h-full overflow-y-auto bg-light-foreground p-2 sm:p-4 dark:bg-dark-foreground border-b sm:border-b-0 sm:border-r border-light-border dark:border-dark-border">
         <h3 className="text-sm font-medium text-[#9a9a9a]">Favourites</h3>
         <div className="mt-2 space-y-1">
@@ -33,7 +33,7 @@ export function TrashBin() {
             onClick={() => {
               dispatch(cleanTrash())
             }}
-            className="rounded bg-primary px-3 py-[2px] text-white disabled:bg-gray-500"
+            className="rounded-sm bg-primary px-3 py-[2px] text-white disabled:bg-gray-500"
           >
             Empty
           </button>

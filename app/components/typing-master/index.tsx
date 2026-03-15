@@ -10,7 +10,7 @@ export function TypingMaster() {
     () => typingTexts[random]?.text || '',
     [random]
   )
-  const intervalRef = useRef<number>()
+  const intervalRef = useRef<number | null>(null)
   const [typing, setTyping] = useState('')
   const [timer, setTimer] = useState(60)
   const [status, setStatus] = useState<'typing' | 'idle'>('idle')
@@ -20,9 +20,9 @@ export function TypingMaster() {
 
   useEffect(() => {
     if (status === 'idle') {
-      if (intervalRef.current !== undefined) {
+      if (intervalRef.current !== null) {
         clearInterval(intervalRef.current)
-        intervalRef.current = undefined
+        intervalRef.current = null
       }
       return
     }
@@ -30,9 +30,9 @@ export function TypingMaster() {
     intervalRef.current = window.setInterval(() => {
       setTimer((prev) => {
         if (prev <= 1) {
-          if (intervalRef.current !== undefined) {
+          if (intervalRef.current !== null) {
             clearInterval(intervalRef.current)
-            intervalRef.current = undefined
+            intervalRef.current = null
           }
 
           const fullText = resultText ? `${resultText} ${typing}` : typing
@@ -59,9 +59,9 @@ export function TypingMaster() {
     }, 1000)
 
     return () => {
-      if (intervalRef.current !== undefined) {
+      if (intervalRef.current !== null) {
         clearInterval(intervalRef.current)
-        intervalRef.current = undefined
+        intervalRef.current = null
       }
     }
   }, [status, resultText, typing, paragraph])
@@ -88,18 +88,18 @@ export function TypingMaster() {
           <div className="flex items-center gap-2 sm:gap-4 font-medium">
             <button
               onClick={handleRestart}
-              className="rounded bg-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white"
+              className="rounded-sm bg-primary px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white"
               type="button"
             >
               Restart
             </button>
-            <h4 className="flex items-center gap-1 rounded bg-white px-2 sm:px-3 py-1 sm:py-1.5 text-sm sm:text-base font-medium dark:bg-black">
+            <h4 className="flex items-center gap-1 rounded-sm bg-white px-2 sm:px-3 py-1 sm:py-1.5 text-sm sm:text-base font-medium dark:bg-black">
               <IconClock className="size-4 sm:size-5" />
               {timer}s
             </h4>
           </div>
         </div>
-        <div className="w-full max-w-4xl text-base sm:text-2xl lg:text-3xl font-medium px-2 break-words">
+        <div className="w-full max-w-4xl text-base sm:text-2xl lg:text-3xl font-medium px-2 wrap-break-word">
           {singleLine.split('').map((char, i) => {
             if (typing[i]) {
               if (typing[i] === char) {
@@ -155,7 +155,7 @@ export function TypingMaster() {
               }
             }
           }}
-          className="w-full max-w-4xl rounded-md bg-light-foreground px-3 sm:px-4 py-3 sm:py-4 text-base sm:text-2xl lg:text-3xl font-medium focus:outline-none dark:bg-dark-foreground mx-2 sm:mx-0"
+          className="w-full max-w-4xl rounded-md bg-light-foreground px-3 sm:px-4 py-3 sm:py-4 text-base sm:text-2xl lg:text-3xl font-medium focus:outline-hidden dark:bg-dark-foreground mx-2 sm:mx-0"
         />
       </div>
     </div>

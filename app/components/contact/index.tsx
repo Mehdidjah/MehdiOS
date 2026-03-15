@@ -35,7 +35,7 @@ export function Contact() {
           href="https://www.linkedin.com/in/mehdi-djahraoui-134bb6389/"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex gap-2 rounded bg-black/5 px-3 py-1 text-sky-500 dark:bg-white/10"
+          className="flex gap-2 rounded-sm bg-black/5 px-3 py-1 text-sky-500 dark:bg-white/10"
         >
           <IconBrandLinkedin />
           <span>Linkedin</span>
@@ -44,7 +44,7 @@ export function Contact() {
           href="https://github.com/Mehdidjah?tab=repositories"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex gap-2 rounded bg-black/5 px-3 py-1 dark:bg-white/10"
+          className="flex gap-2 rounded-sm bg-black/5 px-3 py-1 dark:bg-white/10"
         >
           <IconBrandGithub />
           <span>Github</span>
@@ -53,14 +53,14 @@ export function Contact() {
           href="#"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex gap-2 rounded bg-black/5 px-3 py-1 text-[#FFA116] dark:bg-white/10"
+          className="flex gap-2 rounded-sm bg-black/5 px-3 py-1 text-[#FFA116] dark:bg-white/10"
         >
           <IconBrandLeetcode />
           <span>LeetCode</span>
         </Link>
         <Link
           href="mailto:phoenixytbdjah7@gmail.com?subject=Hello%20Mehdi&body=Hi%20Mehdi,"
-          className="flex gap-2 rounded bg-black/5 px-3 py-1 text-[#EB493B] dark:bg-white/10"
+          className="flex gap-2 rounded-sm bg-black/5 px-3 py-1 text-[#EB493B] dark:bg-white/10"
         >
           <IconBrandGmail />
           <span>E-mail</span>
@@ -74,7 +74,7 @@ export function Contact() {
             src="/assets/images/author2.webp"
             width={200}
             height={100}
-            className="rounded w-full max-w-[200px] mx-auto sm:mx-0"
+            className="rounded-sm w-full max-w-[200px] mx-auto sm:mx-0"
           />
         </div>
         <p className="mb-4">

@@ -28,7 +28,7 @@ export function Topbar() {
   const [isOpenCC, setIsOpenCC] = useState(false)
   const ccRef = useRef<HTMLDivElement>(null)
   const { activeApp } = useSelector((state) => state.settings)
-  const audio = useRef<HTMLAudioElement>()
+  const audio = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -121,7 +121,7 @@ export function Topbar() {
                   {connections.map((c) => (
                     <div
                       key={c.id}
-                      className="grid grid-cols-[auto,1fr] items-center gap-2"
+                      className="grid grid-cols-[auto_1fr] items-center gap-2"
                     >
                       <div className="flex size-9 items-center justify-center rounded-full bg-[#007AFF]">
                         <c.Icon className="text-xl text-white" />
@@ -136,7 +136,7 @@ export function Topbar() {
                 <div className="grid grid-rows-2 gap-4">
                   <div className="mac-tahoe-surface flex items-center gap-2 rounded-[20px] border border-white/10 p-4">
                     <button
-                      className="mac-tahoe-panel-button flex size-9 items-center justify-center rounded-full bg-white/[0.05]"
+                      className="mac-tahoe-panel-button flex size-9 items-center justify-center rounded-full bg-white/5"
                       type="button"
                     >
                       <IoIosMoon className="text-xl" />

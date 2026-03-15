@@ -54,7 +54,7 @@ export function LockScreen({ next }: { next: () => void }) {
     <>
       <div
         ref={bodyRef}
-        className="fixed inset-0 z-[9999] flex flex-col items-center justify-between gap-5 bg-black bg-lock bg-cover bg-center bg-no-repeat py-20"
+        className="fixed inset-0 z-9999 flex flex-col items-center justify-between gap-5 bg-black bg-lock bg-cover bg-center bg-no-repeat py-20"
       >
         <div>
           <p className="text-center text-2xl font-medium text-[#ffffb5]">
@@ -72,7 +72,7 @@ export function LockScreen({ next }: { next: () => void }) {
           />
           <form onSubmit={handleSubmit}>
             <input
-              className="w-36 rounded-full bg-white/35 px-2 py-1 text-xs placeholder:text-gray-500 focus:outline-none"
+              className="w-36 rounded-full bg-white/35 px-2 py-1 text-xs placeholder:text-gray-500 focus:outline-hidden"
               placeholder="Enter Any Password"
               value={password}
               type="password"
@@ -85,7 +85,7 @@ export function LockScreen({ next }: { next: () => void }) {
       </div>
       <div
         ref={blankRef}
-        className="fixed inset-0 z-[9998] flex flex-col items-center justify-center gap-5 bg-dark-background"
+        className="fixed inset-0 z-9998 flex flex-col items-center justify-center gap-5 bg-dark-background"
       ></div>
     </>
   )

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { Taskbar } from './components/taskbar'
 import { ReduxProvider } from './providers/redux-provider'
@@ -6,14 +6,20 @@ import { Topbar } from './components/topbar'
 import { WalpaperProvider } from './components/walpaper-wraper'
 import { ThemeProvider } from 'next-themes'
 
+const metadataBase = new URL(
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+)
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+}
+
 export const metadata: Metadata = {
   title: 'MehdiOS',
   description: 'Creating macOS version as portfolio',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-  },
+  metadataBase,
   openGraph: {
     title: 'MehdiOS',
     description: 'Creating macOS version as portfolio',

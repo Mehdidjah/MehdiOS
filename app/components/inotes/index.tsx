@@ -274,11 +274,11 @@ const folderSections: FolderSection[] = [
 ]
 
 const toolbarButtonClass =
-  'flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-[#c8d0ef] transition-colors hover:bg-white/[0.08] hover:text-white'
+  'flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/3 text-[#c8d0ef] transition-colors hover:bg-white/8 hover:text-white'
 const toolbarButtonActiveClass =
-  'border-white/12 bg-white/[0.09] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]'
+  'border-white/12 bg-white/9 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]'
 const noteActionButtonClass =
-  'flex size-8 items-center justify-center rounded-lg text-[#98a1c4] transition-colors hover:bg-white/[0.06] hover:text-white'
+  'flex size-8 items-center justify-center rounded-lg text-[#98a1c4] transition-colors hover:bg-white/6 hover:text-white'
 
 export function INotes() {
   const inotes = useSelector((state) => state.iNotes.notes)
@@ -496,8 +496,8 @@ export function INotes() {
 
   return (
     <div className="h-full overflow-hidden bg-[#1a1b23] text-[#f4f6fb]">
-      <div className="grid h-full min-h-0 grid-rows-[auto,minmax(0,1fr)]">
-        <div className="grid grid-cols-1 border-b border-white/8 bg-[#252734] md:grid-cols-[240px,280px,minmax(0,1fr)] xl:grid-cols-[280px,320px,minmax(0,1fr)]">
+      <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)]">
+        <div className="grid grid-cols-1 border-b border-white/8 bg-[#252734] md:grid-cols-[240px_280px_minmax(0,1fr)] xl:grid-cols-[280px_320px_minmax(0,1fr)]">
           <div className="flex items-center gap-2 border-b border-white/8 px-4 py-3 md:border-b-0 md:border-r md:border-white/8">
             <button
               className={toolbarButtonClass}
@@ -524,7 +524,7 @@ export function INotes() {
             <button className={toolbarButtonClass} type="button">
               <IconListDetails className="size-4" stroke={1.8} />
             </button>
-            <div className="ml-auto rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-[#b3bbda]">
+            <div className="ml-auto rounded-full border border-white/10 bg-white/4 px-3 py-1 text-xs font-medium text-[#b3bbda]">
               {selectedFolder.name}
             </div>
           </div>
@@ -567,7 +567,7 @@ export function INotes() {
                 stroke={1.8}
               />
               <input
-                className="w-full rounded-full border border-white/10 bg-[#1b1d27] py-2.5 pl-9 pr-4 text-[13px] text-[#eef2ff] outline-none placeholder:text-[#6f7694]"
+                className="w-full rounded-full border border-white/10 bg-[#1b1d27] py-2.5 pl-9 pr-4 text-[13px] text-[#eef2ff] outline-hidden placeholder:text-[#6f7694]"
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="Search"
                 type="text"
@@ -577,7 +577,7 @@ export function INotes() {
           </div>
         </div>
 
-        <div className="grid min-h-0 grid-cols-1 grid-rows-[240px,320px,minmax(0,1fr)] md:grid-cols-[240px,280px,minmax(0,1fr)] md:grid-rows-1 xl:grid-cols-[280px,320px,minmax(0,1fr)]">
+        <div className="grid min-h-0 grid-cols-1 grid-rows-[240px_320px_minmax(0,1fr)] md:grid-cols-[240px_280px_minmax(0,1fr)] md:grid-rows-1 xl:grid-cols-[280px_320px_minmax(0,1fr)]">
           <aside className="flex min-h-0 flex-col border-b border-white/8 bg-[#20222d] md:border-b-0 md:border-r md:border-white/8">
             <div className="border-b border-white/8 px-5 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#727893]">
@@ -611,8 +611,8 @@ export function INotes() {
                         <button
                           className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
                             isActive
-                              ? 'bg-white/[0.08] text-[#0a84ff] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]'
-                              : 'text-[#eef2ff] hover:bg-white/[0.04]'
+                              ? 'bg-white/8 text-[#0a84ff] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]'
+                              : 'text-[#eef2ff] hover:bg-white/4'
                           }`}
                           key={item.id}
                           onClick={() => handleFolderSelect(item.id)}
@@ -650,7 +650,7 @@ export function INotes() {
                 <h3 className="text-[28px] font-semibold tracking-tight text-[#f4f6fb]">
                   {selectedFolder.name}
                 </h3>
-                <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-[#a7afcf]">
+                <span className="rounded-full border border-white/10 bg-white/4 px-3 py-1 text-xs font-medium text-[#a7afcf]">
                   {filteredNotes.length}
                 </span>
               </div>
@@ -673,7 +673,7 @@ export function INotes() {
                             className={`w-full rounded-2xl border px-4 py-3 text-left transition-all ${
                               isActive
                                 ? 'border-[#2997ff]/50 bg-[#0a84ff] text-white shadow-[0_18px_30px_rgba(10,132,255,0.28)]'
-                                : 'border-white/[0.06] bg-white/[0.03] text-[#f3f5ff] hover:bg-white/[0.06]'
+                                : 'border-white/6 bg-white/3 text-[#f3f5ff] hover:bg-white/6'
                             }`}
                             key={note.id}
                             onClick={() => {
@@ -731,7 +731,7 @@ export function INotes() {
                     </p>
                   </div>
                   <button
-                    className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-[13px] font-medium text-[#eef2ff] transition-colors hover:bg-white/[0.08]"
+                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[13px] font-medium text-[#eef2ff] transition-colors hover:bg-white/8"
                     onClick={onNewNote}
                     type="button"
                   >
@@ -753,7 +753,7 @@ export function INotes() {
                 <div className="flex-1 overflow-y-auto">
                   <div className="mx-auto flex min-h-full w-full max-w-[980px] min-w-0 flex-col px-6 py-8 sm:px-10 sm:py-10">
                     <input
-                      className="mb-8 w-full bg-transparent text-[34px] font-semibold tracking-tight text-[#f7f8ff] outline-none placeholder:text-[#5f6785]"
+                      className="mb-8 w-full bg-transparent text-[34px] font-semibold tracking-tight text-[#f7f8ff] outline-hidden placeholder:text-[#5f6785]"
                       onChange={handleTitleChange}
                       onDoubleClick={onEdit}
                       placeholder="Untitled Note"
@@ -763,7 +763,7 @@ export function INotes() {
                       value={activeNoteParts.title}
                     />
                     <textarea
-                      className="min-h-[420px] flex-1 resize-none bg-transparent text-[17px] leading-8 text-[#d6dcf3] outline-none placeholder:text-[#5f6785]"
+                      className="min-h-[420px] flex-1 resize-none bg-transparent text-[17px] leading-8 text-[#d6dcf3] outline-hidden placeholder:text-[#5f6785]"
                       onChange={handleBodyChange}
                       onDoubleClick={onEdit}
                       placeholder="Start writing..."

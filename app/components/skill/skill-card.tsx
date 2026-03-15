@@ -8,7 +8,7 @@ export default function SkillCard({
   className: string
 }) {
   return (
-    <div className="skillCard grid grid-cols-[auto,1fr] gap-4 dark:hover:bg-[#353535] hover:bg-white">
+    <div className="skillCard grid grid-cols-[auto_1fr] gap-4 dark:hover:bg-dark-input-bg hover:bg-white">
       {children}
       <div className="flex flex-col gap-2">
         <h2 className="text-xl font-medium">{title}</h2>

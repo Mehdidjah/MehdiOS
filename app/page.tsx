@@ -146,7 +146,7 @@ export default function Home() {
   return (
     <>
       {screen === 'loading' && (
-        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-5 bg-black overflow-x-hidden">
+        <div className="fixed inset-0 z-9999 flex flex-col items-center justify-center gap-5 bg-black overflow-x-hidden">
           <FaApple className="text-6xl sm:text-8xl text-white" />
           <div className="h-[5px] w-36 sm:w-44 rounded-full bg-[#414141]">
             <div ref={loaderRef} className="h-full w-0 rounded-full bg-white" />
@@ -244,7 +244,7 @@ export default function Home() {
       )}
 
       {screen === 'desktop' && screenSize && !isScreenSizeValid && (
-        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-4 sm:gap-5 bg-black p-4 overflow-x-hidden">
+        <div className="fixed inset-0 z-9999 flex flex-col items-center justify-center gap-4 sm:gap-5 bg-black p-4 overflow-x-hidden">
           <h1 className="text-base sm:text-lg md:text-2xl font-medium text-white text-center">
             Screen size too small
           </h1>

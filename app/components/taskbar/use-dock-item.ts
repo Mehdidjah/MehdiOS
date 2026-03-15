@@ -13,7 +13,7 @@ interface SpringState {
 
 export function useDockItem(
   mouseX: number | null,
-  iconRef: React.RefObject<HTMLElement>,
+  iconRef: React.RefObject<HTMLElement | null>,
   config: DockMagnificationConfig = DEFAULT_DOCK_CONFIG
 ) {
   const [distance, setDistance] = useState(BEYOND_DISTANCE_LIMIT)
@@ -22,8 +22,8 @@ export function useDockItem(
     value: config.baseWidth,
     velocity: 0,
   })
-  const rafRef = useRef<number>()
-  const animationRef = useRef<number>()
+  const rafRef = useRef<number | null>(null)
+  const animationRef = useRef<number | null>(null)
   const getWidthFromDistance = createDistanceInterpolation(config)
 
   const animate = useCallback(() => {
@@ -46,7 +46,7 @@ export function useDockItem(
     rafRef.current = requestAnimationFrame(animate)
 
     return () => {
-      if (rafRef.current) {
+      if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current)
       }
     }
@@ -83,7 +83,7 @@ export function useDockItem(
     animationRef.current = requestAnimationFrame(springAnimate)
 
     return () => {
-      if (animationRef.current) {
+      if (animationRef.current !== null) {
         cancelAnimationFrame(animationRef.current)
       }
     }

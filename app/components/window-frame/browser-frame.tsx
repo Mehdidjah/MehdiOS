@@ -58,7 +58,7 @@ export function BrowserFrame({
   const minimizeTL = useRef<gsap.core.Timeline>(gsap.timeline())
   const fullscreenTL = useRef<gsap.core.Timeline>(gsap.timeline())
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const dragRef = useRef<globalThis.Draggable[]>()
+  const dragRef = useRef<globalThis.Draggable[] | null>(null)
   const { zIndex } = useSelector((state) => state.settings)
   const [isFocused, setIsFocused] = useState(true)
   const { theme } = useTheme()
@@ -417,7 +417,7 @@ export function BrowserFrame({
         <div
           ref={frameHeader}
           onDoubleClick={onFullScreen}
-          className="grid !cursor-custom-auto grid-cols-[auto,1fr] bg-light-background py-1 sm:py-2 pb-1 dark:bg-dark-background"
+          className="grid cursor-custom-auto! grid-cols-[auto_1fr] bg-light-background py-1 sm:py-2 pb-1 dark:bg-dark-background"
         >
           <div className="group flex items-center px-2">
             <button
@@ -425,7 +425,7 @@ export function BrowserFrame({
                 onClose()
                 dispatch(resetChrome())
               }}
-              className="!cursor-custom-auto p-1"
+              className="cursor-custom-auto! p-1"
               type="button"
             >
               <div className="size-3 rounded-full bg-[#FF6058]">
@@ -434,7 +434,7 @@ export function BrowserFrame({
             </button>
             <button
               onClick={onMinimize}
-              className="!cursor-custom-auto p-1"
+              className="cursor-custom-auto! p-1"
               type="button"
             >
               <div className="size-3 rounded-full bg-[#FFC130]">
@@ -443,7 +443,7 @@ export function BrowserFrame({
             </button>
             <button
               onClick={onFullScreen}
-              className="!cursor-custom-auto p-1 group/fullscreen relative"
+              className="cursor-custom-auto! p-1 group/fullscreen relative"
               type="button"
             >
               <div className="size-3 rounded-full bg-[#27CA40]">
@@ -453,7 +453,7 @@ export function BrowserFrame({
                 onClick={(e) => {
                   e.stopPropagation()
                 }}
-                className="invisible absolute -left-5 top-7 z-[1000] transition-all delay-200 group-hover/fullscreen:visible"
+                className="invisible absolute -left-5 top-7 z-1000 transition-all delay-200 group-hover/fullscreen:visible"
               >
                 <div className="relative w-56 rounded-md border-2 border-[#e1e1e1] bg-[#f3f3f3] p-2 shadow-xl dark:border-[#3e3e3e] dark:bg-[#181818]">
                   <span className="absolute -top-[9px] left-5 block size-4 rotate-45 rounded-tl border-l-2 border-t-2 border-[#e1e1e1] bg-[#f3f3f3] dark:border-[#3e3e3e] dark:bg-[#181818]" />
@@ -463,30 +463,30 @@ export function BrowserFrame({
                   <div className="grid grid-cols-4 items-center gap-5 p-4">
                     <div
                       onClick={onLeftScreen}
-                      className="flex h-5 justify-start rounded border-2 border-dark-background p-[1px] dark:border-light-background/80"
+                      className="flex h-5 justify-start rounded-sm border-2 border-dark-background p-px dark:border-light-background/80"
                     >
-                      <div className="h-full w-1/2 rounded-sm bg-dark-background dark:bg-light-background/80"></div>
+                      <div className="h-full w-1/2 rounded-xs bg-dark-background dark:bg-light-background/80"></div>
                     </div>
                     <div
                       onClick={onRightScreen}
-                      className="flex h-5 justify-end rounded border-2 border-dark-background p-[1px] dark:border-light-background/80"
+                      className="flex h-5 justify-end rounded-sm border-2 border-dark-background p-px dark:border-light-background/80"
                     >
-                      <div className="h-full w-1/2 rounded-sm bg-dark-background dark:bg-light-background/80"></div>
+                      <div className="h-full w-1/2 rounded-xs bg-dark-background dark:bg-light-background/80"></div>
                     </div>
                     <div
                       onClick={onTopScreen}
-                      className="flex h-5 items-start rounded border-2 border-dark-background p-[1px] dark:border-light-background/80"
+                      className="flex h-5 items-start rounded-sm border-2 border-dark-background p-px dark:border-light-background/80"
                     >
-                      <div className="h-1/2 w-full rounded-sm bg-dark-background dark:bg-light-background/80"></div>
+                      <div className="h-1/2 w-full rounded-xs bg-dark-background dark:bg-light-background/80"></div>
                     </div>
                     <div
                       onClick={onBottomScreen}
-                      className="flex h-5 items-end rounded border-2 border-dark-background p-[1px] dark:border-light-background/80"
+                      className="flex h-5 items-end rounded-sm border-2 border-dark-background p-px dark:border-light-background/80"
                     >
-                      <div className="h-1/2 w-full rounded-sm bg-dark-background dark:bg-light-background/80"></div>
+                      <div className="h-1/2 w-full rounded-xs bg-dark-background dark:bg-light-background/80"></div>
                     </div>
                   </div>
-                  <div className="mb-1 h-[1px] bg-[#bbb] dark:bg-[#5b5b5b]" />
+                  <div className="mb-1 h-px bg-[#bbb] dark:bg-[#5b5b5b]" />
                   <div>
                     <div
                       onClick={onFullScreen}
@@ -511,7 +511,7 @@ export function BrowserFrame({
                   setHomeSearchQuery('')
                 }}
                 key={tab.id}
-                className="relative flex w-full max-w-32 sm:max-w-40 items-center justify-between rounded-t-md bg-light-foreground px-2 sm:px-3 py-1 sm:py-[6px] dark:bg-[#35363A] flex-shrink-0"
+                className="relative flex w-full max-w-32 sm:max-w-40 items-center justify-between rounded-t-md bg-light-foreground px-2 sm:px-3 py-1 sm:py-[6px] dark:bg-[#35363A] shrink-0"
               >
                 <span className="line-clamp-1 truncate text-xs sm:text-sm">{tab.title}</span>
                 <IconX
@@ -522,7 +522,7 @@ export function BrowserFrame({
                     }
                   }}
                   stroke={2}
-                  className="size-3 sm:size-4 flex-shrink-0"
+                  className="size-3 sm:size-4 shrink-0"
                 />
                 {focusedTab === tab.id && (
                   <span className="absolute -bottom-1 left-0 h-1 w-full bg-light-foreground dark:bg-[#35363A]"></span>
@@ -563,7 +563,7 @@ export function BrowserFrame({
               aria-label="Go back"
               disabled={!activeTab?.iframe_url}
             >
-              <IconArrowLeft stroke={2} className="size-4 sm:size-5 flex-shrink-0" />
+              <IconArrowLeft stroke={2} className="size-4 sm:size-5 shrink-0" />
             </button>
             <button
               type="button"
@@ -583,7 +583,7 @@ export function BrowserFrame({
               aria-label="Go forward"
               disabled={!activeTab?.iframe_url}
             >
-              <IconArrowRight stroke={2} className="size-4 sm:size-5 flex-shrink-0" />
+              <IconArrowRight stroke={2} className="size-4 sm:size-5 shrink-0" />
             </button>
             <button
               type="button"
@@ -599,7 +599,7 @@ export function BrowserFrame({
               aria-label="Reload"
               disabled={!activeTab?.iframe_url}
             >
-              <IconReload stroke={2} className="size-4 sm:size-5 flex-shrink-0" />
+              <IconReload stroke={2} className="size-4 sm:size-5 shrink-0" />
             </button>
             <button
               type="button"
@@ -611,7 +611,7 @@ export function BrowserFrame({
               className="hover:text-gray-700 dark:hover:text-gray-300"
               aria-label="Home"
             >
-              <IconHome stroke={2} className="size-4 sm:size-5 flex-shrink-0" />
+              <IconHome stroke={2} className="size-4 sm:size-5 shrink-0" />
             </button>
             <form onSubmit={handleSubmit} className="w-full min-w-0">
               <input
@@ -622,11 +622,11 @@ export function BrowserFrame({
                 }}
                 type="text"
                 placeholder="Search or enter website name"
-                className="w-full rounded-2xl border-2 border-light-border bg-light-background px-2 sm:px-3 py-1 text-xs sm:text-sm focus:border-[#858585] focus:outline-none dark:border-[#191919] dark:bg-[#1d1d1d] truncate"
+                className="w-full rounded-2xl border-2 border-light-border bg-light-background px-2 sm:px-3 py-1 text-xs sm:text-sm focus:border-[#858585] focus:outline-hidden dark:border-[#191919] dark:bg-[#1d1d1d] truncate"
               />
               <input type="submit" hidden />
             </form>
-            <IconDotsVertical stroke={2} className="size-4 sm:size-5 flex-shrink-0" />
+            <IconDotsVertical stroke={2} className="size-4 sm:size-5 shrink-0" />
           </div>
           {activeTab && activeTab.iframe_url ? (
             <div className="h-[calc(100%-40px)] w-full overflow-hidden bg-light-background dark:bg-dark-background relative">
@@ -661,7 +661,7 @@ export function BrowserFrame({
                   value={homeSearchQuery}
                   onChange={(e) => setHomeSearchQuery(e.target.value)}
                   placeholder="Search DuckDuckGo or enter a URL"
-                  className="h-12 w-full rounded-full border-2 border-light-border bg-light-background px-4 text-sm focus:border-[#858585] focus:outline-none dark:border-[#858585] dark:bg-[#1d1d1d]"
+                  className="h-12 w-full rounded-full border-2 border-light-border bg-light-background px-4 text-sm focus:border-[#858585] focus:outline-hidden dark:border-[#858585] dark:bg-[#1d1d1d]"
                 />
                 <input type="submit" hidden />
               </form>

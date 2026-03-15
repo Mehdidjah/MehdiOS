@@ -93,7 +93,7 @@ export function WindowFrame({
   const minimizeTL = useRef<gsap.core.Timeline>(gsap.timeline())
   const fullscreenTL = useRef<gsap.core.Timeline>(gsap.timeline())
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const dragRef = useRef<globalThis.Draggable[]>()
+  const dragRef = useRef<globalThis.Draggable[] | null>(null)
   const { zIndex } = useSelector((state) => state.settings)
   const [isFocused, setIsFocused] = useState(true)
   const isNotesFrame = frame_id === 'inotes'
@@ -410,7 +410,7 @@ export function WindowFrame({
         <div
           ref={frameHeader}
           onDoubleClick={onFullScreen}
-          className="relative grid !cursor-custom-auto grid-cols-[auto,1fr] sm:grid-cols-[200px,1fr] lg:grid-cols-[250px,1fr]"
+          className="relative grid cursor-custom-auto! grid-cols-[auto_1fr] sm:grid-cols-[200px_1fr] lg:grid-cols-[250px_1fr]"
         >
           <div
             className={`group flex items-center p-3 ${
@@ -423,7 +423,7 @@ export function WindowFrame({
           >
             <button
               onClick={onClose}
-              className="!cursor-custom-auto p-1"
+              className="cursor-custom-auto! p-1"
               type="button"
             >
               <div className="size-3 rounded-full bg-rose-500">
@@ -432,7 +432,7 @@ export function WindowFrame({
             </button>
             <button
               onClick={onMinimize}
-              className="!cursor-custom-auto p-1"
+              className="cursor-custom-auto! p-1"
               type="button"
             >
               <div className="size-3 rounded-full bg-yellow-500">
@@ -441,7 +441,7 @@ export function WindowFrame({
             </button>
             <button
               onClick={onFullScreen}
-              className="group/fullscreen relative !cursor-custom-auto p-1"
+              className="group/fullscreen relative cursor-custom-auto! p-1"
               type="button"
             >
               <div className="size-3 rounded-full bg-green-500">
@@ -451,7 +451,7 @@ export function WindowFrame({
                 onClick={(e) => {
                   e.stopPropagation()
                 }}
-                className="invisible absolute -left-5 top-7 z-[1000] transition-all delay-200 group-hover/fullscreen:visible"
+                className="invisible absolute -left-5 top-7 z-1000 transition-all delay-200 group-hover/fullscreen:visible"
               >
                 <div className="relative w-56 rounded-md border-2 border-[#e1e1e1] bg-[#f3f3f3] p-2 shadow-xl dark:border-[#3e3e3e] dark:bg-[#181818]">
                   <span className="absolute -top-[9px] left-5 block size-4 rotate-45 rounded-tl border-l-2 border-t-2 border-[#e1e1e1] bg-[#f3f3f3] dark:border-[#3e3e3e] dark:bg-[#181818]" />
@@ -461,30 +461,30 @@ export function WindowFrame({
                   <div className="grid grid-cols-4 items-center gap-5 p-4">
                     <div
                       onClick={onLeftScreen}
-                      className="flex h-5 justify-start rounded border-2 border-dark-background p-[1px] dark:border-light-background/80"
+                      className="flex h-5 justify-start rounded-sm border-2 border-dark-background p-px dark:border-light-background/80"
                     >
-                      <div className="h-full w-1/2 rounded-sm bg-dark-background dark:bg-light-background/80"></div>
+                      <div className="h-full w-1/2 rounded-xs bg-dark-background dark:bg-light-background/80"></div>
                     </div>
                     <div
                       onClick={onRightScreen}
-                      className="flex h-5 justify-end rounded border-2 border-dark-background p-[1px] dark:border-light-background/80"
+                      className="flex h-5 justify-end rounded-sm border-2 border-dark-background p-px dark:border-light-background/80"
                     >
-                      <div className="h-full w-1/2 rounded-sm bg-dark-background dark:bg-light-background/80"></div>
+                      <div className="h-full w-1/2 rounded-xs bg-dark-background dark:bg-light-background/80"></div>
                     </div>
                     <div
                       onClick={onTopScreen}
-                      className="flex h-5 items-start rounded border-2 border-dark-background p-[1px] dark:border-light-background/80"
+                      className="flex h-5 items-start rounded-sm border-2 border-dark-background p-px dark:border-light-background/80"
                     >
-                      <div className="h-1/2 w-full rounded-sm bg-dark-background dark:bg-light-background/80"></div>
+                      <div className="h-1/2 w-full rounded-xs bg-dark-background dark:bg-light-background/80"></div>
                     </div>
                     <div
                       onClick={onBottomScreen}
-                      className="flex h-5 items-end rounded border-2 border-dark-background p-[1px] dark:border-light-background/80"
+                      className="flex h-5 items-end rounded-sm border-2 border-dark-background p-px dark:border-light-background/80"
                     >
-                      <div className="h-1/2 w-full rounded-sm bg-dark-background dark:bg-light-background/80"></div>
+                      <div className="h-1/2 w-full rounded-xs bg-dark-background dark:bg-light-background/80"></div>
                     </div>
                   </div>
-                  <div className="mb-1 h-[1px] bg-[#bbb] dark:bg-[#5b5b5b]" />
+                  <div className="mb-1 h-px bg-[#bbb] dark:bg-[#5b5b5b]" />
                   <div>
                     <div
                       onClick={onFullScreen}
@@ -510,11 +510,11 @@ export function WindowFrame({
               isNotesFrame
                 ? 'bg-[#252734] text-[#eef2ff]'
                 : 'bg-light-background dark:bg-dark-background dark:text-dark-text'
-            } ${enableSidebar ? 'grid grid-cols-[1fr,auto] justify-between' : 'flex justify-end'}`}
+            } ${enableSidebar ? 'grid grid-cols-[1fr_auto] justify-between' : 'flex justify-end'}`}
           >
             {enableSidebar && (
               <div
-                className={`flex !cursor-custom-auto items-center gap-1 sm:gap-2 ${
+                className={`flex cursor-custom-auto! items-center gap-1 sm:gap-2 ${
                   isNotesFrame
                     ? 'text-[#c7cfea]'
                     : 'text-dark-primary dark:text-light-primary'

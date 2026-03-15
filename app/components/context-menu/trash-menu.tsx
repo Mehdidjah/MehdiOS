@@ -21,10 +21,10 @@ export function TrashContextMenu({
       onContextMenu={(e) => {
         e.stopPropagation()
       }}
-      className="absolute z-[9999] w-52 rounded-md bg-dark-context-bg text-sm shadow-2xl"
+      className="absolute z-9999 w-52 rounded-md bg-dark-context-bg text-sm shadow-2xl"
     >
       <ul className="space-y-1 p-2 [&>li:hover]:bg-[#222222] [&>li]:rounded-md [&>li]:p-[3px] [&>li]:px-2 [&>li]:text-[#e0e0e0]">
-        <li className="relative !mb-2 !text-[#888888] after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:bg-[#5a5a5a] after:content-['']">
+        <li className="relative mb-2! text-[#888888]! after:absolute after:bottom-[-4px] after:left-0 after:h-px after:w-full after:bg-[#5a5a5a] after:content-['']">
           Open
         </li>
         <li
@@ -32,7 +32,7 @@ export function TrashContextMenu({
             dispatch(restoreFolder(item))
             dispatch(removeFromTrash({ id: item.id, name: item.name }))
           }}
-          className="relative !mb-2 after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:bg-[#5a5a5a] after:content-['']"
+          className="relative mb-2! after:absolute after:bottom-[-4px] after:left-0 after:h-px after:w-full after:bg-[#5a5a5a] after:content-['']"
         >
           Put Back
         </li>
@@ -43,7 +43,7 @@ export function TrashContextMenu({
               dispatch(cleanTrash())
             }
           }}
-          className={`relative !mb-2 after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:bg-[#5a5a5a] after:content-[''] ${trashItems.length <= 1 ? '!text-[#888888]' : ''}`}
+          className={`relative mb-2! after:absolute after:bottom-[-4px] after:left-0 after:h-px after:w-full after:bg-[#5a5a5a] after:content-[''] ${trashItems.length <= 1 ? 'text-[#888888]!' : ''}`}
         >
           Put Back All
         </li>
@@ -61,8 +61,8 @@ export function TrashContextMenu({
         >
           Empty Trash
         </li>
-        <li className="!text-[#888888]">Get Info</li>
-        <li className="!text-[#888888]">Copy</li>
+        <li className="text-[#888888]!">Get Info</li>
+        <li className="text-[#888888]!">Copy</li>
       </ul>
     </div>
   )

@@ -112,7 +112,7 @@ export function Terminal() {
                 <span>desktop</span>
                 <IconTerminal stroke={2} />
               </h2>
-              <p className="w-full resize-none overflow-hidden whitespace-pre border-none bg-transparent font-mono leading-normal outline-none">
+              <p className="w-full resize-none overflow-hidden whitespace-pre border-none bg-transparent font-mono leading-normal outline-hidden">
                 {command.command}
               </p>
             </div>
@@ -155,7 +155,7 @@ export function Terminal() {
                   stroke={1.5}
                 />
               </h2>
-              <p className="w-full resize-none overflow-hidden whitespace-pre border-none bg-transparent font-mono leading-normal outline-none">
+              <p className="w-full resize-none overflow-hidden whitespace-pre border-none bg-transparent font-mono leading-normal outline-hidden">
                 {command.command}
               </p>
             </div>
@@ -172,7 +172,7 @@ export function Terminal() {
         )
       })}
       <div className={terminal.mode === 'directory' ? 'flex gap-2' : ''}>
-        <h2 className="grid grid-cols-[auto,1fr] items-center gap-2">
+        <h2 className="grid grid-cols-[auto_1fr] items-center gap-2">
           <span>{terminal.mode === 'node' ? 'console' : 'desktop'}</span>
           {terminal.mode === 'directory' ? (
             <IconTerminal stroke={2} />
@@ -188,7 +188,7 @@ export function Terminal() {
               onChange={(e) => {
                 setPrompt(e.target.value)
               }}
-              className="w-full resize-none overflow-hidden whitespace-pre border-none bg-transparent font-mono leading-normal outline-none"
+              className="w-full resize-none overflow-hidden whitespace-pre border-none bg-transparent font-mono leading-normal outline-hidden"
             />
             <input type="submit" hidden />
           </form>
@@ -203,7 +203,7 @@ export function Terminal() {
               }}
               onKeyDown={handleNodeSubmit}
               rows={5}
-              className="w-full resize-none overflow-hidden whitespace-pre border-none bg-transparent font-mono leading-normal outline-none"
+              className="w-full resize-none overflow-hidden whitespace-pre border-none bg-transparent font-mono leading-normal outline-hidden"
             />
           </form>
         )}

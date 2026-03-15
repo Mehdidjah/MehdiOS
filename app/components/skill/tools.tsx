@@ -11,19 +11,20 @@ import SkillCard from './skill-card'
 
 export function Tools() {
   const skillContainer = useRef<HTMLDivElement>(null)
-  const timeline = useRef<gsap.core.Timeline>()
+  const timeline = useRef<gsap.core.Timeline | null>(null)
 
   useGSAP(
     () => {
-      timeline.current = gsap.timeline()
-      timeline.current.from('.skillCard', {
+      const skillTimeline = gsap.timeline()
+      timeline.current = skillTimeline
+      skillTimeline.from('.skillCard', {
         y: 100,
         opacity: 0,
         stagger: 0.2,
         ease: 'power1.inOut',
         duration: 0.5,
       })
-      timeline.current.eventCallback('onComplete', () => {
+      skillTimeline.eventCallback('onComplete', () => {
         gsap.to('.git', { width: '85%', duration: 1.5, ease: 'back.inOut' })
         gsap.to('.github', {
           width: '80%',

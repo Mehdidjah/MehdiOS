@@ -1,197 +1,140 @@
 # MehdiOS
 
-A macOS-inspired portfolio website built with Next.js, React, and TypeScript. Experience a fully interactive desktop environment that showcases my projects, skills, and experience in a unique and engaging way.
+A macOS-inspired portfolio desktop built with Next.js, React, TypeScript, and Tailwind CSS. It recreates a desktop-style experience with draggable windows, a magnifying dock, a lock screen, system menus, and portfolio apps for projects, notes, messages, and more.
 
-![MehdiOS](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)
+![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)
-![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=for-the-badge&logo=tailwind-css)
 
-## ✨ Features
+## Features
 
-### 🖥️ Desktop Environment
-- **Lock Screen** - Secure lock screen with password authentication
-- **Desktop** - Interactive desktop with customizable wallpapers
-- **Dock/Taskbar** - macOS-style dock with app magnification effect
-- **Topbar Menu** - System menu bar with clock, weather, and control center
-- **Theme Support** - Dark and light mode with smooth transitions
+### Desktop shell
+- Lock screen with animated transition into the desktop
+- Desktop icons with drag support and context menus
+- macOS-style dock with magnification and liquid-glass styling
+- Top bar with menus, weather, clock, and control center
+- Theme-aware wallpaper support and settings
 
-### 📱 Applications
+### Built-in apps
+- Safari-style browser with tabs and search
+- Calculator
+- Terminal with command execution API
+- Projects showcase
+- Skills overview
+- iNotes with local persistence
+- Messages contact form
+- Settings
+- Contact profile
+- Typing Master game
+- Resume/PDF preview with native browser rendering
+- Trash bin with restore flow
 
-#### Safari Browser
-- Full-featured browser with URL navigation
-- Search functionality with Google
-- Tab management
-- Homepage with search interface
+## Tech stack
 
-#### Calculator
-- Full calculator application
-- Beautiful macOS-style UI
+- Framework: [Next.js 15](https://nextjs.org/) with the App Router
+- UI: [React 19](https://react.dev/)
+- Language: [TypeScript](https://www.typescriptlang.org/)
+- Styling: [Tailwind CSS 4](https://tailwindcss.com/)
+- State: [Redux Toolkit](https://redux-toolkit.js.org/) and [React Redux](https://react-redux.js.org/)
+- Animation: [GSAP](https://gsap.com/)
+- Theme management: [next-themes](https://github.com/pacocoursey/next-themes)
+- Icons: [Tabler Icons](https://tabler.io/icons) and [React Icons](https://react-icons.github.io/react-icons/)
+- Weather data: [Open-Meteo](https://open-meteo.com/)
 
-#### Terminal
-- Interactive terminal with command execution
-- Support for various terminal commands
-- Code execution capabilities
+## Quality and security
 
-#### Projects
-- Showcase of portfolio projects
-- Project details with live links and GitHub repositories
-- Beautiful project cards
+- Updated to React 19 and Next.js 15
+- Migrated to Tailwind CSS 4 and the new PostCSS plugin
+- Uses the ESLint CLI instead of deprecated `next lint`
+- Replaced the previous PDF.js viewer dependency chain with native browser PDF rendering
+- Current dependency audit is clean: `npm audit` reports `0` vulnerabilities
 
-#### Skills
-- Frontend technologies showcase
-- Backend technologies showcase
-- Programming languages
-- Tools and frameworks
-
-#### iNotes
-- Note-taking application
-- Create, edit, and delete notes
-- Local storage persistence
-
-#### Messages
-- Contact form
-- Email integration
-
-#### Settings
-- Wallpaper customization
-- Theme selection (Dark/Light/System)
-- Desktop view preferences
-
-#### Contact
-- Contact information
-- Social media links
-- About me section
-
-#### Typing Master
-- Typing speed test game
-- Multiple difficulty levels
-- Real-time statistics
-
-#### Resume Viewer
-- PDF resume viewer
-- Integrated PDF reader
-
-#### Trash Bin
-- File management
-- Delete and restore functionality
-
-## 🛠️ Tech Stack
-
-- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **UI Library**: [React 18](https://react.dev/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **State Management**: [Redux Toolkit](https://redux-toolkit.js.org/)
-- **Animations**: [GSAP](https://gsap.com/)
-- **Icons**: [Tabler Icons](https://tabler.io/icons), [React Icons](https://react-icons.github.io/react-icons/)
-- **Theming**: [next-themes](https://github.com/pacocoursey/next-themes)
-- **PDF Viewer**: [@react-pdf-viewer](https://react-pdf-viewer.dev/)
-
-## 🚀 Getting Started
+## Getting started
 
 ### Prerequisites
 
-- Node.js 18+ 
-- npm or yarn or pnpm
+- Node.js 18.18+ or newer
+- npm
 
-### Installation
+### Install
 
-1. Clone the repository
 ```bash
 git clone https://github.com/Mehdidjah/MehdiOS.git
 cd MehdiOS
-```
-
-2. Install dependencies
-```bash
 npm install
-# or
-yarn install
-# or
-pnpm install
 ```
 
-3. Run the development server
+### Run in development
+
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+Open the local URL printed by Next.js, usually `http://localhost:3000`. If port `3000` is already in use, Next.js will automatically choose the next available port.
 
-### Build for Production
+### Production build
 
 ```bash
 npm run build
 npm start
 ```
 
-## 📁 Project Structure
+### Checks
 
+```bash
+npm run lint
+npm run build
+npm audit
 ```
+
+## Project structure
+
+```text
 MehdiOS/
 ├── app/
-│   ├── components/          # React components
-│   │   ├── calculator/      # Calculator app
-│   │   ├── contact/         # Contact page
-│   │   ├── folder/          # Desktop folders
-│   │   ├── inotes/          # Notes app
-│   │   ├── messages/        # Messages app
-│   │   ├── projects/        # Projects showcase
-│   │   ├── settings/        # Settings app
-│   │   ├── skill/           # Skills showcase
-│   │   ├── taskbar/         # Dock/Taskbar
-│   │   ├── terminal/        # Terminal app
-│   │   ├── topbar/          # Menu bar
-│   │   ├── trash-bin/       # Trash bin
-│   │   ├── typing-master/   # Typing game
-│   │   └── window-frame/    # Window components
-│   ├── features/            # Redux slices
-│   ├── hooks/               # Custom React hooks
-│   ├── store/               # Redux store
-│   ├── utils/               # Utility functions
-│   ├── layout.tsx           # Root layout
-│   └── page.tsx             # Home page
-├── public/                  # Static assets
-│   ├── assets/
-│   │   ├── background/      # Wallpapers
-│   │   ├── icons/           # App icons
-│   │   └── images/          # Images
-│   └── assets/pdf/          # PDF files
-└── tailwind.config.ts       # Tailwind configuration
+│   ├── actions/               # Server actions
+│   ├── components/            # UI and desktop apps
+│   ├── features/              # Redux slices
+│   ├── hooks/                 # Shared hooks
+│   ├── providers/             # App providers
+│   ├── store/                 # Redux store
+│   ├── utils/                 # Utility helpers
+│   ├── globals.css            # Tailwind v4 theme + app styles
+│   ├── layout.tsx             # Root layout
+│   └── page.tsx               # Desktop entry page
+├── public/
+│   └── assets/                # Wallpapers, icons, images, music, PDFs
+├── next.config.mjs
+├── postcss.config.mjs
+├── package.json
+└── tsconfig.json
 ```
 
-## 🎨 Customization
+## Customization
 
-### Changing Wallpapers
+### Wallpapers
 
-Add your wallpapers to `public/assets/background/` and update `app/components/settings/wallpaper.tsx`
+Add wallpapers under `public/assets/background/` and update the options in `app/components/settings/wallpaper.tsx`.
 
-### Adding Projects
+### Projects
 
-Edit `app/components/projects/projects.ts` to add or modify projects
+Update the project data in `app/components/projects/projects.ts`.
 
-### Modifying Skills
+### Icons
 
-Update the skill data in `app/components/skill/` components
+Dock and desktop icon assets live under `public/assets/icons/` and `public/assets/new icon style/`.
 
-## 🌐 Live Demo
+## Notes
 
-Visit the live website: [Coming Soon]
+- The weather widget gracefully falls back when geolocation is unavailable.
+- PDF viewing now relies on the browser's native PDF support, which keeps the implementation simpler and reduces dependency risk.
 
-## 📝 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 👨‍💻 Author
+## Author
 
 **Mehdi**
 
 - GitHub: [@Mehdidjah](https://github.com/Mehdidjah)
-- Portfolio: [MehdiOS](https://github.com/Mehdidjah/MehdiOS)
+- Repository: [MehdiOS](https://github.com/Mehdidjah/MehdiOS)
 
-⭐ If you like this project, please give it a star on GitHub!
+If you like the project, a star on GitHub is always appreciated.

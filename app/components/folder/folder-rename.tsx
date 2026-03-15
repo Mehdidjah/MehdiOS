@@ -56,7 +56,7 @@ export function FolderRename({
       <textarea
         ref={inputRef}
         style={{ width: rename.length >= 2 ? rename.length + 'ch' : '2ch' }}
-        className="max-h-40 max-w-full resize-none bg-[#1a1a1a] text-center text-white focus:outline-none"
+        className="max-h-40 max-w-full resize-none bg-[#1a1a1a] text-center text-white focus:outline-hidden"
         value={rename}
         rows={1}
         onKeyDown={handleKeyDown}

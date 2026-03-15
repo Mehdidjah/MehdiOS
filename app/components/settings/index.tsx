@@ -10,17 +10,17 @@ export function Settings() {
   const [tab, setTab] = useState<'walpaper'>('walpaper')
 
   return (
-    <div className="grid h-full grid-cols-1 sm:grid-cols-[200px,1fr] lg:grid-cols-[250px,1fr] text-light-text dark:text-dark-text">
+    <div className="grid h-full grid-cols-1 sm:grid-cols-[200px_1fr] lg:grid-cols-[250px_1fr] text-light-text dark:text-dark-text">
       <div className="max-h-full overflow-y-auto bg-light-foreground p-2 sm:p-4 dark:bg-dark-foreground border-b sm:border-b-0 sm:border-r border-light-border dark:border-dark-border">
         <div className="relative mb-2">
           <FiSearch className="absolute left-2 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search"
-            className="w-full rounded-md bg-white px-3 py-1 pl-8 text-sm focus:border-[#858585] focus:outline-none dark:bg-dark-input-bg"
+            className="w-full rounded-md bg-white px-3 py-1 pl-8 text-sm focus:border-[#858585] focus:outline-hidden dark:bg-dark-input-bg"
           />
         </div>
-        <div className="my-4 grid grid-cols-[auto,1fr] items-center gap-3 font-medium">
+        <div className="my-4 grid grid-cols-[auto_1fr] items-center gap-3 font-medium">
           <div className="size-10">
             <Image alt="" src={author} className="size-full rounded-full" />
           </div>
