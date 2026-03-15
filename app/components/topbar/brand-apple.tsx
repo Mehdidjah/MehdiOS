@@ -1,42 +1,72 @@
 import { FaApple } from 'react-icons/fa'
 import { brandApple } from './menu-data'
-import { Fragment, useState } from 'react'
+import { Fragment, useRef, useState } from 'react'
+import { useClickOutside } from '@/app/hooks/use-click-outside'
+import { LiquidGlassShell } from '../ui/liquid-glass-shell'
+
+const panelButtonClassName =
+  'mac-tahoe-panel-button flex h-[22px] items-center rounded-full px-2.5 text-white/90'
 
 export function BrandApple() {
-  const [isOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useClickOutside(() => {
+    setIsOpen(false)
+  }, menuRef)
 
   return (
-    <div className="relative flex h-full items-center rounded-md px-2 hover:bg-white/25">
-      <FaApple className="text-lg" />
+    <div ref={menuRef} className="relative flex h-full items-center">
+      <button
+        className={panelButtonClassName}
+        data-state={isOpen ? 'active' : undefined}
+        onClick={() => setIsOpen((previous) => !previous)}
+        type="button"
+      >
+        <FaApple className="text-[1rem]" />
+      </button>
       {isOpen && (
-        <div className="absolute left-0 top-full z-[1000] w-52 rounded-md bg-white/80 p-2 text-light-text shadow-xl backdrop-blur-lg dark:text-dark-text">
+        <LiquidGlassShell
+          className="absolute left-0 top-[calc(100%+0.35rem)] z-[1000]"
+          contentClassName="mac-tahoe-menu-overlay w-56 overflow-hidden rounded-2xl p-2 text-white"
+          displacementScale={42}
+          blurAmount={0.2}
+          saturation={155}
+          aberrationIntensity={1.5}
+          elasticity={0}
+          cornerRadius={18}
+          overLight
+          mode="prominent"
+        >
           {brandApple.map((item) => {
             if (item.divider) {
               return (
                 <Fragment key={item.id}>
-                  <p
-                    className="rounded-md px-2 py-[3px] text-start font-medium hover:bg-white"
+                  <button
+                    className="mac-tahoe-menu-item block w-full rounded-xl px-3 py-2 text-start text-sm font-medium text-white/92"
                     key={item.id}
+                    type="button"
                   >
                     {item.label}
-                  </p>
+                  </button>
                   <div className="px-4">
-                    <span className="my-1 block h-[1px] w-full bg-[#575757]" />
+                    <span className="my-1 block h-px w-full bg-[var(--mac-tahoe-menu-separator)]" />
                   </div>
                 </Fragment>
               )
             } else {
               return (
-                <p
-                  className="rounded-md px-2 py-[3px] text-start font-medium hover:bg-white"
+                <button
+                  className="mac-tahoe-menu-item block w-full rounded-xl px-3 py-2 text-start text-sm font-medium text-white/92"
                   key={item.id}
+                  type="button"
                 >
                   {item.label}
-                </p>
+                </button>
               )
             }
           })}
-        </div>
+        </LiquidGlassShell>
       )}
     </div>
   )

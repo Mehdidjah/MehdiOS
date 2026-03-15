@@ -1,10 +1,17 @@
 import { setWallpaper } from '@/app/features/settings'
 import { useDispatch, useSelector } from '@/app/store'
+import anime1 from '@/public/assets/background/anime1.webp'
+import anime2 from '@/public/assets/background/anime2.webp'
+import anime3 from '@/public/assets/background/anime3.webp'
+import anime4 from '@/public/assets/background/anime4.webp'
+import anime5 from '@/public/assets/background/anime5.webp'
+import anime6 from '@/public/assets/background/anime6.webp'
+import anime7 from '@/public/assets/background/anime7.webp'
+import macosTahoe from '@/public/assets/background/macos-tahoe.jpg'
 import vd from '@/public/assets/background/ventura-dark.jpg'
 import vl from '@/public/assets/background/ventura-light.jpg'
 import { useTheme } from 'next-themes'
-import Image from 'next/image'
-import { StaticImageData } from 'next/image'
+import Image, { StaticImageData } from 'next/image'
 
 const createWallpaper = (
   name: string,
@@ -15,15 +22,8 @@ const createWallpaper = (
   light: image,
 })
 
-import anime1 from '@/public/assets/background/anime1.webp'
-import anime2 from '@/public/assets/background/anime2.webp'
-import anime3 from '@/public/assets/background/anime3.webp'
-import anime4 from '@/public/assets/background/anime4.webp'
-import anime5 from '@/public/assets/background/anime5.webp'
-import anime6 from '@/public/assets/background/anime6.webp'
-import anime7 from '@/public/assets/background/anime7.webp'
-
 const wallpapers = [
+  createWallpaper('macOS Tahoe', macosTahoe),
   createWallpaper('Anime 1', anime1),
   createWallpaper('Anime 2', anime2),
   createWallpaper('Anime 3', anime3),

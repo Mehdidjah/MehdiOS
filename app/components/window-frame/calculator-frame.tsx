@@ -132,7 +132,7 @@ export function CalculatorFrame({
         setIsFocused(true)
       }}
       ref={frame}
-      className={`absolute rounded-md bg-light-background shadow-2xl dark:bg-dark-foreground ${isFocused ? 'brightness-100' : 'brightness-90'} ${status === 'minimize' ? 'hidden' : ''}`}
+      className={`absolute rounded-[21.33px] bg-light-background shadow-2xl dark:bg-dark-foreground ${isFocused ? 'brightness-100' : 'brightness-90'} ${status === 'minimize' ? 'hidden' : ''}`}
     >
       <div className="relative h-full">
         <div ref={frameHeader} className="!cursor-custom-auto">

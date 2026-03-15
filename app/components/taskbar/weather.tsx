@@ -61,7 +61,7 @@ export function Weather() {
   }, [])
 
   return (
-    <div className="space-x-2 p-1 pr-0 font-medium">
+    <div className="font-semibold tabular-nums tracking-[0.01em] text-white/92">
       <span>
         {condition
           ? `${condition.Temperature.toFixed(1)} °C`

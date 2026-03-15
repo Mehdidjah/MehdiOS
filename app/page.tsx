@@ -1,6 +1,5 @@
 'use client'
 
-import anime3 from '@/public/assets/background/anime3.webp'
 import { useGSAP } from '@gsap/react'
 import { gsap } from 'gsap'
 import { Draggable } from 'gsap/Draggable'
@@ -22,7 +21,7 @@ import { TypingMaster } from './components/typing-master'
 import { WindowFrame } from './components/window-frame'
 import { BrowserFrame } from './components/window-frame/browser-frame'
 import { CalculatorFrame } from './components/window-frame/calculator-frame'
-import { setScreenMode, setWallpaper } from './features/settings'
+import { setScreenMode } from './features/settings'
 import { useDispatch, useSelector } from './store'
 
 const PDFViewer = dynamic(
@@ -113,7 +112,6 @@ export default function Home() {
     }
 
     document.addEventListener('fullscreenchange', onFullscreen)
-    dispatch(setWallpaper({ dark: anime3, light: anime3 }))
 
     return () => {
       document.removeEventListener('fullscreenchange', onFullscreen)

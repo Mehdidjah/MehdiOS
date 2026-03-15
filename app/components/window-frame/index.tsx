@@ -20,14 +20,58 @@ import { Size, useResize } from '@/app/hooks/use-resize'
 import { setActiveApp, setZIndex } from '@/app/features/settings'
 import { useClickOutside } from '@/app/hooks/use-click-outside'
 
-const getSize = (): Size => {
-  if (typeof window === 'undefined') return { minW: 750, minH: 300 }
-  return window.innerWidth < 768 
-    ? { minW: 320, minH: 300 }
-    : { minW: 750, minH: 300 }
+const DEFAULT_FRAME_SIZE: Size = { minW: 750, minH: 300 }
+const NOTES_FRAME_SIZE: Size = { minW: 980, minH: 620 }
+
+const getSize = (frameId: string): Size => {
+  if (typeof window === 'undefined') {
+    return frameId === 'inotes' ? NOTES_FRAME_SIZE : DEFAULT_FRAME_SIZE
+  }
+
+  if (window.innerWidth < 768) {
+    return {
+      minW: 320,
+      minH: frameId === 'inotes' ? 480 : 300,
+    }
+  }
+
+  return frameId === 'inotes' ? NOTES_FRAME_SIZE : DEFAULT_FRAME_SIZE
 }
 
-const size: Size = getSize()
+const getInitialFrameBounds = (
+  frameId: string,
+  screenWidth: number,
+  screenHeight: number
+) => {
+  if (frameId === 'inotes') {
+    const topbarHeight = 28
+    const width =
+      screenWidth < 768 ? screenWidth : Math.min(screenWidth - 32, 1600)
+    const height =
+      screenWidth < 768
+        ? screenHeight - topbarHeight
+        : Math.max(620, screenHeight - topbarHeight - 52)
+
+    return {
+      width,
+      height,
+      left: screenWidth < 768 ? 0 : Math.max(0, Math.floor((screenWidth - width) / 2)),
+      top:
+        screenWidth < 768
+          ? topbarHeight
+          : Math.max(topbarHeight + 12, Math.floor((screenHeight - height + topbarHeight) / 2)),
+    }
+  }
+
+  const width = screenWidth < 768 ? screenWidth : Math.floor(screenWidth / 2)
+
+  return {
+    width: null,
+    height: null,
+    left: Math.max(0, Math.floor((screenWidth - width) / 2)),
+    top: Math.max(0, Math.floor((screenHeight - 300) / 4)),
+  }
+}
 
 export function WindowFrame({
   enableSidebar = true,
@@ -52,28 +96,42 @@ export function WindowFrame({
   const dragRef = useRef<globalThis.Draggable[]>()
   const { zIndex } = useSelector((state) => state.settings)
   const [isFocused, setIsFocused] = useState(true)
+  const isNotesFrame = frame_id === 'inotes'
+  const size = getSize(frame_id)
 
   const { contextSafe } = useGSAP(() => {
     const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1920
     const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 1080
-    const windowWidth = screenWidth < 768 ? screenWidth : Math.floor(screenWidth / 2)
-    const position_x = Math.max(0, Math.floor((screenWidth - windowWidth) / 2))
-    const position_y = Math.max(0, Math.floor((screenHeight - 300) / 4))
+    const initialBounds = getInitialFrameBounds(frame_id, screenWidth, screenHeight)
+
+    if (frame.current) {
+      const initialFrameStyles: gsap.TweenVars = {
+        left: `${initialBounds.left}px`,
+        top: `${initialBounds.top}px`,
+      }
+
+      if (initialBounds.width !== null) {
+        initialFrameStyles.width = `${initialBounds.width}px`
+      }
+
+      if (initialBounds.height !== null) {
+        initialFrameStyles.height = `${initialBounds.height}px`
+      }
+
+      gsap.set(frame.current, initialFrameStyles)
+    }
 
     timeline.current.fromTo(
       frame.current,
       {
-        left: `${position_x}px`,
-        top: `${position_y}px`,
         opacity: 0,
         scale: 0.8,
-        ease: 'back.inOut(1.7)',
-        duration: 0.5,
       },
       {
         scale: 1,
         opacity: 1,
         ease: 'back.inOut(1.7)',
+        duration: 0.5,
       }
     )
     dragRef.current = Draggable.create(frame.current, {
@@ -306,7 +364,11 @@ export function WindowFrame({
         setIsFocused(true)
       }}
       ref={frame}
-      className={`absolute h-1/2 min-h-[300px] w-full sm:w-2/4 min-w-0 sm:min-w-[750px] max-w-full overflow-hidden rounded-md bg-white/20 shadow-2xl backdrop-blur-xl ${isFocused ? 'brightness-100' : 'brightness-90'} ${status === 'minimize' ? 'hidden' : ''}`}
+      className={`absolute min-h-[300px] w-full min-w-0 max-w-full overflow-hidden rounded-[21.33px] ${
+        isNotesFrame
+          ? 'h-[calc(100vh-92px)] border border-white/10 bg-[#1b1c24] shadow-[0_28px_80px_rgba(0,0,0,0.48)] sm:min-w-[980px] sm:w-[92vw]'
+          : 'h-1/2 bg-white/20 shadow-2xl backdrop-blur-xl sm:w-2/4 sm:min-w-[750px]'
+      } ${isFocused ? 'brightness-100' : 'brightness-90'} ${status === 'minimize' ? 'hidden' : ''}`}
     >
       <div className="relative h-full">
         {!isFullscreen && (
@@ -351,7 +413,13 @@ export function WindowFrame({
           className="relative grid !cursor-custom-auto grid-cols-[auto,1fr] sm:grid-cols-[200px,1fr] lg:grid-cols-[250px,1fr]"
         >
           <div
-            className={`group flex items-center p-3 ${enableSidebar ? 'bg-light-foreground dark:bg-dark-foreground' : 'bg-light-background dark:bg-dark-background'}`}
+            className={`group flex items-center p-3 ${
+              isNotesFrame
+                ? 'bg-[#252734]'
+                : enableSidebar
+                  ? 'bg-light-foreground dark:bg-dark-foreground'
+                  : 'bg-light-background dark:bg-dark-background'
+            }`}
           >
             <button
               onClick={onClose}
@@ -438,10 +506,20 @@ export function WindowFrame({
             </div>
           )}
           <div
-            className={`items-center bg-light-background px-2 sm:px-4 text-light-text dark:bg-dark-background dark:text-dark-text ${enableSidebar ? 'grid grid-cols-[1fr,auto] justify-between' : 'flex justify-end'}`}
+            className={`items-center px-2 text-light-text sm:px-4 ${
+              isNotesFrame
+                ? 'bg-[#252734] text-[#eef2ff]'
+                : 'bg-light-background dark:bg-dark-background dark:text-dark-text'
+            } ${enableSidebar ? 'grid grid-cols-[1fr,auto] justify-between' : 'flex justify-end'}`}
           >
             {enableSidebar && (
-              <div className="dark:text-light-primary text-dark-primary flex !cursor-custom-auto items-center gap-1 sm:gap-2">
+              <div
+                className={`flex !cursor-custom-auto items-center gap-1 sm:gap-2 ${
+                  isNotesFrame
+                    ? 'text-[#c7cfea]'
+                    : 'text-dark-primary dark:text-light-primary'
+                }`}
+              >
                 <div className="flex items-center">
                   <button className="hidden sm:block">
                     <IconChevronLeft stroke={2} />
@@ -453,7 +531,7 @@ export function WindowFrame({
                 <h3 className="font-semibold text-xs sm:text-base truncate">{frameName}</h3>
               </div>
             )}
-            <div className="flex items-center gap-2 text-[#8d8d8d]">
+            <div className={`flex items-center gap-2 ${isNotesFrame ? 'text-[#8f96b8]' : 'text-[#8d8d8d]'}`}>
               <button>
                 <IconListDetails stroke={2} />
               </button>
@@ -463,7 +541,13 @@ export function WindowFrame({
             </div>
           </div>
         </div>
-        <div className="h-full max-h-[calc(100%-44px)] bg-light-background text-light-text dark:bg-dark-background dark:text-dark-text">
+        <div
+          className={`h-full max-h-[calc(100%-44px)] ${
+            isNotesFrame
+              ? 'bg-[#1a1b23] text-[#eef2ff]'
+              : 'bg-light-background text-light-text dark:bg-dark-background dark:text-dark-text'
+          }`}
+        >
           {children}
         </div>
       </div>

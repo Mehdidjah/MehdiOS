@@ -1,8 +1,8 @@
 'use client'
 
 import { useClickOutside } from '@/app/hooks/use-click-outside'
+import { newIconSrc } from '@/app/utils/icon-paths'
 import acrobat from '@/public/assets/icons/Acrobat.png'
-import folderBlue from '@/public/assets/icons/Folder.png'
 import Image from 'next/image'
 import { MouseEvent, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -88,10 +88,10 @@ export function TrashFolder({ item }: { item: Folder }) {
         ) : (
           <Image
             alt=""
-            src={folderBlue}
-            width={45}
-            height={45}
-            className="object-cover object-center"
+            src={newIconSrc.folder}
+            width={40}
+            height={40}
+            className="object-contain object-center"
           />
         )}
         <h2 className="line-clamp-1 text-xs">{item.name}</h2>

@@ -3,40 +3,37 @@
 import { setZIndex } from '@/app/features/settings'
 import { minimizeFolder, openFolder, FolderControler } from '@/app/features/window-slice'
 import { useDispatch, useSelector } from '@/app/store'
+import { newIconSrc } from '@/app/utils/icon-paths'
 import acrobat from '@/public/assets/icons/Acrobat.png'
-import calculator from '@/public/assets/icons/calculator.png'
-import contactIcon from '@/public/assets/icons/Contacts.png'
-import finder from '@/public/assets/icons/Finder.png'
-import folderIcon from '@/public/assets/icons/Folder.png'
-import messageIcon from '@/public/assets/icons/Messages.png'
-import notes from '@/public/assets/icons/Notes.png'
-import safari from '@/public/assets/icons/Safari.png'
-import settings from '@/public/assets/icons/Settings.png'
 import terminalIcon from '@/public/assets/icons/Terminal.png'
-import trashEmpty from '@/public/assets/icons/TrashEmpty.png'
-import trashFull from '@/public/assets/icons/TrashFull.png'
 import typingMaterIcon from '@/public/assets/icons/typing-master.png'
 import { IconBrandGithub } from '@tabler/icons-react'
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { isDesktopDevice } from './dock-magnification'
 import { DockItem } from './dock-item'
+import { LiquidGlassShell } from '../ui/liquid-glass-shell'
+
+const NEW_STYLE_DOCK_ICON_CLASS = 'object-contain object-center p-[4px] sm:p-[5px]'
 
 const getFolderIcon = (type: string, id: string): string | null => {
   if (type === 'folder') {
-    if (id === 'settings') return settings.src
-    if (id === 'contact') return contactIcon.src
-    if (id === 'trash') return null
-    if (id === 'inotes') return notes.src
+    if (id === 'settings') return newIconSrc.settings
+    if (id === 'contact') return newIconSrc.contact
+    if (id === 'trash') return newIconSrc.trash
+    if (id === 'inotes') return newIconSrc.notes
     if (id === 'terminal') return terminalIcon.src
     if (id === 'typing-master') return typingMaterIcon.src
-    if (id === 'messages') return messageIcon.src
-    return folderIcon.src
+    if (id === 'messages') return newIconSrc.messages
+    return newIconSrc.folder
   }
-  if (type === 'browser') return safari.src
-  if (type === 'calculator') return calculator.src
+  if (type === 'browser') return newIconSrc.safari
+  if (type === 'calculator') return newIconSrc.calculator
   if (type === 'pdf') return acrobat.src
-  return folderIcon.src
+  return newIconSrc.folder
 }
+
+const isNewStyleIcon = (iconSrc: string) =>
+  iconSrc.startsWith('/assets/new%20icon%20style/')
 
 interface DockIcon {
   id: string
@@ -59,7 +56,6 @@ export default function AppTray() {
   )
   const dispatch = useDispatch()
   const taskbarApps = folders.filter((f) => f.placement === 'taskbar')
-  const trashItems = useSelector((state) => state.trash.items).length
   const { zIndex } = useSelector((state) => state.settings)
 
   const [mouseX, setMouseX] = useState<number | null>(null)
@@ -139,16 +135,17 @@ export default function AppTray() {
 
   const dockIcons = useMemo<DockIcon[]>(() => {
     const icons: DockIcon[] = [
-      { id: 'finder', type: 'static', name: 'Finder', iconSrc: finder.src },
+      {
+        id: 'finder',
+        type: 'static',
+        name: 'Finder',
+        iconSrc: newIconSrc.finder,
+        customClassName: NEW_STYLE_DOCK_ICON_CLASS,
+      },
     ]
 
     taskbarApps.forEach((folder) => {
-      const iconSrc =
-        folder.type === 'folder' && folder.id === 'trash'
-          ? trashItems > 0
-            ? trashFull.src
-            : trashEmpty.src
-          : getFolderIcon(folder.type, folder.id)
+      const iconSrc = getFolderIcon(folder.type, folder.id)
 
       if (iconSrc) {
         icons.push({
@@ -159,6 +156,9 @@ export default function AppTray() {
           folder,
           onClick: () => handleFolderClick(folder),
           showIndicator: folder.status === 'open' || folder.status === 'minimize',
+          customClassName: isNewStyleIcon(iconSrc)
+            ? NEW_STYLE_DOCK_ICON_CLASS
+            : undefined,
         })
       }
     })
@@ -169,7 +169,7 @@ export default function AppTray() {
           ? typingMaterIcon.src
           : folder.type === 'pdf'
             ? acrobat.src
-            : folderIcon.src
+            : newIconSrc.folder
 
       icons.push({
         id: folder.id,
@@ -186,54 +186,69 @@ export default function AppTray() {
         customClassName:
           folder.type === 'pdf' || folder.id === 'typing-master'
             ? 'object-cover object-center p-[6px]'
-            : 'object-cover object-center',
+            : isNewStyleIcon(iconSrc)
+              ? NEW_STYLE_DOCK_ICON_CLASS
+              : 'object-cover object-center',
       })
     })
 
     icons.push({ id: 'github', type: 'link', name: 'Github', iconSrc: null, href: 'https://github.com/Mehdidjah' })
 
     return icons
-  }, [taskbarApps, minimizeFolders, trashItems, handleFolderClick, dispatch])
+  }, [taskbarApps, minimizeFolders, handleFolderClick, dispatch])
 
   return (
     <div
       ref={dockContainerRef}
-      className="pointer-events-none fixed bottom-0 left-0 flex w-full justify-center pb-3"
-      style={{ height: '5.2rem', paddingBottom: '0.7rem' }}
+      className="pointer-events-none fixed inset-x-0 bottom-[18px] z-40 flex justify-center sm:bottom-6"
     >
       <div
         ref={dockElRef}
-        className={`pointer-events-auto flex items-end gap-1 rounded-3xl bg-white dark:bg-black p-2 shadow-[inset_0_0_0_0.2px_rgba(0,0,0,0.1),0_0_0_0.2px_rgba(0,0,0,0.1),rgba(0,0,0,0.3)_2px_5px_19px_7px] backdrop-blur-md transition-transform duration-300 ease-in-out ${isDockHidden ? 'translate-y-[200%]' : ''}`}
+        className={`relative transition-transform duration-200 ease-in-out ${isDockHidden ? 'translate-y-[200%]' : ''}`}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        style={{ position: 'relative', height: '100%' }}
+        style={{ position: 'relative' }}
       >
-        <div className="absolute inset-0 rounded-3xl backdrop-blur-md" style={{ zIndex: -1, margin: '1px', width: 'calc(100% - 2px)', height: 'calc(100% - 2px)' }} />
-        <div className="flex items-end gap-1" style={{ overflow: 'visible' }}>
-          {dockIcons.map((icon) => {
-            if (icon.type === 'link' && icon.href) {
+        <LiquidGlassShell
+          contentClassName="mac-tahoe-dock-overlay pointer-events-auto relative flex h-[78px] items-end overflow-visible rounded-[23px] px-[7px] py-[10px]"
+          hideOutline
+          displacementScale={44}
+          blurAmount={0.18}
+          saturation={158}
+          aberrationIntensity={1.45}
+          elasticity={0}
+          cornerRadius={23}
+          mode="prominent"
+        >
+          <div
+            className="relative z-10 flex h-full items-end justify-center gap-[3px]"
+            style={{ overflow: 'visible' }}
+          >
+            {dockIcons.map((icon) => {
+              if (icon.type === 'link' && icon.href) {
+                return (
+                  <DockItem key={icon.id} mouseX={isDesktop ? mouseX : null} iconSrc={null} name={icon.name} href={icon.href} isLink>
+                    <IconBrandGithub stroke={1.4} className="size-8 text-white/95" />
+                  </DockItem>
+                )
+              }
+
+              if (!icon.iconSrc) return null
+
               return (
-                <DockItem key={icon.id} mouseX={isDesktop ? mouseX : null} iconSrc={null} name={icon.name} href={icon.href} isLink>
-                  <IconBrandGithub stroke={1} className="size-10 text-dark-text" />
-                </DockItem>
+                <DockItem
+                  key={icon.id}
+                  mouseX={isDesktop ? mouseX : null}
+                  iconSrc={icon.iconSrc}
+                  name={icon.name}
+                  onClick={icon.onClick}
+                  showIndicator={icon.showIndicator}
+                  customClassName={icon.customClassName}
+                />
               )
-            }
-
-            if (!icon.iconSrc) return null
-
-            return (
-              <DockItem
-                key={icon.id}
-                mouseX={isDesktop ? mouseX : null}
-                iconSrc={icon.iconSrc}
-                name={icon.name}
-                onClick={icon.onClick}
-                showIndicator={icon.showIndicator}
-                customClassName={icon.customClassName}
-              />
-            )
-          })}
-        </div>
+            })}
+          </div>
+        </LiquidGlassShell>
       </div>
     </div>
   )

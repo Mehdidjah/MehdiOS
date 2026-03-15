@@ -22,7 +22,7 @@ export function TaskbarClock() {
   }, [])
 
   return (
-    <div className="space-x-2 p-1 font-medium">
+    <div className="space-x-2 font-semibold tabular-nums tracking-[0.01em] text-white/92">
       <span>{clock.date}</span>
       <span>{clock.time}</span>
     </div>

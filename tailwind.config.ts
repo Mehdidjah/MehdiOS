@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       backgroundImage: {
-        lock: "url('/assets/background/anime3.webp')",
+        lock: "url('/assets/background/macos-tahoe.jpg')",
       },
       cursor: {
         'custom-pointer': "url('/assets/cursor/Link.png') 0 0, pointer",

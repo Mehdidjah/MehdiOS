@@ -1,4 +1,4 @@
-import folderBlue from '@/public/assets/icons/Folder.png'
+import { newIconSrc } from '@/app/utils/icon-paths'
 import Image from 'next/image'
 import acrobat from '@/public/assets/icons/Acrobat.png'
 import { Frame } from './folders'
@@ -11,5 +11,13 @@ export function RandomFolder({ type, id }: { type: Frame; id: string }) {
   if (id === 'typing-master') {
     return <Image alt="pdf" src={typingMaterIcon} width={50} height={50} />
   }
-  return <Image alt="folder" src={folderBlue} width={60} height={60} />
+  return (
+    <Image
+      alt="folder"
+      src={newIconSrc.folder}
+      width={54}
+      height={54}
+      className="object-contain object-center"
+    />
+  )
 }

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import macosTahoe from '@/public/assets/background/macos-tahoe.jpg'
 import { StaticImageData } from 'next/image'
 
 interface Wallpaper {
@@ -22,8 +23,13 @@ interface InitialState {
   }
 }
 
+const defaultWallpaper: Wallpaper = {
+  dark: macosTahoe,
+  light: macosTahoe,
+}
+
 const initialState: InitialState = {
-  wallpaper: null,
+  wallpaper: defaultWallpaper,
   screen: 'default',
   brightness: 100,
   volume: 50,

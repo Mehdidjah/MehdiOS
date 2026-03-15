@@ -378,7 +378,7 @@ export function BrowserFrame({
         setIsFocused(true)
       }}
       ref={frame}
-      className={`absolute h-1/2 min-h-[300px] w-full sm:w-2/4 min-w-0 sm:min-w-[750px] max-w-full overflow-hidden rounded-md bg-white/20 shadow-xl backdrop-blur-xl ${isFocused ? 'brightness-100' : 'brightness-90'} ${status === 'minimize' ? 'hidden' : ''}`}
+      className={`absolute h-1/2 min-h-[300px] w-full sm:w-2/4 min-w-0 sm:min-w-[750px] max-w-full overflow-hidden rounded-[21.33px] bg-white/20 shadow-xl backdrop-blur-xl ${isFocused ? 'brightness-100' : 'brightness-90'} ${status === 'minimize' ? 'hidden' : ''}`}
     >
       <div className="relative h-full">
         <div

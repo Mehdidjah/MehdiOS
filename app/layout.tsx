@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     description: 'Creating macOS version as portfolio',
     images: [
       {
-        url: '/assets/background/anime3.webp',
+        url: '/assets/background/macos-tahoe.jpg',
         width: 1200,
         height: 630,
         alt: 'MehdiOS - macOS Portfolio',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'MehdiOS',
     description: 'Creating macOS version as portfolio',
-    images: ['/assets/background/anime3.webp'],
+    images: ['/assets/background/macos-tahoe.jpg'],
   },
 }
 
