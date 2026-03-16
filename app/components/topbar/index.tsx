@@ -1,7 +1,5 @@
 'use client'
 
-import notch from '@/public/assets/icons/Сhelka.svg'
-import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import { IoIosBatteryFull, IoIosMoon } from 'react-icons/io'
 import { IoSearch } from 'react-icons/io5'
@@ -68,12 +66,6 @@ export function Topbar() {
           <button className={`hidden ${panelButtonClassName} lg:flex`} type="button">
             Help
           </button>
-        </div>
-        <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2 hidden sm:block">
-          <div className="relative">
-            <Image alt="" src={notch} className="w-36" />
-            <span className="absolute left-2/3 top-2 size-1 rounded-full bg-green-500" />
-          </div>
         </div>
         <div className="relative z-10 flex h-full items-center gap-1 sm:gap-2">
           <div className="flex h-full items-center gap-1 sm:gap-2">

@@ -9,5 +9,6 @@ export const newIconSrc = {
   notes: `${NEW_ICON_STYLE_BASE_PATH}/Notes26.svg`,
   safari: `${NEW_ICON_STYLE_BASE_PATH}/Safari26.svg`,
   settings: `${NEW_ICON_STYLE_BASE_PATH}/Settings26svg.svg`,
+  terminal: `${NEW_ICON_STYLE_BASE_PATH}/terminal26.svg`,
   trash: `${NEW_ICON_STYLE_BASE_PATH}/Trash26empty.svg`,
 } as const

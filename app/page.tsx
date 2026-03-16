@@ -12,15 +12,13 @@ import { ContextMenu } from './components/context-menu'
 import { Folder } from './components/folder'
 import { INotes } from './components/inotes'
 import { LockScreen } from './components/lock-screen'
-import { Projects } from './components/projects'
 import { Settings } from './components/settings'
-import { Skill } from './components/skill'
 import { Terminal } from './components/terminal'
-import { TrashBin } from './components/trash-bin'
 import { TypingMaster } from './components/typing-master'
 import { WindowFrame } from './components/window-frame'
 import { BrowserFrame } from './components/window-frame/browser-frame'
 import { CalculatorFrame } from './components/window-frame/calculator-frame'
+import { FinderFrame } from './components/window-frame/finder-frame'
 import { setScreenMode } from './features/settings'
 import { useDispatch, useSelector } from './store'
 
@@ -212,6 +210,20 @@ export default function Home() {
               )
             }
 
+            if (
+              frame.id === 'projects' ||
+              frame.id === 'skills' ||
+              frame.id === 'trash'
+            ) {
+              return (
+                <FinderFrame
+                  key={frame.id}
+                  frame_id={frame.id}
+                  status={frame.status}
+                />
+              )
+            }
+
             const enableSidebar =
               frame.id === 'skills' ||
               frame.id === 'trash' ||
@@ -227,12 +239,9 @@ export default function Home() {
                 frameName={frame.name}
                 key={frame.id}
               >
-                {frame.id === 'skills' && <Skill />}
-                {frame.id === 'trash' && <TrashBin />}
                 {frame.id === 'inotes' && <INotes />}
                 {frame.id === 'settings' && <Settings />}
                 {frame.id === 'terminal' && <Terminal />}
-                {frame.id === 'projects' && <Projects />}
                 {frame.id === 'typing-master' && <TypingMaster />}
                 {frame.id === 'contact' && <Contact />}
                 {frame.id === 'messages' && <Messages />}

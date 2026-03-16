@@ -5,7 +5,6 @@ import { minimizeFolder, openFolder, FolderControler } from '@/app/features/wind
 import { useDispatch, useSelector } from '@/app/store'
 import { newIconSrc } from '@/app/utils/icon-paths'
 import acrobat from '@/public/assets/icons/Acrobat.png'
-import terminalIcon from '@/public/assets/icons/Terminal.png'
 import typingMaterIcon from '@/public/assets/icons/typing-master.png'
 import { IconBrandGithub } from '@tabler/icons-react'
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
@@ -21,7 +20,7 @@ const getFolderIcon = (type: string, id: string): string | null => {
     if (id === 'contact') return newIconSrc.contact
     if (id === 'trash') return newIconSrc.trash
     if (id === 'inotes') return newIconSrc.notes
-    if (id === 'terminal') return terminalIcon.src
+    if (id === 'terminal') return newIconSrc.terminal
     if (id === 'typing-master') return typingMaterIcon.src
     if (id === 'messages') return newIconSrc.messages
     return newIconSrc.folder
