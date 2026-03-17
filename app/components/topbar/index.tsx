@@ -36,6 +36,9 @@ const menuButtonClassName =
 const topbarGlassButtonClassName =
   'flex h-[22px] items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-2 text-white/92 [box-shadow:inset_1px_1px_4px_0_rgba(0,0,0,0.14),inset_-1px_-1px_5px_0_rgba(255,255,255,0.14)] backdrop-blur-[18px] transition hover:bg-white/[0.09] active:scale-[0.98]'
 
+const topbarIconButtonClassName =
+  'flex size-[22px] items-center justify-center bg-transparent px-0 text-white/82 transition hover:text-white active:scale-[0.98]'
+
 const tileClassName =
   'relative overflow-hidden bg-[rgba(255,255,255,0.01)] opacity-90 [box-shadow:inset_1px_1px_4px_0_rgba(0,0,0,0.14),inset_-1px_-1px_6px_0_rgba(255,255,255,0.16)] backdrop-blur-[18px]'
 
@@ -361,9 +364,7 @@ function TopbarIconButton({
   return (
     <button
       aria-label={ariaLabel}
-      className={`${topbarGlassButtonClassName} ${
-        active ? 'bg-white/[0.12] text-white' : ''
-      } size-[22px] px-0`}
+      className={`${topbarIconButtonClassName} ${active ? 'text-white' : ''}`}
       onClick={onClick}
       type="button"
     >
