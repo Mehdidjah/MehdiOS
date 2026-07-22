@@ -10,7 +10,7 @@ import { IconBrandGithub } from '@tabler/icons-react'
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { isDesktopDevice } from './dock-magnification'
 import { DockItem } from './dock-item'
-import { LiquidGlassShell } from '../ui/liquid-glass-shell'
+import { LiquidGlassStudio } from '../ui/liquid-glass-studio'
 
 const NEW_STYLE_DOCK_ICON_CLASS = 'object-contain object-center p-[4px] sm:p-[5px]'
 
@@ -208,21 +208,24 @@ export default function AppTray() {
         onMouseLeave={handleMouseLeave}
         style={{ position: 'relative' }}
       >
-        <LiquidGlassShell
-          contentClassName="mac-tahoe-dock-overlay pointer-events-auto relative flex h-[78px] items-end overflow-visible rounded-[23px] px-[7px] py-[10px]"
-          hideOutline
-          displacementScale={44}
-          blurAmount={0.18}
-          saturation={158}
-          aberrationIntensity={1.45}
-          elasticity={0}
-          cornerRadius={23}
-          mode="prominent"
+        <LiquidGlassStudio
+          bleed={72}
+          tint={[0.09, 0.09, 0.11, 0.18]}
+          refThickness={18}
+          refDispersion={7}
+          blurRadius={25}
+          mergeRatePx={4}
+          shadowFactor={0.22}
+          shadowPosition={{ x: 0, y: -8 }}
         >
           <div
-            className="relative z-10 flex h-full items-end justify-center gap-[3px]"
-            style={{ overflow: 'visible' }}
+            data-liquid-glass
+            className="pointer-events-auto relative flex h-[78px] items-end overflow-visible rounded-[23px] px-[7px] py-[10px]"
           >
+            <div
+              className="relative z-10 flex h-full items-end justify-center gap-[3px]"
+              style={{ overflow: 'visible' }}
+            >
             {dockIcons.map((icon) => {
               if (icon.type === 'link' && icon.href) {
                 return (
@@ -246,8 +249,9 @@ export default function AppTray() {
                 />
               )
             })}
+            </div>
           </div>
-        </LiquidGlassShell>
+        </LiquidGlassStudio>
       </div>
     </div>
   )

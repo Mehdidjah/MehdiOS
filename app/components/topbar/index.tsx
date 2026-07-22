@@ -24,6 +24,7 @@ import {
   IoSearch,
 } from 'react-icons/io5'
 import { BlurFade } from '@/registry/magicui/blur-fade'
+import { LiquidGlassStudio } from '../ui/liquid-glass-studio'
 import { AnimatePresence, motion } from 'framer-motion'
 import { TaskbarClock } from '../taskbar/clock'
 import { Weather } from '../taskbar/weather'
@@ -39,8 +40,10 @@ const topbarGlassButtonClassName =
 const topbarIconButtonClassName =
   'flex size-[22px] items-center justify-center bg-transparent px-0 text-white/82 transition hover:text-white active:scale-[0.98]'
 
+// Tile chrome is drawn by the LiquidGlassStudio shader canvas behind the grid;
+// the DOM keeps only a hairline inner highlight for definition.
 const tileClassName =
-  'relative overflow-hidden bg-[rgba(255,255,255,0.01)] opacity-90 [box-shadow:inset_1px_1px_4px_0_rgba(0,0,0,0.14),inset_-1px_-1px_6px_0_rgba(255,255,255,0.16)] backdrop-blur-[18px]'
+  'relative overflow-hidden [box-shadow:inset_0_1px_0_rgba(255,255,255,0.08)]'
 
 export function Topbar() {
   const [isOpenCC, setIsOpenCC] = useState(false)
@@ -224,10 +227,20 @@ export function Topbar() {
             animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.94, y: -8, filter: 'blur(12px)' }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed right-2 top-7 z-[3100] max-h-[calc(100dvh-44px)] w-[351px] max-w-[calc(100vw-0.75rem)] overflow-y-auto p-[6.5px] text-white"
+            className="fixed right-2 top-7 z-[3100] w-[351px] max-w-[calc(100vw-0.75rem)] text-white"
           >
             <div ref={ccRef} className="w-full">
-              <div className="grid grid-cols-4 grid-rows-[74px_74px_74px_74px_74px_74px_28px] gap-[14px]">
+              <LiquidGlassStudio
+                bleed={56}
+                tint={[1, 1, 1, 0.04]}
+                refThickness={14}
+                refDispersion={7}
+                blurRadius={25}
+                mergeRatePx={6}
+                shadowFactor={0.16}
+              >
+                <div className="max-h-[calc(100dvh-44px)] overflow-y-auto p-[6.5px]">
+                  <div className="grid grid-cols-4 grid-rows-[74px_74px_74px_74px_74px_74px_28px] gap-[14px]">
                 <BlurFade delay={0.04} className="col-span-2 contents">
                   <WideNetworkTile
                     className="col-span-2"
@@ -334,6 +347,7 @@ export function Topbar() {
                 <BlurFade delay={0.39} className="col-span-4 row-start-7 contents">
                   <div className="col-span-4 row-start-7 flex items-center justify-center">
                     <button
+                      data-liquid-glass
                       className={`flex h-[28px] w-[111px] items-center justify-center rounded-full text-[12px] font-medium text-white/85 transition hover:bg-white/[0.08] ${tileClassName}`}
                       type="button"
                     >
@@ -341,7 +355,9 @@ export function Topbar() {
                     </button>
                   </div>
                 </BlurFade>
-              </div>
+                  </div>
+                </div>
+              </LiquidGlassStudio>
             </div>
           </motion.div>
         )}
@@ -398,6 +414,7 @@ function WideNetworkTile({
 }) {
   return (
     <button
+      data-liquid-glass
       className={`flex items-center gap-2 rounded-full px-[18px] text-left ${tileClassName} ${className}`}
       onClick={onClick}
       type="button"
@@ -426,6 +443,7 @@ function WideFocusTile({
 }) {
   return (
     <button
+      data-liquid-glass
       className={`flex items-center gap-2 rounded-full px-[18px] text-left ${tileClassName} ${className}`}
       onClick={onClick}
       type="button"
@@ -458,8 +476,9 @@ function RoundToggleTile({
 }) {
   return (
     <button
-      className={`relative flex items-center justify-center overflow-hidden rounded-full border border-white/[0.12] bg-transparent text-center text-white/90 [box-shadow:inset_1px_1px_4px_0_rgba(255,255,255,0.12),inset_-1px_-1px_4px_0_rgba(255,255,255,0.03)] backdrop-blur-[18px] transition hover:bg-white/[0.03] ${
-        active ? 'border-white/[0.22] bg-white/[0.06] brightness-110' : ''
+      data-liquid-glass
+      className={`relative flex items-center justify-center overflow-hidden rounded-full text-center text-white/90 transition hover:bg-white/[0.03] ${
+        active ? 'bg-white/[0.08] brightness-110' : ''
       } ${className}`}
       onClick={onClick}
       type="button"
@@ -479,7 +498,10 @@ function MusicTile({
   onToggle: () => void
 }) {
   return (
-    <div className={`rounded-[28px] px-[20px] py-[17px] ${tileClassName} ${className}`}>
+    <div
+      data-liquid-glass
+      className={`rounded-[28px] px-[20px] py-[17px] ${tileClassName} ${className}`}
+    >
       <div className="flex h-full flex-col justify-between">
         <div className="flex size-12 items-center justify-center overflow-hidden rounded-[16px] bg-white/[0.06]">
           <Image alt="" src={musicIcon} width={34} height={34} />
@@ -530,7 +552,10 @@ function SliderTile({
   onChange: (value: number) => void
 }) {
   return (
-    <div className={`rounded-[28px] px-[20px] py-[14px] ${tileClassName} ${className}`}>
+    <div
+      data-liquid-glass
+      className={`rounded-[28px] px-[20px] py-[14px] ${tileClassName} ${className}`}
+    >
       <p className="text-[14px] font-semibold tracking-[-0.2px] text-white/90">
         {label}
       </p>
@@ -552,6 +577,7 @@ function UtilityTile({
 }) {
   return (
     <button
+      data-liquid-glass
       className={`flex items-center justify-center rounded-full text-white/82 transition hover:bg-white/[0.06] ${tileClassName} ${className}`}
       type="button"
     >
