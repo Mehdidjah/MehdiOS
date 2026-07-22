@@ -210,12 +210,12 @@ export default function AppTray() {
       >
         <LiquidGlassStudio
           bleed={72}
-          tint={[0.09, 0.09, 0.11, 0.18]}
+          tint={[1, 1, 1, 0.12]}
           refThickness={18}
           refDispersion={7}
           blurRadius={25}
           mergeRatePx={4}
-          shadowFactor={0.22}
+          shadowFactor={0.14}
           shadowPosition={{ x: 0, y: -8 }}
         >
           <div

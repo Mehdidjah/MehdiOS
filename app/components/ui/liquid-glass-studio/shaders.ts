@@ -126,6 +126,11 @@ void main() {
   float shadow =
     exp(-1.0 / u_shadowExpand * abs(merged) * u_resolution1x.y) * 0.6 * u_shadowFactor;
 
+  // The studio bakes the full shadow everywhere; over dark wallpapers that
+  // crushes the glass interior to black, so keep only a hint of it inside.
+  float inside = 1.0 - smoothstep(-2.0 / u_resolution.y, 0.0, mainSDF(gl_FragCoord.xy));
+  shadow *= mix(1.0, 0.25, inside);
+
   fragColor = vec4(bgColor - vec3(shadow), 1.0);
 }
 `

@@ -34,9 +34,6 @@ import { ControlCenter } from './control-center'
 const menuButtonClassName =
   'mac-tahoe-panel-button flex h-[22px] items-center rounded-full px-2 text-[13px] font-medium text-white/95 whitespace-nowrap sm:px-2.5'
 
-const topbarGlassButtonClassName =
-  'flex h-[22px] items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-2 text-white/92 [box-shadow:inset_1px_1px_4px_0_rgba(0,0,0,0.14),inset_-1px_-1px_5px_0_rgba(255,255,255,0.14)] backdrop-blur-[18px] transition hover:bg-white/[0.09] active:scale-[0.98]'
-
 const topbarIconButtonClassName =
   'flex size-[22px] items-center justify-center bg-transparent px-0 text-white/82 transition hover:text-white active:scale-[0.98]'
 
@@ -210,13 +207,13 @@ export function Topbar() {
           <ControlCenter className="size-3.5 fill-white/92" />
         </TopbarIconButton>
 
-        <TopbarPill>
+        <div className="px-1.5 text-[12px] font-medium">
           <Weather />
-        </TopbarPill>
+        </div>
 
-        <TopbarPill>
+        <div className="px-1.5 text-[12px] font-medium">
           <TaskbarClock />
-        </TopbarPill>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -386,14 +383,6 @@ function TopbarIconButton({
     >
       {children}
     </button>
-  )
-}
-
-function TopbarPill({ children }: { children: ReactNode }) {
-  return (
-    <div className={`${topbarGlassButtonClassName} px-2.5 text-[12px] font-medium`}>
-      {children}
-    </div>
   )
 }
 

@@ -41,7 +41,7 @@ export function DockItem({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="mac-tahoe-dock-button group relative flex flex-col items-center justify-end rounded-[20px]"
+        className="mac-tahoe-dock-button group relative flex flex-col items-center justify-center rounded-[20px]"
         style={{
           width: `${widthRem}rem`,
           height: `${widthRem}rem`,
@@ -65,7 +65,7 @@ export function DockItem({
   return (
     <button
       ref={iconRef as React.RefObject<HTMLButtonElement>}
-      className="mac-tahoe-dock-button group relative flex flex-col items-center justify-end rounded-[20px]"
+      className="mac-tahoe-dock-button group relative flex flex-col items-center justify-center rounded-[20px]"
       onClick={onClick}
       type="button"
       style={{
@@ -91,7 +91,7 @@ export function DockItem({
         {name}
       </span>
       {showIndicator && (
-        <span className="absolute bottom-[3px] left-1/2 z-10 size-[5px] -translate-x-1/2 rounded-full bg-white/90"></span>
+        <span className="absolute -bottom-[7px] left-1/2 z-10 size-[4px] -translate-x-1/2 rounded-full bg-white/85"></span>
       )}
     </button>
   )
