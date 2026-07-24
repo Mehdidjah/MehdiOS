@@ -105,14 +105,17 @@ export function ProjectCard({ project }: { project: Projects }) {
           {project.description}
         </p>
         <div ref={buttonRef} className="flex items-center justify-end gap-4">
-          <Link
-            target="_blank"
-            href={project.github}
-            className="flex items-center gap-1 rounded-sm bg-black px-3 py-1 text-xs font-medium text-white"
-          >
-            <IconBrandGithub stroke={2} className="size-4" />
-            <span>Code</span>
-          </Link>
+          {project.github && (
+            <Link
+              target="_blank"
+              rel="noopener noreferrer"
+              href={project.github}
+              className="flex items-center gap-1 rounded-sm bg-black px-3 py-1 text-xs font-medium text-white"
+            >
+              <IconBrandGithub stroke={2} className="size-4" />
+              <span>Code</span>
+            </Link>
+          )}
           <button
             onClick={handleOpen}
             className="flex items-center gap-1 rounded-sm bg-primary px-3 py-1 text-xs font-medium text-white"
