@@ -16,13 +16,12 @@ import {
 } from 'react'
 import { FaBluetoothB, FaWifi } from 'react-icons/fa'
 import { HiMiniSpeakerWave, HiMiniSpeakerXMark } from 'react-icons/hi2'
-import { IoIosBatteryFull, IoIosMoon } from 'react-icons/io'
+import { IoIosMoon } from 'react-icons/io'
 import {
   IoCalculatorOutline,
   IoCameraOutline,
   IoColorPaletteOutline,
   IoPowerOutline,
-  IoSearch,
 } from 'react-icons/io5'
 import { BlurFade } from '@/registry/magicui/blur-fade'
 import { LiquidGlassStudio } from '../ui/liquid-glass-studio'
@@ -51,7 +50,6 @@ export function Topbar() {
   const [mirrorEnabled, setMirrorEnabled] = useState(false)
   const [duplicateEnabled, setDuplicateEnabled] = useState(false)
   const ccRef = useRef<HTMLDivElement>(null)
-  const previousVolume = useRef(50)
   const dispatch = useDispatch()
   const { activeApp, brightness, music_status, volume } = useSelector(
     (state) => state.settings
@@ -101,21 +99,7 @@ export function Topbar() {
   }
 
   const updateVolume = (value: number) => {
-    if (value > 0) {
-      previousVolume.current = value
-    }
-
     dispatch(setVolume(value))
-  }
-
-  const toggleMute = () => {
-    if (volume > 0) {
-      previousVolume.current = volume
-      updateVolume(0)
-      return
-    }
-
-    updateVolume(previousVolume.current || 50)
   }
 
   const toggleMusic = () => {
@@ -158,42 +142,6 @@ export function Topbar() {
       </div>
 
       <div className="relative z-10 flex h-full items-center gap-1.5">
-        <TopbarIconButton
-          active={wifiEnabled}
-          ariaLabel="Toggle Wi-Fi"
-          onClick={() => setWifiEnabled((prev) => !prev)}
-        >
-          <FaWifi className="text-[11px]" />
-        </TopbarIconButton>
-
-        <TopbarIconButton
-          active={bluetoothEnabled}
-          ariaLabel="Toggle Bluetooth"
-          onClick={() => setBluetoothEnabled((prev) => !prev)}
-        >
-          <FaBluetoothB className="text-[12px]" />
-        </TopbarIconButton>
-
-        <TopbarIconButton
-          active={volume > 0}
-          ariaLabel="Toggle sound"
-          onClick={toggleMute}
-        >
-          {volume > 0 ? (
-            <HiMiniSpeakerWave className="text-[13px]" />
-          ) : (
-            <HiMiniSpeakerXMark className="text-[13px]" />
-          )}
-        </TopbarIconButton>
-
-        <TopbarIconButton ariaLabel="Battery status">
-          <IoIosBatteryFull className="text-[16px]" />
-        </TopbarIconButton>
-
-        <TopbarIconButton ariaLabel="Search">
-          <IoSearch className="text-[13px]" />
-        </TopbarIconButton>
-
         <TopbarIconButton
           active={isOpenCC}
           ariaLabel="Open control center"
