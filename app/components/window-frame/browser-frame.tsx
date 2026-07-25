@@ -748,6 +748,7 @@ export function BrowserFrame({
 
   return (
     <div
+      aria-label={`${frameName} window`}
       onContextMenu={(event) => event.stopPropagation()}
       onMouseDown={() => {
         dispatch(setActiveApp({ id: frame_id, name: frameName }))

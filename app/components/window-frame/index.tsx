@@ -440,6 +440,7 @@ export function WindowFrame({
 
   return (
     <div
+      aria-label={`${frameName} window`}
       onContextMenu={(e) => {
         e.stopPropagation()
       }}
