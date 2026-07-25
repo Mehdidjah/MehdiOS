@@ -284,6 +284,7 @@ export function Settings() {
             return (
               <button
                 aria-controls={`settings-panel-${section.id}`}
+                aria-label={section.label}
                 aria-selected={selected}
                 className={`my-px flex h-[30px] w-full items-center justify-center gap-2 rounded-md px-1.5 text-[12.5px] transition md:justify-start md:px-2.5 ${
                   selected

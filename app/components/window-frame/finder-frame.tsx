@@ -1022,6 +1022,7 @@ function SidebarItem({
 }) {
   return (
     <button
+      aria-label={label}
       onClick={onClick}
       className={`flex w-full items-center justify-center gap-2 rounded-r-md px-1 py-1.5 text-left transition md:justify-start md:px-3 ${
         active
