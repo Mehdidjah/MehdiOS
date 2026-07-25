@@ -8,6 +8,7 @@ import { MouseEvent, useEffect, useRef, useState, useCallback } from 'react'
 import { FaApple } from 'react-icons/fa'
 import { Contact } from './components/contact'
 import { Messages } from './components/messages'
+import { Music } from './components/music'
 import { ContextMenu } from './components/context-menu'
 import { Folder } from './components/folder'
 import { INotes } from './components/inotes'
@@ -226,6 +227,7 @@ export default function Home() {
               frame.id === 'skills' ||
               frame.id === 'trash' ||
               frame.id === 'inotes' ||
+              frame.id === 'music' ||
               frame.id === 'messages'
 
             return (
@@ -237,6 +239,7 @@ export default function Home() {
                 key={frame.id}
               >
                 {frame.id === 'inotes' && <INotes />}
+                {frame.id === 'music' && <Music />}
                 {frame.id === 'settings' && <Settings />}
                 {frame.id === 'terminal' && <Terminal />}
                 {frame.id === 'typing-master' && <TypingMaster />}

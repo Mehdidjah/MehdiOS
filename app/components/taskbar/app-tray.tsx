@@ -24,6 +24,7 @@ const getFolderIcon = (type: string, id: string): string | null => {
     if (id === 'contact') return newIconSrc.contact
     if (id === 'trash') return newIconSrc.trash
     if (id === 'inotes') return newIconSrc.notes
+    if (id === 'music') return newIconSrc.music
     if (id === 'terminal') return newIconSrc.terminal
     if (id === 'typing-master') return typingMaterIcon.src
     if (id === 'messages') return newIconSrc.messages

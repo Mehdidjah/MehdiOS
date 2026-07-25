@@ -1,8 +1,8 @@
 import { setMusicStatus, setVolume } from '@/app/features/settings'
 import { useDispatch, useSelector } from '@/app/store'
+import { newIconSrc } from '@/app/utils/icon-paths'
 import { useCallback, useEffect, useRef } from 'react'
 import { HiMiniSpeakerWave, HiMiniSpeakerXMark } from 'react-icons/hi2'
-import musicIcon from '@/public/assets/icons/Music.png'
 import Image from 'next/image'
 import { FaForward, FaPause, FaPlay } from 'react-icons/fa'
 
@@ -23,8 +23,14 @@ export function SoundRange({ audio }: { audio?: HTMLAudioElement | null }) {
       const rect = track.getBoundingClientRect()
       if (!rect) return
 
-      const range = Math.max(70, Math.min(e.clientX - rect.left, rect.width - 2))
-      const sound = Math.max(0, Math.min(100, ((range - 25) / (rect.width - 27)) * 100))
+      const range = Math.max(
+        70,
+        Math.min(e.clientX - rect.left, rect.width - 2)
+      )
+      const sound = Math.max(
+        0,
+        Math.min(100, ((range - 25) / (rect.width - 27)) * 100)
+      )
 
       dispatch(setVolume(sound))
       if (audio instanceof HTMLAudioElement) {
@@ -95,9 +101,9 @@ export function SoundRange({ audio }: { audio?: HTMLAudioElement | null }) {
           className="relative h-6 rounded-full border border-[#6f6f6f] bg-black/20"
         >
           {volume > 0 ? (
-            <HiMiniSpeakerWave className="pointer-events-none absolute left-1 top-1/2 size-5 -translate-y-1/2" />
+            <HiMiniSpeakerWave className="pointer-events-none absolute top-1/2 left-1 size-5 -translate-y-1/2" />
           ) : (
-            <HiMiniSpeakerXMark className="pointer-events-none absolute left-1 top-1/2 size-5 -translate-y-1/2" />
+            <HiMiniSpeakerXMark className="pointer-events-none absolute top-1/2 left-1 size-5 -translate-y-1/2" />
           )}
           <div
             ref={soundLabel}
@@ -115,7 +121,7 @@ export function SoundRange({ audio }: { audio?: HTMLAudioElement | null }) {
       <div className="flex items-center justify-between rounded-2xl bg-white/50 p-3">
         <div className="flex items-center gap-2">
           <div className="flex size-12 items-center justify-center rounded-md bg-black/20">
-            <Image alt="" src={musicIcon} width={30} height={30} />
+            <Image alt="" src={newIconSrc.music} width={30} height={30} />
           </div>
           <h2 className="font-medium">
             {music_status === 'playing' ? 'Starboy' : 'Music'}

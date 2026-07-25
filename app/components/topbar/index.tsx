@@ -3,7 +3,8 @@
 import { setBrightness, setMusicStatus, setVolume } from '@/app/features/settings'
 import { useClickOutside } from '@/app/hooks/use-click-outside'
 import { useDispatch, useSelector } from '@/app/store'
-import musicIcon from '@/public/assets/icons/Music.png'
+import { newIconSrc } from '@/app/utils/icon-paths'
+import { getMusicPlayer } from '@/app/utils/music-player'
 import { IconCast, IconDots } from '@tabler/icons-react'
 import Image from 'next/image'
 import {
@@ -50,7 +51,6 @@ export function Topbar() {
   const [mirrorEnabled, setMirrorEnabled] = useState(false)
   const [duplicateEnabled, setDuplicateEnabled] = useState(false)
   const ccRef = useRef<HTMLDivElement>(null)
-  const audio = useRef<HTMLAudioElement | null>(null)
   const previousVolume = useRef(50)
   const dispatch = useDispatch()
   const { activeApp, brightness, music_status, volume } = useSelector(
@@ -58,12 +58,8 @@ export function Topbar() {
   )
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const player = new Audio('/assets/music/starboy.mp3')
-    player.loop = true
-    player.volume = 0.5
-    audio.current = player
+    const player = getMusicPlayer()
+    if (!player) return
 
     const handlePlay = () => dispatch(setMusicStatus('playing'))
     const handlePause = () => dispatch(setMusicStatus('paused'))
@@ -73,17 +69,16 @@ export function Topbar() {
     player.addEventListener('ended', handlePause)
 
     return () => {
-      player.pause()
       player.removeEventListener('play', handlePlay)
       player.removeEventListener('pause', handlePause)
       player.removeEventListener('ended', handlePause)
-      audio.current = null
     }
   }, [dispatch])
 
   useEffect(() => {
-    if (audio.current instanceof HTMLAudioElement) {
-      audio.current.volume = Math.max(0, Math.min(1, volume / 100))
+    const player = getMusicPlayer()
+    if (player) {
+      player.volume = Math.max(0, Math.min(1, volume / 100))
     }
   }, [volume])
 
@@ -124,8 +119,8 @@ export function Topbar() {
   }
 
   const toggleMusic = () => {
-    const player = audio.current
-    if (!(player instanceof HTMLAudioElement)) return
+    const player = getMusicPlayer()
+    if (!player) return
 
     if (music_status === 'playing') {
       player.pause()
@@ -493,7 +488,7 @@ function MusicTile({
     >
       <div className="flex h-full flex-col justify-between">
         <div className="flex size-12 items-center justify-center overflow-hidden rounded-[16px] bg-white/[0.06]">
-          <Image alt="" src={musicIcon} width={34} height={34} />
+          <Image alt="" src={newIconSrc.music} width={34} height={34} />
         </div>
 
         <div className="space-y-0.5">

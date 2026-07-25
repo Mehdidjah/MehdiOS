@@ -31,6 +31,13 @@ export const folders: Folder[] = [
     type: 'folder',
   },
   {
+    id: 'music',
+    name: 'Music',
+    status: 'close',
+    placement: 'taskbar',
+    type: 'folder',
+  },
+  {
     id: 'chrome',
     name: 'Safari',
     status: 'close',

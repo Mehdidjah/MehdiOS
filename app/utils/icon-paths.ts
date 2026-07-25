@@ -1,5 +1,6 @@
 const NEW_ICON_STYLE_BASE_PATH = '/assets/new%20icon%20style'
 const MACWEB_ICON_BASE_PATH = '/assets/macweb-icons'
+const MACX_ICON_BASE_PATH = '/assets/macx-icons'
 
 export const macwebAppIconSrc = {
   finder: {
@@ -18,12 +19,17 @@ export const macwebSettingsSectionIconSrc = {
   wallpaper: `${MACWEB_ICON_BASE_PATH}/settings-sections/Wallpapers.png`,
 } as const
 
+export const macxAppIconSrc = {
+  music: `${MACX_ICON_BASE_PATH}/Music.png`,
+} as const
+
 export const newIconSrc = {
   calculator: `${NEW_ICON_STYLE_BASE_PATH}/Calculator26.svg`,
   contact: `${NEW_ICON_STYLE_BASE_PATH}/Contacts26.svg`,
   finder: macwebAppIconSrc.finder.light,
   folder: `${NEW_ICON_STYLE_BASE_PATH}/Folder26.svg`,
   messages: `${NEW_ICON_STYLE_BASE_PATH}/Messages26.svg`,
+  music: macxAppIconSrc.music,
   notes: `${NEW_ICON_STYLE_BASE_PATH}/Notes26.svg`,
   safari: `${NEW_ICON_STYLE_BASE_PATH}/Safari26.svg`,
   settings: macwebAppIconSrc.settings.light,
