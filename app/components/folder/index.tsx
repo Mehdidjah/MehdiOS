@@ -55,11 +55,7 @@ export function Folder({
   ) => {
     event.preventDefault()
     event.stopPropagation()
-    const coX =
-      innerWidth - event.clientX > 256 ? event.clientX : event.clientX - 256
-    const coY =
-      innerHeight - event.clientY > 294 ? event.clientY : event.clientY - 294
-    setCtxPosition({ x: coX, y: coY })
+    setCtxPosition({ x: event.clientX, y: event.clientY })
   }
 
   useEffect(() => {
@@ -98,10 +94,7 @@ export function Folder({
     dispatch(
       setActiveApp({
         id,
-        name:
-          id === 'projects' || id === 'trash'
-            ? 'Finder'
-            : name,
+        name: id === 'projects' || id === 'trash' ? 'Finder' : name,
       })
     )
   }

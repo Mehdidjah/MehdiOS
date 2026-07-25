@@ -1,3 +1,5 @@
+'use client'
+
 import {
   setSortOption,
   setViewOption,
@@ -5,9 +7,15 @@ import {
 } from '@/app/features/settings'
 import { addFolder, openFolder } from '@/app/features/window-slice'
 import { useDispatch, useSelector } from '@/app/store'
-import { IconArrowsHorizontal, IconArrowsVertical } from '@tabler/icons-react'
+import { IconDeviceMobile } from '@tabler/icons-react'
 import { useEffect, useState } from 'react'
-import { IoIosArrowForward } from 'react-icons/io'
+import {
+  MacContextMenu,
+  MacContextMenuItem,
+  MacContextMenuSeparator,
+  MacContextSubmenu,
+} from './menu-parts'
+import { ReferenceMenuIcon } from './reference-icons'
 
 export function ContextMenu({
   position,
@@ -15,139 +23,160 @@ export function ContextMenu({
   position: { x: number; y: number }
 }) {
   const dispatch = useDispatch()
-  const { screen: screenMode, zIndex } = useSelector((state) => state.settings)
+  const {
+    desktop,
+    screen: screenMode,
+    zIndex,
+  } = useSelector((state) => state.settings)
   const [subPosition, setSubPosition] = useState<'left' | 'right'>('right')
+  const [activeSubmenu, setActiveSubmenu] = useState<'sort' | 'view' | null>(
+    null
+  )
 
   useEffect(() => {
-    if (position.x + 2 * 256 <= innerWidth) {
-      setSubPosition('right')
-    } else setSubPosition('left')
+    const requiredWidth = 220 + 170 + 14
+    setSubPosition(
+      position.x + requiredWidth <= window.innerWidth ? 'right' : 'left'
+    )
   }, [position.x])
 
+  const createFolder = () => {
+    dispatch(
+      addFolder({
+        id: crypto.randomUUID(),
+        name: 'Untitled',
+        status: 'close',
+        placement: 'desktop',
+        type: 'folder',
+      })
+    )
+  }
+
+  const openWallpaperSettings = () => {
+    dispatch(setZIndex(zIndex + 1))
+    dispatch(openFolder('settings'))
+  }
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen()
+    } else if (document.body.requestFullscreen) {
+      void document.body.requestFullscreen()
+    }
+  }
+
   return (
-    <div
-      style={{
-        top: position.y,
-        left: position.x,
-      }}
-      onContextMenu={(e) => {
-        e.stopPropagation()
-      }}
-      className="absolute z-9999 w-64 rounded-md border border-[#545454] bg-dark-context-bg text-sm shadow-2xl"
-    >
-      <div className="relative">
-        <ul className="space-y-1 p-2 [&>li:hover]:bg-[#222222] [&>li]:rounded-md [&>li]:p-[3px] [&>li]:px-2 [&>li]:text-[#e0e0e0]">
-          <li
-            onClick={() => {
-              dispatch(
-                addFolder({
-                  id: crypto.randomUUID(),
-                  name: 'Untitled',
-                  status: 'close',
-                  placement: 'desktop',
-                  type: 'folder',
-                })
-              )
-            }}
-            className="relative mb-2! after:absolute after:bottom-[-4px] after:left-0 after:h-px after:w-full after:bg-[#5a5a5a] after:content-['']"
-          >
-            New Folder
-          </li>
-          <li className="relative mb-2! text-[#888888]! after:absolute after:bottom-[-4px] after:left-0 after:h-px after:w-full after:bg-[#5a5a5a] after:content-['']">
-            Get Info
-          </li>
-          <li className="relative mb-2! flex items-center justify-between text-[#888888]! after:absolute after:bottom-[-4px] after:left-0 after:h-px after:w-full after:bg-[#5a5a5a] after:content-['']">
-            <span>Import From Iphone</span>
-            <IoIosArrowForward />
-          </li>
-          <li
-            onClick={() => {
-              dispatch(setZIndex(zIndex + 1))
-              dispatch(openFolder('settings'))
-            }}
-          >
-            Change Desktop Background
-          </li>
-          <li
-            onClick={() => {
-              if (document.fullscreenElement) {
-                document.exitFullscreen()
-              } else if (document.body.requestFullscreen) {
-                document.body.requestFullscreen()
-              }
-            }}
-            className="flex items-center justify-between"
-          >
-            <span>
-              {screenMode === 'fullscreen'
-                ? 'Exit Fullscreen'
-                : 'Request Fullscreen'}
-            </span>
-            <span>F11</span>
-          </li>
-          <li className="group/sort relative flex items-center justify-between">
-            <span>Sort By</span>
-            <IoIosArrowForward />
-            <div
-              className={`invisible absolute top-0 w-64 bg-transparent px-2 text-sm shadow-2xl group-hover/sort:visible ${subPosition === 'right' ? 'left-full' : 'right-full'}`}
-            >
-              <div className="rounded-md border border-[#545454] bg-dark-context-bg">
-                <ul className="space-y-1 p-2 [&>li:hover]:bg-[#222222] [&>li]:rounded-md [&>li]:p-[3px] [&>li]:px-2 [&>li]:text-[#e0e0e0]">
-                  <li
-                    onClick={() => {
-                      dispatch(setSortOption('name'))
-                    }}
-                  >
-                    <span>Name</span>
-                  </li>
-                  <li
-                    onClick={() => {
-                      dispatch(setSortOption('date'))
-                    }}
-                  >
-                    <span>Date Created</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </li>
-          <li className="text-[#888888]!">Clean Up</li>
-          <li className="flex items-center justify-between text-[#888888]!">
-            <span>Clean Up By</span>
-            <IoIosArrowForward />
-          </li>
-          <li className="group/view flex items-center justify-between">
-            <span>Show View Options</span>
-            <IoIosArrowForward />
-            <div
-              className={`invisible absolute bottom-0 w-64 bg-transparent px-2 text-sm shadow-2xl group-hover/view:visible ${subPosition === 'right' ? 'left-[calc(100%-8px)]' : 'right-[calc(100%-8px)]'}`}
-            >
-              <div className="rounded-md border border-[#545454] bg-dark-context-bg">
-                <ul className="space-y-1 p-2 [&>li:hover]:bg-[#222222] [&>li]:rounded-md [&>li]:p-[3px] [&>li]:px-2 [&>li]:text-[#e0e0e0]">
-                  <li
-                    onClick={() => {
-                      dispatch(setViewOption('vertical'))
-                    }}
-                    className="flex items-center justify-between"
-                  >
-                    <span>Vertical</span>
-                    <IconArrowsVertical stroke={1} className="size-5" />
-                  </li>
-                  <li
-                    onClick={() => {
-                      dispatch(setViewOption('horizontal'))
-                    }}
-                    className="flex items-center justify-between"
-                  >
-                    <span>Horizontal</span>
-                    <IconArrowsHorizontal stroke={1} className="size-5" />
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </li>
-        </ul>
+    <MacContextMenu ariaLabel="Desktop context menu" position={position}>
+      <MacContextMenuItem
+        icon={<ReferenceMenuIcon name="folder" />}
+        label="New Folder"
+        onClick={createFolder}
+        shortcut="⇧⌘N"
+      />
+
+      <MacContextMenuSeparator />
+
+      <MacContextMenuItem
+        disabled
+        icon={<ReferenceMenuIcon name="info" />}
+        label="Get Info"
+        shortcut="⌘I"
+      />
+      <MacContextMenuItem
+        disabled
+        icon={<IconDeviceMobile aria-hidden className="size-4" stroke={1.8} />}
+        label="Import From iPhone"
+        submenu
+      />
+
+      <MacContextMenuSeparator />
+
+      <MacContextMenuItem
+        icon={<ReferenceMenuIcon name="wallpaper" />}
+        label="Change Wallpaper..."
+        onClick={openWallpaperSettings}
+      />
+      <MacContextMenuItem
+        icon={<ReferenceMenuIcon name="fullscreen" />}
+        label={
+          screenMode === 'fullscreen' ? 'Exit Fullscreen' : 'Request Fullscreen'
+        }
+        onClick={toggleFullscreen}
+        shortcut="F11"
+      />
+
+      <div
+        className="relative"
+        onMouseEnter={() => setActiveSubmenu('sort')}
+        onMouseLeave={() => setActiveSubmenu(null)}
+      >
+        <MacContextMenuItem
+          icon={<ReferenceMenuIcon name="sort" />}
+          keepOpen
+          label="Sort By"
+          onClick={() => setActiveSubmenu('sort')}
+          submenu
+        />
+        {activeSubmenu === 'sort' && (
+          <MacContextSubmenu ariaLabel="Sort desktop by" side={subPosition}>
+            <MacContextMenuItem
+              checked={desktop.sort === 'name'}
+              label="Name"
+              onClick={() => dispatch(setSortOption('name'))}
+            />
+            <MacContextMenuItem
+              checked={desktop.sort === 'date'}
+              label="Date Created"
+              onClick={() => dispatch(setSortOption('date'))}
+            />
+          </MacContextSubmenu>
+        )}
       </div>
-    </div>
+
+      <MacContextMenuItem
+        disabled
+        icon={<ReferenceMenuIcon name="cleanup" />}
+        label="Clean Up"
+      />
+      <MacContextMenuItem
+        disabled
+        icon={<ReferenceMenuIcon name="sort" />}
+        label="Clean Up By"
+        submenu
+      />
+
+      <MacContextMenuSeparator />
+
+      <div
+        className="relative"
+        onMouseEnter={() => setActiveSubmenu('view')}
+        onMouseLeave={() => setActiveSubmenu(null)}
+      >
+        <MacContextMenuItem
+          icon={<ReferenceMenuIcon name="view" />}
+          keepOpen
+          label="Show View Options"
+          onClick={() => setActiveSubmenu('view')}
+          submenu
+        />
+        {activeSubmenu === 'view' && (
+          <MacContextSubmenu
+            ariaLabel="Desktop view options"
+            side={subPosition}
+          >
+            <MacContextMenuItem
+              checked={desktop.view === 'vertical'}
+              label="Vertical"
+              onClick={() => dispatch(setViewOption('vertical'))}
+            />
+            <MacContextMenuItem
+              checked={desktop.view === 'horizontal'}
+              label="Horizontal"
+              onClick={() => dispatch(setViewOption('horizontal'))}
+            />
+          </MacContextSubmenu>
+        )}
+      </div>
+    </MacContextMenu>
   )
 }

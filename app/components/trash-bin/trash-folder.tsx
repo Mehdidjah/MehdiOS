@@ -24,11 +24,7 @@ export function TrashFolder({ item }: { item: Folder }) {
   ) => {
     event.preventDefault()
     event.stopPropagation()
-    const coX =
-      innerWidth - event.clientX > 208 ? event.clientX : event.clientX - 208
-    const coY =
-      innerHeight - event.clientY > 230 ? event.clientY : event.clientY - 230
-    setCtxPosition({ x: coX, y: coY })
+    setCtxPosition({ x: event.clientX, y: event.clientY })
   }
 
   useEffect(() => {

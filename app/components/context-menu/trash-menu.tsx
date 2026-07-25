@@ -1,7 +1,22 @@
+'use client'
+
 import { cleanTrash, removeFromTrash } from '@/app/features/trash'
 import { restoreFolder, restoreFolderAll } from '@/app/features/window-slice'
 import { useDispatch, useSelector } from '@/app/store'
+import {
+  IconArrowBackUp,
+  IconCopy,
+  IconFolderOpen,
+  IconInfoCircle,
+  IconTrash,
+  IconTrashX,
+} from '@tabler/icons-react'
 import { Folder } from '../folder/folders'
+import {
+  MacContextMenu,
+  MacContextMenuItem,
+  MacContextMenuSeparator,
+} from './menu-parts'
 
 export function TrashContextMenu({
   position,
@@ -12,58 +27,66 @@ export function TrashContextMenu({
 }) {
   const dispatch = useDispatch()
   const trashItems = useSelector((state) => state.trash.items)
+  const iconProps = { className: 'size-4', stroke: 1.8 }
+
   return (
-    <div
-      style={{
-        top: position.y,
-        left: position.x,
-      }}
-      onContextMenu={(e) => {
-        e.stopPropagation()
-      }}
-      className="absolute z-9999 w-52 rounded-md bg-dark-context-bg text-sm shadow-2xl"
+    <MacContextMenu
+      ariaLabel={`${item.name} Trash context menu`}
+      position={position}
     >
-      <ul className="space-y-1 p-2 [&>li:hover]:bg-[#222222] [&>li]:rounded-md [&>li]:p-[3px] [&>li]:px-2 [&>li]:text-[#e0e0e0]">
-        <li className="relative mb-2! text-[#888888]! after:absolute after:bottom-[-4px] after:left-0 after:h-px after:w-full after:bg-[#5a5a5a] after:content-['']">
-          Open
-        </li>
-        <li
-          onClick={() => {
-            dispatch(restoreFolder(item))
-            dispatch(removeFromTrash({ id: item.id, name: item.name }))
-          }}
-          className="relative mb-2! after:absolute after:bottom-[-4px] after:left-0 after:h-px after:w-full after:bg-[#5a5a5a] after:content-['']"
-        >
-          Put Back
-        </li>
-        <li
-          onClick={() => {
-            if (trashItems.length > 1) {
-              dispatch(restoreFolderAll(trashItems))
-              dispatch(cleanTrash())
-            }
-          }}
-          className={`relative mb-2! after:absolute after:bottom-[-4px] after:left-0 after:h-px after:w-full after:bg-[#5a5a5a] after:content-[''] ${trashItems.length <= 1 ? 'text-[#888888]!' : ''}`}
-        >
-          Put Back All
-        </li>
-        <li
-          onClick={() => {
-            dispatch(removeFromTrash({ id: item.id, name: item.name }))
-          }}
-        >
-          Delete Immediately
-        </li>
-        <li
-          onClick={() => {
-            dispatch(cleanTrash())
-          }}
-        >
-          Empty Trash
-        </li>
-        <li className="text-[#888888]!">Get Info</li>
-        <li className="text-[#888888]!">Copy</li>
-      </ul>
-    </div>
+      <MacContextMenuItem
+        disabled
+        icon={<IconFolderOpen aria-hidden {...iconProps} />}
+        label="Open"
+      />
+
+      <MacContextMenuSeparator />
+
+      <MacContextMenuItem
+        icon={<IconArrowBackUp aria-hidden {...iconProps} />}
+        label="Put Back"
+        onClick={() => {
+          dispatch(restoreFolder(item))
+          dispatch(removeFromTrash({ id: item.id, name: item.name }))
+        }}
+      />
+      <MacContextMenuItem
+        disabled={trashItems.length <= 1}
+        icon={<IconArrowBackUp aria-hidden {...iconProps} />}
+        label="Put Back All"
+        onClick={() => {
+          dispatch(restoreFolderAll(trashItems))
+          dispatch(cleanTrash())
+        }}
+      />
+
+      <MacContextMenuSeparator />
+
+      <MacContextMenuItem
+        icon={<IconTrashX aria-hidden {...iconProps} />}
+        label="Delete Immediately"
+        onClick={() => {
+          dispatch(removeFromTrash({ id: item.id, name: item.name }))
+        }}
+      />
+      <MacContextMenuItem
+        icon={<IconTrash aria-hidden {...iconProps} />}
+        label="Empty Trash"
+        onClick={() => dispatch(cleanTrash())}
+      />
+
+      <MacContextMenuSeparator />
+
+      <MacContextMenuItem
+        disabled
+        icon={<IconInfoCircle aria-hidden {...iconProps} />}
+        label="Get Info"
+      />
+      <MacContextMenuItem
+        disabled
+        icon={<IconCopy aria-hidden {...iconProps} />}
+        label="Copy"
+      />
+    </MacContextMenu>
   )
 }

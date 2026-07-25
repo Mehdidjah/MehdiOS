@@ -54,18 +54,7 @@ export default function Home() {
   const handleContextMenu = useCallback((event: MouseEvent<HTMLDivElement>) => {
     event.preventDefault()
     event.stopPropagation()
-
-    const menuWidth = 256
-    const menuHeight = 294
-    const coX =
-      window.innerWidth - event.clientX > menuWidth
-        ? event.clientX
-        : event.clientX - menuWidth
-    const coY =
-      window.innerHeight - event.clientY > menuHeight
-        ? event.clientY
-        : event.clientY - menuHeight
-    setCtxPosition({ x: coX, y: coY })
+    setCtxPosition({ x: event.clientX, y: event.clientY })
   }, [])
 
   useEffect(() => {
@@ -209,10 +198,7 @@ export default function Home() {
               )
             }
 
-            if (
-              frame.id === 'projects' ||
-              frame.id === 'trash'
-            ) {
+            if (frame.id === 'projects' || frame.id === 'trash') {
               return (
                 <FinderFrame
                   key={frame.id}
