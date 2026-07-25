@@ -19,23 +19,29 @@ import { closeFolder, minimizeFolder } from '@/app/features/window-slice'
 import { Size, useResize } from '@/app/hooks/use-resize'
 import { setActiveApp, setZIndex } from '@/app/features/settings'
 import { useClickOutside } from '@/app/hooks/use-click-outside'
+import { MacTrafficLights } from './mac-traffic-lights'
 
 const DEFAULT_FRAME_SIZE: Size = { minW: 750, minH: 300 }
 const NOTES_FRAME_SIZE: Size = { minW: 980, minH: 620 }
+const SETTINGS_FRAME_SIZE: Size = { minW: 720, minH: 500 }
 
 const getSize = (frameId: string): Size => {
   if (typeof window === 'undefined') {
-    return frameId === 'inotes' ? NOTES_FRAME_SIZE : DEFAULT_FRAME_SIZE
+    if (frameId === 'inotes') return NOTES_FRAME_SIZE
+    if (frameId === 'settings') return SETTINGS_FRAME_SIZE
+    return DEFAULT_FRAME_SIZE
   }
 
   if (window.innerWidth < 768) {
     return {
       minW: 320,
-      minH: frameId === 'inotes' ? 480 : 300,
+      minH: frameId === 'inotes' ? 480 : frameId === 'settings' ? 420 : 300,
     }
   }
 
-  return frameId === 'inotes' ? NOTES_FRAME_SIZE : DEFAULT_FRAME_SIZE
+  if (frameId === 'inotes') return NOTES_FRAME_SIZE
+  if (frameId === 'settings') return SETTINGS_FRAME_SIZE
+  return DEFAULT_FRAME_SIZE
 }
 
 const getInitialFrameBounds = (
@@ -43,6 +49,38 @@ const getInitialFrameBounds = (
   screenWidth: number,
   screenHeight: number
 ) => {
+  if (frameId === 'settings') {
+    const topbarHeight = 28
+
+    if (screenWidth < 768) {
+      return {
+        width: screenWidth,
+        height: screenHeight - topbarHeight,
+        left: 0,
+        top: topbarHeight,
+      }
+    }
+
+    const width = Math.min(
+      Math.max(720, Math.floor(screenWidth * 0.7)),
+      Math.min(1100, screenWidth - 32)
+    )
+    const height = Math.min(
+      Math.max(520, Math.floor(screenHeight * 0.76)),
+      screenHeight - topbarHeight - 24
+    )
+
+    return {
+      width,
+      height,
+      left: Math.max(0, Math.floor((screenWidth - width) / 2)),
+      top: Math.max(
+        topbarHeight + 8,
+        Math.floor((screenHeight - height + topbarHeight) / 2)
+      ),
+    }
+  }
+
   if (frameId === 'inotes') {
     const topbarHeight = 28
     const width =
@@ -55,11 +93,17 @@ const getInitialFrameBounds = (
     return {
       width,
       height,
-      left: screenWidth < 768 ? 0 : Math.max(0, Math.floor((screenWidth - width) / 2)),
+      left:
+        screenWidth < 768
+          ? 0
+          : Math.max(0, Math.floor((screenWidth - width) / 2)),
       top:
         screenWidth < 768
           ? topbarHeight
-          : Math.max(topbarHeight + 12, Math.floor((screenHeight - height + topbarHeight) / 2)),
+          : Math.max(
+              topbarHeight + 12,
+              Math.floor((screenHeight - height + topbarHeight) / 2)
+            ),
     }
   }
 
@@ -94,15 +138,21 @@ export function WindowFrame({
   const fullscreenTL = useRef<gsap.core.Timeline>(gsap.timeline())
   const [isFullscreen, setIsFullscreen] = useState(false)
   const dragRef = useRef<globalThis.Draggable[] | null>(null)
-  const { zIndex } = useSelector((state) => state.settings)
+  const { activeApp, zIndex } = useSelector((state) => state.settings)
   const [isFocused, setIsFocused] = useState(true)
   const isNotesFrame = frame_id === 'inotes'
+  const isSettingsFrame = frame_id === 'settings'
   const size = getSize(frame_id)
 
   const { contextSafe } = useGSAP(() => {
     const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1920
-    const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 1080
-    const initialBounds = getInitialFrameBounds(frame_id, screenWidth, screenHeight)
+    const screenHeight =
+      typeof window !== 'undefined' ? window.innerHeight : 1080
+    const initialBounds = getInitialFrameBounds(
+      frame_id,
+      screenWidth,
+      screenHeight
+    )
 
     if (frame.current) {
       const initialFrameStyles: gsap.TweenVars = {
@@ -125,18 +175,21 @@ export function WindowFrame({
       frame.current,
       {
         opacity: 0,
-        scale: 0.8,
+        scale: isSettingsFrame ? 0.9 : 0.8,
+        y: isSettingsFrame ? 20 : 0,
       },
       {
         scale: 1,
         opacity: 1,
-        ease: 'back.inOut(1.7)',
-        duration: 0.5,
+        y: 0,
+        ease: isSettingsFrame ? 'power3.out' : 'back.inOut(1.7)',
+        duration: isSettingsFrame ? 0.25 : 0.5,
       }
     )
     dragRef.current = Draggable.create(frame.current, {
       trigger: frameHeader.current,
       zIndexBoost: false,
+      dragClickables: false,
       allowEventDefault: true,
     })
   })
@@ -347,11 +400,10 @@ export function WindowFrame({
   }, frame)
 
   useEffect(() => {
-    if (frame.current) {
+    if (activeApp?.id === frame_id && frame.current) {
       frame.current.style.zIndex = `${zIndex}`
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [activeApp?.id, frame_id, zIndex])
 
   return (
     <div
@@ -359,16 +411,18 @@ export function WindowFrame({
         e.stopPropagation()
       }}
       onMouseDown={() => {
-        dispatch(setActiveApp({ name: frameName }))
+        dispatch(setActiveApp({ id: frame_id, name: frameName }))
         handleZIndex()
         setIsFocused(true)
       }}
       ref={frame}
-      className={`absolute min-h-[300px] w-full min-w-0 max-w-full overflow-hidden rounded-[21.33px] ${
+      className={`absolute min-h-[300px] w-full max-w-full min-w-0 overflow-hidden ${
         isNotesFrame
-          ? 'h-[calc(100vh-92px)] border border-white/10 bg-[#1b1c24] shadow-[0_28px_80px_rgba(0,0,0,0.48)] sm:min-w-[980px] sm:w-[92vw]'
-          : 'h-1/2 bg-white/20 shadow-2xl backdrop-blur-xl sm:w-2/4 sm:min-w-[750px]'
-      } ${isFocused ? 'brightness-100' : 'brightness-90'} ${status === 'minimize' ? 'hidden' : ''}`}
+          ? 'h-[calc(100vh-92px)] rounded-[21.33px] border border-white/10 bg-[#1b1c24] shadow-[0_28px_80px_rgba(0,0,0,0.48)] sm:w-[92vw] sm:min-w-[980px]'
+          : isSettingsFrame
+            ? `${isFullscreen ? 'rounded-none' : 'rounded-none sm:rounded-xl'} min-h-[420px] border border-black/10 bg-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.1)] dark:border-white/10 dark:bg-[#1e1e1e]`
+            : 'h-1/2 rounded-[21.33px] bg-white/20 shadow-2xl backdrop-blur-xl sm:w-2/4 sm:min-w-[750px]'
+      } ${isSettingsFrame || isFocused ? 'brightness-100' : 'brightness-90'} ${status === 'minimize' ? 'hidden' : ''}`}
     >
       <div className="relative h-full">
         {!isFullscreen && (
@@ -391,11 +445,11 @@ export function WindowFrame({
             />
             <div
               ref={tl}
-              className="absolute left-0 top-0 z-20 size-2 cursor-nwse-resize bg-transparent"
+              className="absolute top-0 left-0 z-20 size-2 cursor-nwse-resize bg-transparent"
             />
             <div
               ref={tr}
-              className="absolute right-0 top-0 z-20 size-2 cursor-nesw-resize bg-transparent"
+              className="absolute top-0 right-0 z-20 size-2 cursor-nesw-resize bg-transparent"
             />
             <div
               ref={bl}
@@ -403,118 +457,144 @@ export function WindowFrame({
             />
             <div
               ref={br}
-              className="absolute bottom-0 right-0 z-20 size-2 cursor-nwse-resize bg-transparent"
+              className="absolute right-0 bottom-0 z-20 size-2 cursor-nwse-resize bg-transparent"
             />
           </>
         )}
         <div
           ref={frameHeader}
           onDoubleClick={onFullScreen}
-          className="relative grid cursor-custom-auto! grid-cols-[auto_1fr] sm:grid-cols-[200px_1fr] lg:grid-cols-[250px_1fr]"
+          className={`cursor-custom-auto! relative grid ${
+            isSettingsFrame
+              ? 'h-11 grid-cols-[auto_1fr_auto] items-center border-b border-black/10 bg-[#f3f3f3] px-3 dark:border-white/10 dark:bg-[#2c2c2e]'
+              : 'grid-cols-[auto_1fr] sm:grid-cols-[200px_1fr] lg:grid-cols-[250px_1fr]'
+          }`}
         >
           <div
-            className={`group flex items-center p-3 ${
-              isNotesFrame
-                ? 'bg-[#252734]'
-                : enableSidebar
-                  ? 'bg-light-foreground dark:bg-dark-foreground'
-                  : 'bg-light-background dark:bg-dark-background'
+            className={`group flex items-center ${
+              isSettingsFrame
+                ? ''
+                : `p-3 ${
+                    isNotesFrame
+                      ? 'bg-[#252734]'
+                      : enableSidebar
+                        ? 'bg-light-foreground dark:bg-dark-foreground'
+                        : 'bg-light-background dark:bg-dark-background'
+                  }`
             }`}
           >
-            <button
-              onClick={onClose}
-              className="cursor-custom-auto! p-1"
-              type="button"
-            >
-              <div className="size-3 rounded-full bg-rose-500">
-                <IconX className="size-full text-black opacity-0 group-hover:opacity-100" />
-              </div>
-            </button>
-            <button
-              onClick={onMinimize}
-              className="cursor-custom-auto! p-1"
-              type="button"
-            >
-              <div className="size-3 rounded-full bg-yellow-500">
-                <IconMinus className="size-full text-black opacity-0 group-hover:opacity-100" />
-              </div>
-            </button>
-            <button
-              onClick={onFullScreen}
-              className="group/fullscreen relative cursor-custom-auto! p-1"
-              type="button"
-            >
-              <div className="size-3 rounded-full bg-green-500">
-                <IconBracketsAngle className="size-full -rotate-45 text-black opacity-0 group-hover:opacity-100" />
-              </div>
-              <div
-                onClick={(e) => {
-                  e.stopPropagation()
-                }}
-                className="invisible absolute -left-5 top-7 z-1000 transition-all delay-200 group-hover/fullscreen:visible"
-              >
-                <div className="relative w-56 rounded-md border-2 border-[#e1e1e1] bg-[#f3f3f3] p-2 shadow-xl dark:border-[#3e3e3e] dark:bg-[#181818]">
-                  <span className="absolute -top-[9px] left-5 block size-4 rotate-45 rounded-tl border-l-2 border-t-2 border-[#e1e1e1] bg-[#f3f3f3] dark:border-[#3e3e3e] dark:bg-[#181818]" />
-                  <h2 className="text-start text-sm font-medium text-[#afafaf]">
-                    Move & Resize
-                  </h2>
-                  <div className="grid grid-cols-4 items-center gap-5 p-4">
-                    <div
-                      onClick={onLeftScreen}
-                      className="flex h-5 justify-start rounded-sm border-2 border-dark-background p-px dark:border-light-background/80"
-                    >
-                      <div className="h-full w-1/2 rounded-xs bg-dark-background dark:bg-light-background/80"></div>
-                    </div>
-                    <div
-                      onClick={onRightScreen}
-                      className="flex h-5 justify-end rounded-sm border-2 border-dark-background p-px dark:border-light-background/80"
-                    >
-                      <div className="h-full w-1/2 rounded-xs bg-dark-background dark:bg-light-background/80"></div>
-                    </div>
-                    <div
-                      onClick={onTopScreen}
-                      className="flex h-5 items-start rounded-sm border-2 border-dark-background p-px dark:border-light-background/80"
-                    >
-                      <div className="h-1/2 w-full rounded-xs bg-dark-background dark:bg-light-background/80"></div>
-                    </div>
-                    <div
-                      onClick={onBottomScreen}
-                      className="flex h-5 items-end rounded-sm border-2 border-dark-background p-px dark:border-light-background/80"
-                    >
-                      <div className="h-1/2 w-full rounded-xs bg-dark-background dark:bg-light-background/80"></div>
+            {isSettingsFrame ? (
+              <MacTrafficLights
+                appName={frameName}
+                isFullscreen={isFullscreen}
+                onClose={onClose}
+                onMinimize={onMinimize}
+                onZoom={onFullScreen}
+              />
+            ) : (
+              <>
+                <button
+                  onClick={onClose}
+                  className="cursor-custom-auto! p-1"
+                  type="button"
+                >
+                  <div className="size-3 rounded-full bg-rose-500">
+                    <IconX className="size-full text-black opacity-0 group-hover:opacity-100" />
+                  </div>
+                </button>
+                <button
+                  onClick={onMinimize}
+                  className="cursor-custom-auto! p-1"
+                  type="button"
+                >
+                  <div className="size-3 rounded-full bg-yellow-500">
+                    <IconMinus className="size-full text-black opacity-0 group-hover:opacity-100" />
+                  </div>
+                </button>
+                <button
+                  onClick={onFullScreen}
+                  className="group/fullscreen cursor-custom-auto! relative p-1"
+                  type="button"
+                >
+                  <div className="size-3 rounded-full bg-green-500">
+                    <IconBracketsAngle className="size-full -rotate-45 text-black opacity-0 group-hover:opacity-100" />
+                  </div>
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation()
+                    }}
+                    className="invisible absolute top-7 -left-5 z-1000 transition-all delay-200 group-hover/fullscreen:visible"
+                  >
+                    <div className="relative w-56 rounded-md border-2 border-[#e1e1e1] bg-[#f3f3f3] p-2 shadow-xl dark:border-[#3e3e3e] dark:bg-[#181818]">
+                      <span className="absolute -top-[9px] left-5 block size-4 rotate-45 rounded-tl border-t-2 border-l-2 border-[#e1e1e1] bg-[#f3f3f3] dark:border-[#3e3e3e] dark:bg-[#181818]" />
+                      <h2 className="text-start text-sm font-medium text-[#afafaf]">
+                        Move & Resize
+                      </h2>
+                      <div className="grid grid-cols-4 items-center gap-5 p-4">
+                        <div
+                          onClick={onLeftScreen}
+                          className="border-dark-background dark:border-light-background/80 flex h-5 justify-start rounded-sm border-2 p-px"
+                        >
+                          <div className="bg-dark-background dark:bg-light-background/80 h-full w-1/2 rounded-xs"></div>
+                        </div>
+                        <div
+                          onClick={onRightScreen}
+                          className="border-dark-background dark:border-light-background/80 flex h-5 justify-end rounded-sm border-2 p-px"
+                        >
+                          <div className="bg-dark-background dark:bg-light-background/80 h-full w-1/2 rounded-xs"></div>
+                        </div>
+                        <div
+                          onClick={onTopScreen}
+                          className="border-dark-background dark:border-light-background/80 flex h-5 items-start rounded-sm border-2 p-px"
+                        >
+                          <div className="bg-dark-background dark:bg-light-background/80 h-1/2 w-full rounded-xs"></div>
+                        </div>
+                        <div
+                          onClick={onBottomScreen}
+                          className="border-dark-background dark:border-light-background/80 flex h-5 items-end rounded-sm border-2 p-px"
+                        >
+                          <div className="bg-dark-background dark:bg-light-background/80 h-1/2 w-full rounded-xs"></div>
+                        </div>
+                      </div>
+                      <div className="mb-1 h-px bg-[#bbb] dark:bg-[#5b5b5b]" />
+                      <div>
+                        <div
+                          onClick={onFullScreen}
+                          className="bg-primary flex w-full items-center justify-between rounded-md px-2 py-[2px] text-sm text-white"
+                        >
+                          <span>
+                            {isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
+                          </span>
+                          <IconChevronRight stroke={2} className="size-5" />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="mb-1 h-px bg-[#bbb] dark:bg-[#5b5b5b]" />
-                  <div>
-                    <div
-                      onClick={onFullScreen}
-                      className="flex w-full items-center justify-between rounded-md bg-primary px-2 py-[2px] text-sm text-white"
-                    >
-                      <span>
-                        {isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
-                      </span>
-                      <IconChevronRight stroke={2} className="size-5" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </button>
+                </button>
+              </>
+            )}
           </div>
           {!enableSidebar && (
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-              <h3 className="font-semibold">{frameName}</h3>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              <h3 className="truncate text-[13px] font-semibold text-zinc-800 dark:text-white/90">
+                {frameName}
+              </h3>
             </div>
           )}
           <div
-            className={`items-center px-2 text-light-text sm:px-4 ${
-              isNotesFrame
-                ? 'bg-[#252734] text-[#eef2ff]'
-                : 'bg-light-background dark:bg-dark-background dark:text-dark-text'
-            } ${enableSidebar ? 'grid grid-cols-[1fr_auto] justify-between' : 'flex justify-end'}`}
+            className={
+              isSettingsFrame
+                ? 'flex min-w-[60px] items-center justify-end'
+                : `text-light-text items-center px-2 sm:px-4 ${
+                    isNotesFrame
+                      ? 'bg-[#252734] text-[#eef2ff]'
+                      : 'bg-light-background dark:bg-dark-background dark:text-dark-text'
+                  } ${enableSidebar ? 'grid grid-cols-[1fr_auto] justify-between' : 'flex justify-end'}`
+            }
           >
-            {enableSidebar && (
+            {!isSettingsFrame && enableSidebar && (
               <div
-                className={`flex cursor-custom-auto! items-center gap-1 sm:gap-2 ${
+                className={`cursor-custom-auto! flex items-center gap-1 sm:gap-2 ${
                   isNotesFrame
                     ? 'text-[#c7cfea]'
                     : 'text-dark-primary dark:text-light-primary'
@@ -528,24 +608,32 @@ export function WindowFrame({
                     <IconChevronRight stroke={2} />
                   </button>
                 </div>
-                <h3 className="font-semibold text-xs sm:text-base truncate">{frameName}</h3>
+                <h3 className="truncate text-xs font-semibold sm:text-base">
+                  {frameName}
+                </h3>
               </div>
             )}
-            <div className={`flex items-center gap-2 ${isNotesFrame ? 'text-[#8f96b8]' : 'text-[#8d8d8d]'}`}>
-              <button>
-                <IconListDetails stroke={2} />
-              </button>
-              <button>
-                <IconLayoutBoard stroke={2} />
-              </button>
-            </div>
+            {!isSettingsFrame && (
+              <div
+                className={`flex items-center gap-2 ${isNotesFrame ? 'text-[#8f96b8]' : 'text-[#8d8d8d]'}`}
+              >
+                <button aria-label="List view" type="button">
+                  <IconListDetails stroke={2} />
+                </button>
+                <button aria-label="Board view" type="button">
+                  <IconLayoutBoard stroke={2} />
+                </button>
+              </div>
+            )}
           </div>
         </div>
         <div
           className={`h-full max-h-[calc(100%-44px)] ${
             isNotesFrame
               ? 'bg-[#1a1b23] text-[#eef2ff]'
-              : 'bg-light-background text-light-text dark:bg-dark-background dark:text-dark-text'
+              : isSettingsFrame
+                ? 'bg-[#f4f4f5] text-zinc-900 dark:bg-[#27272a] dark:text-white'
+                : 'bg-light-background text-light-text dark:bg-dark-background dark:text-dark-text'
           }`}
         >
           {children}

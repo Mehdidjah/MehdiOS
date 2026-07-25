@@ -17,10 +17,8 @@ import { useGSAP } from '@gsap/react'
 import {
   IconArrowLeft,
   IconArrowRight,
-  IconBracketsAngle,
   IconDotsVertical,
   IconHome,
-  IconMinus,
   IconPlus,
   IconReload,
   IconSearch,
@@ -29,8 +27,18 @@ import {
 import gsap from 'gsap'
 import { Draggable } from 'gsap/Draggable'
 import Image, { type StaticImageData } from 'next/image'
-import { type CSSProperties, type FormEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  type CSSProperties,
+  type FormEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import googleIcon from '@/public/assets/icons/google_logo.svg'
+import { MacTrafficLights } from './mac-traffic-lights'
 import { projects } from '../projects/projects'
 import { Status } from '../folder/folders'
 
@@ -57,7 +65,7 @@ type SearchResult = {
   source: string
 }
 
-const BROWSER_FRAME_SIZE: Size = { minW: 860, minH: 520 }
+const BROWSER_FRAME_SIZE: Size = { minW: 720, minH: 480 }
 
 const getBrowserSize = () => {
   if (typeof window === 'undefined') {
@@ -86,9 +94,12 @@ const getInitialFrameBounds = (screenWidth: number, screenHeight: number) => {
     }
   }
 
-  const width = Math.min(Math.max(980, Math.floor(screenWidth * 0.8)), 1280)
+  const width = Math.min(
+    Math.max(720, Math.floor(screenWidth * 0.7)),
+    screenWidth - 32
+  )
   const height = Math.min(
-    Math.max(620, Math.floor(screenHeight * 0.8)),
+    Math.max(480, Math.floor(screenHeight * 0.76)),
     screenHeight - topbarHeight - 34
   )
 
@@ -96,7 +107,10 @@ const getInitialFrameBounds = (screenWidth: number, screenHeight: number) => {
     width,
     height,
     left: Math.max(0, Math.floor((screenWidth - width) / 2)),
-    top: Math.max(topbarHeight + 10, Math.floor((screenHeight - height + topbarHeight) / 2)),
+    top: Math.max(
+      topbarHeight + 10,
+      Math.floor((screenHeight - height + topbarHeight) / 2)
+    ),
   }
 }
 
@@ -107,21 +121,6 @@ const isSearchUrl = (rawUrl: string) => rawUrl.startsWith(SEARCH_URL_PREFIX)
 
 const buildProxyUrl = (rawUrl: string) =>
   `${BROWSER_PROXY_PATH}?url=${encodeURIComponent(rawUrl)}`
-
-const getDisplayUrl = (rawUrl: string) => {
-  if (!rawUrl) return ''
-
-  if (isSearchUrl(rawUrl)) {
-    return decodeURIComponent(rawUrl.slice(SEARCH_URL_PREFIX.length))
-  }
-
-  try {
-    const url = new URL(rawUrl)
-    return url.hostname.replace(/^www\./, '') + url.pathname + url.search
-  } catch {
-    return rawUrl
-  }
-}
 
 const getHostname = (rawUrl: string) => {
   if (isSearchUrl(rawUrl)) {
@@ -184,7 +183,7 @@ export function BrowserFrame({
   const fullscreenTL = useRef<gsap.core.Timeline>(gsap.timeline())
   const dragRef = useRef<globalThis.Draggable[] | null>(null)
   const dispatch = useDispatch()
-  const { zIndex } = useSelector((state) => state.settings)
+  const { activeApp, zIndex } = useSelector((state) => state.settings)
   const { focusedTab, tabs } = useSelector((state) => state.chrome)
   const [isFocused, setIsFocused] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -203,7 +202,8 @@ export function BrowserFrame({
 
   const { contextSafe } = useGSAP(() => {
     const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1920
-    const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 1080
+    const screenHeight =
+      typeof window !== 'undefined' ? window.innerHeight : 1080
     const initialBounds = getInitialFrameBounds(screenWidth, screenHeight)
 
     if (frame.current) {
@@ -219,19 +219,22 @@ export function BrowserFrame({
       frame.current,
       {
         opacity: 0,
-        scale: 0.82,
+        scale: 0.9,
+        y: 20,
       },
       {
         opacity: 1,
         scale: 1,
-        ease: 'back.inOut(1.45)',
-        duration: 0.5,
+        y: 0,
+        ease: 'power2.out',
+        duration: 0.25,
       }
     )
 
     dragRef.current = Draggable.create(frame.current, {
       trigger: frameHeader.current,
       zIndexBoost: false,
+      dragClickables: false,
       allowEventDefault: true,
     })
   })
@@ -424,7 +427,11 @@ export function BrowserFrame({
       const trimmedInput = rawInput.trim()
       if (!trimmedInput) return
 
-      if (!isLikelyUrl(trimmedInput) && !trimmedInput.startsWith('http://') && !trimmedInput.startsWith('https://')) {
+      if (
+        !isLikelyUrl(trimmedInput) &&
+        !trimmedInput.startsWith('http://') &&
+        !trimmedInput.startsWith('https://')
+      ) {
         const searchToken = getSearchToken(trimmedInput)
 
         seedHistoryForTab(activeTab.id, searchToken)
@@ -467,8 +474,10 @@ export function BrowserFrame({
     navigateToUrl(homeSearchQuery)
   }
 
-  const activeTabHistory =
-    (activeTab && historyByTab[activeTab.id]) || { entries: [], index: -1 }
+  const activeTabHistory = (activeTab && historyByTab[activeTab.id]) || {
+    entries: [],
+    index: -1,
+  }
 
   const canGoBack = activeTabHistory.index > 0
   const canGoForward =
@@ -585,10 +594,10 @@ export function BrowserFrame({
   }, frame)
 
   useEffect(() => {
-    if (frame.current) {
+    if (activeApp?.id === frame_id && frame.current) {
       frame.current.style.zIndex = `${zIndex}`
     }
-  }, [zIndex])
+  }, [activeApp?.id, frame_id, zIndex])
 
   useEffect(() => {
     if (!activeTab) return
@@ -660,7 +669,11 @@ export function BrowserFrame({
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin || !activeTab || activeSearchQuery) {
+      if (
+        event.origin !== window.location.origin ||
+        !activeTab ||
+        activeSearchQuery
+      ) {
         return
       }
 
@@ -709,58 +722,79 @@ export function BrowserFrame({
         event.stopPropagation()
       }}
       onMouseDown={() => {
-        dispatch(setActiveApp({ name: frameName }))
+        dispatch(setActiveApp({ id: frame_id, name: frameName }))
         handleZIndex()
         setIsFocused(true)
       }}
       ref={frame}
-      className={`absolute min-h-[420px] min-w-0 max-w-full overflow-hidden rounded-[26px] border border-white/40 bg-white/60 shadow-[0_36px_90px_rgba(15,23,42,0.28)] backdrop-blur-[34px] ${
-        isFocused ? 'brightness-100' : 'brightness-90 saturate-75'
+      className={`absolute min-h-[420px] max-w-full min-w-0 overflow-hidden rounded-none border border-black/15 bg-[#f5f5f7] md:min-h-[480px] md:min-w-[720px] dark:border-white/15 dark:bg-[#292929] ${
+        isFullscreen ? 'rounded-none' : 'sm:rounded-xl'
+      } ${
+        isFocused
+          ? 'shadow-[0_24px_60px_rgba(0,0,0,0.24)]'
+          : 'shadow-[0_12px_36px_rgba(0,0,0,0.2)]'
       } ${status === 'minimize' ? 'hidden' : ''}`}
       style={{
         fontFamily:
           "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif",
       }}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.92),_rgba(255,255,255,0.58)_42%,_rgba(229,235,244,0.46)_100%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.74),rgba(255,255,255,0.38)_40%,rgba(214,226,242,0.28))]" />
-
       {!isFullscreen && (
         <>
-          <div ref={t} className="absolute top-0 z-20 h-1 w-full cursor-ns-resize bg-transparent" />
-          <div ref={b} className="absolute bottom-0 z-20 h-1 w-full cursor-ns-resize bg-transparent" />
-          <div ref={r} className="absolute right-0 z-20 h-full w-1 cursor-ew-resize bg-transparent" />
-          <div ref={l} className="absolute left-0 z-20 h-full w-1 cursor-ew-resize bg-transparent" />
-          <div ref={tl} className="absolute left-0 top-0 z-20 size-2 cursor-nwse-resize bg-transparent" />
-          <div ref={tr} className="absolute right-0 top-0 z-20 size-2 cursor-nesw-resize bg-transparent" />
-          <div ref={bl} className="absolute bottom-0 left-0 z-20 size-2 cursor-nesw-resize bg-transparent" />
-          <div ref={br} className="absolute bottom-0 right-0 z-20 size-2 cursor-nwse-resize bg-transparent" />
+          <div
+            ref={t}
+            className="absolute top-0 z-20 h-1 w-full cursor-ns-resize bg-transparent"
+          />
+          <div
+            ref={b}
+            className="absolute bottom-0 z-20 h-1 w-full cursor-ns-resize bg-transparent"
+          />
+          <div
+            ref={r}
+            className="absolute right-0 z-20 h-full w-1 cursor-ew-resize bg-transparent"
+          />
+          <div
+            ref={l}
+            className="absolute left-0 z-20 h-full w-1 cursor-ew-resize bg-transparent"
+          />
+          <div
+            ref={tl}
+            className="absolute top-0 left-0 z-20 size-2 cursor-nwse-resize bg-transparent"
+          />
+          <div
+            ref={tr}
+            className="absolute top-0 right-0 z-20 size-2 cursor-nesw-resize bg-transparent"
+          />
+          <div
+            ref={bl}
+            className="absolute bottom-0 left-0 z-20 size-2 cursor-nesw-resize bg-transparent"
+          />
+          <div
+            ref={br}
+            className="absolute right-0 bottom-0 z-20 size-2 cursor-nwse-resize bg-transparent"
+          />
         </>
       )}
 
-      <div className="relative grid h-full grid-rows-[76px_auto_1fr]">
+      <div className="relative grid h-full grid-rows-[44px_34px_1fr]">
         <div
           ref={frameHeader}
           onDoubleClick={onFullScreen}
-          className="grid cursor-custom-auto! grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-black/6 bg-white/44 px-4 py-3 backdrop-blur-xl"
+          className="cursor-custom-auto! grid grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-black/10 bg-[#ececee] px-3 dark:border-white/10 dark:bg-[#323232]"
         >
           <div className="flex items-center gap-3">
-            <div className="group flex items-center gap-2">
-              <TrafficLightButton color="bg-[#ff736a]" onClick={() => {
+            <MacTrafficLights
+              appName={frameName}
+              isFullscreen={isFullscreen}
+              onClose={() => {
                 dispatch(resetChrome())
                 onClose()
-              }}>
-                <IconX className="size-3 text-black/75 opacity-0 transition-opacity group-hover:opacity-100" />
-              </TrafficLightButton>
-              <TrafficLightButton color="bg-[#febc2e]" onClick={onMinimize}>
-                <IconMinus className="size-3 text-black/75 opacity-0 transition-opacity group-hover:opacity-100" />
-              </TrafficLightButton>
-              <TrafficLightButton color="bg-[#19c332]" onClick={onFullScreen}>
-                <IconBracketsAngle className="size-3 -rotate-45 text-black/75 opacity-0 transition-opacity group-hover:opacity-100" />
-              </TrafficLightButton>
-            </div>
+              }}
+              onMinimize={onMinimize}
+              onZoom={onFullScreen}
+            />
 
-            <GlassGroup className="hidden sm:flex">
+            <div className="hidden items-center sm:flex">
               <ToolbarIconButton
                 ariaLabel="Back"
                 disabled={!canGoBack}
@@ -776,35 +810,43 @@ export function BrowserFrame({
               >
                 <IconArrowRight stroke={2} className="size-4" />
               </ToolbarIconButton>
-            </GlassGroup>
+            </div>
           </div>
 
           <form
             onSubmit={handleUrlSubmit}
-            className="mx-auto flex h-11 w-full max-w-3xl min-w-0 items-center gap-3 rounded-full border border-white/60 bg-white/76 px-4 shadow-[0_12px_24px_rgba(15,23,42,0.07),inset_0_1px_0_rgba(255,255,255,0.86)]"
+            className="mx-auto flex h-7 w-full max-w-3xl min-w-0 items-center gap-2 rounded-md border border-black/10 bg-white/80 px-3 dark:border-white/10 dark:bg-black/20"
           >
             <Image
               alt=""
-              src={activeSearchQuery || !activeTab?.iframe_url ? googleIcon : newIconSrc.safari}
+              src={
+                activeSearchQuery || !activeTab?.iframe_url
+                  ? googleIcon
+                  : newIconSrc.safari
+              }
               width={activeSearchQuery || !activeTab?.iframe_url ? 20 : 18}
               height={activeSearchQuery || !activeTab?.iframe_url ? 20 : 18}
               className="shrink-0 object-contain"
             />
-            <IconSearch stroke={1.9} className="size-4 shrink-0 text-black/35" />
+            <IconSearch
+              stroke={1.9}
+              className="size-4 shrink-0 text-black/35 dark:text-white/35"
+            />
             <input
               value={urlInput}
               onChange={(event) => setUrlInput(event.target.value)}
               type="text"
               placeholder="Search or enter website name"
-              className="w-full min-w-0 bg-transparent text-[13px] text-black/75 outline-hidden placeholder:text-black/35"
+              aria-label="Safari address and search"
+              className="w-full min-w-0 bg-transparent text-[13px] text-black/75 outline-hidden placeholder:text-black/35 dark:text-white/80 dark:placeholder:text-white/35"
             />
             <button
               type="button"
               onClick={handleRefresh}
               className={`flex size-7 items-center justify-center rounded-full transition ${
                 activeSearchQuery || activeFrameUrl
-                  ? 'text-black/55 hover:bg-black/[0.05] hover:text-black/75'
-                  : 'pointer-events-none text-black/20'
+                  ? 'text-black/55 hover:bg-black/[0.05] hover:text-black/75 dark:text-white/55 dark:hover:bg-white/[0.08] dark:hover:text-white/80'
+                  : 'pointer-events-none text-black/20 dark:text-white/20'
               }`}
               aria-label="Refresh page"
             >
@@ -812,7 +854,7 @@ export function BrowserFrame({
             </button>
           </form>
 
-          <GlassGroup className="hidden md:flex">
+          <div className="hidden items-center md:flex">
             <ToolbarIconButton ariaLabel="Home" onClick={handleHome}>
               <IconHome stroke={1.9} className="size-4" />
             </ToolbarIconButton>
@@ -822,64 +864,66 @@ export function BrowserFrame({
             <ToolbarIconButton ariaLabel="Window actions">
               <IconDotsVertical stroke={1.9} className="size-4" />
             </ToolbarIconButton>
-          </GlassGroup>
+          </div>
         </div>
 
-        <div className="px-4 py-2">
-          <div className="flex min-w-0 items-center gap-0.5 overflow-x-auto">
+        <div className="border-b border-black/10 bg-[#e5e5e7] px-2 dark:border-white/10 dark:bg-[#292929]">
+          <div
+            className="flex h-[33px] min-w-0 items-end gap-0.5 overflow-x-auto"
+            role="tablist"
+          >
             {tabs.map((tab) => {
               const active = tab.id === focusedTab
               const tabSearchQuery = getSearchQuery(tab.url)
 
               return (
-                <button
-                  key={tab.id}
-                  onClick={() => dispatch(focusTab(tab.id))}
-                  className={`group relative flex min-w-[160px] max-w-[240px] items-center gap-2 rounded-[16px] border px-3 py-2 text-left transition ${
+                <div
+                  className={`group relative flex h-7 max-w-[220px] min-w-[130px] items-center rounded-t-md border border-b-0 transition ${
                     active
-                      ? 'border-white/70 bg-white/84 shadow-[0_12px_24px_rgba(15,23,42,0.08)]'
-                      : 'border-transparent bg-white/36 hover:bg-white/58'
+                      ? 'border-black/10 bg-[#f5f5f7] dark:border-white/10 dark:bg-[#1f1f1f]'
+                      : 'border-transparent bg-black/[0.03] hover:bg-black/[0.06] dark:bg-white/[0.03] dark:hover:bg-white/[0.07]'
                   }`}
-                  type="button"
+                  key={tab.id}
                 >
-                  <Image
-                    alt=""
-                    src={tabSearchQuery || !tab.iframe_url ? googleIcon : newIconSrc.safari}
-                    width={tabSearchQuery || !tab.iframe_url ? 18 : 16}
-                    height={tabSearchQuery || !tab.iframe_url ? 18 : 16}
-                    className="shrink-0 object-contain"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[12px] font-semibold text-black/75">
-                      {tab.title || 'New Tab'}
-                    </p>
-                    <p className="truncate text-[11px] text-black/42">
-                      {tabSearchQuery
-                        ? 'Search results'
-                        : tab.iframe_url
-                          ? getHostname(tab.url || tab.iframe_url)
-                          : 'Google start page'}
-                    </p>
-                  </div>
-                  <span
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      handleCloseTab(tab.id)
-                    }}
-                    className="flex size-5 shrink-0 items-center justify-center rounded-full text-black/30 transition hover:bg-black/[0.05] hover:text-black/60"
+                  <button
+                    aria-selected={active}
+                    className="flex min-w-0 flex-1 items-center gap-2 px-2.5 text-left"
+                    onClick={() => dispatch(focusTab(tab.id))}
+                    role="tab"
+                    type="button"
                   >
-                    <IconX stroke={2} className="size-3.5" />
-                  </span>
-                </button>
+                    <Image
+                      alt=""
+                      className="shrink-0 object-contain"
+                      height={tabSearchQuery || !tab.iframe_url ? 16 : 14}
+                      src={
+                        tabSearchQuery || !tab.iframe_url
+                          ? googleIcon
+                          : newIconSrc.safari
+                      }
+                      width={tabSearchQuery || !tab.iframe_url ? 16 : 14}
+                    />
+                    <span className="truncate text-[12px] font-medium text-black/75 dark:text-white/75">
+                      {tab.title || 'New Tab'}
+                    </span>
+                  </button>
+                  <button
+                    aria-label={`Close ${tab.title || 'tab'}`}
+                    className="mr-1 flex size-5 shrink-0 items-center justify-center rounded-full text-black/30 transition hover:bg-black/[0.06] hover:text-black/65 dark:text-white/30 dark:hover:bg-white/[0.08] dark:hover:text-white/65"
+                    onClick={() => handleCloseTab(tab.id)}
+                    type="button"
+                  >
+                    <IconX aria-hidden className="size-3.5" stroke={2} />
+                  </button>
+                </div>
               )
             })}
           </div>
         </div>
 
-        <div className="min-h-0 overflow-hidden px-3 pb-3 pt-0">
+        <div className="min-h-0 overflow-hidden bg-white dark:bg-[#1f1f1f]">
           {activeSearchQuery ? (
-            <div className="relative flex h-full flex-col overflow-auto rounded-[24px] border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(244,247,251,0.94))] px-6 py-8 shadow-[0_18px_38px_rgba(15,23,42,0.08)]">
-              <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,_rgba(90,160,255,0.14),_transparent_70%)]" />
+            <div className="relative flex h-full flex-col overflow-auto bg-[#f7f7f8] px-4 py-6 sm:px-6 sm:py-8 dark:bg-[#1f1f1f]">
               <div className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col">
                 <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
                   <Image
@@ -892,26 +936,26 @@ export function BrowserFrame({
                   <p className="mt-6 text-[11px] font-semibold tracking-[0.22em] text-[#2563eb] uppercase">
                     Research
                   </p>
-                  <h2 className="mt-2 text-[34px] font-semibold tracking-[-0.04em] text-slate-900">
+                  <h2 className="mt-2 text-[30px] font-semibold tracking-[-0.04em] text-slate-900 dark:text-white">
                     {activeSearchQuery}
                   </h2>
-                  <p className="mt-3 max-w-2xl text-[14px] leading-6 text-slate-500">
-                    Search results open inside the Safari window so you can keep researching
-                    without leaving the desktop.
+                  <p className="mt-3 max-w-2xl text-[14px] leading-6 text-slate-500 dark:text-white/50">
+                    Search results open inside the Safari window so you can keep
+                    researching without leaving the desktop.
                   </p>
                 </div>
 
                 <div className="mt-10 flex-1 space-y-4">
                   {isSearching ? (
-                    <div className="rounded-[22px] border border-white/60 bg-white/78 p-6 text-center text-[14px] text-slate-500 shadow-[0_14px_30px_rgba(15,23,42,0.05)]">
+                    <div className="rounded-lg border border-black/8 bg-white p-5 text-center text-[14px] text-slate-500 shadow-sm dark:border-white/8 dark:bg-white/5 dark:text-white/50">
                       Searching for results...
                     </div>
                   ) : searchError ? (
-                    <div className="rounded-[22px] border border-white/60 bg-white/78 p-6 text-center text-[14px] text-slate-500 shadow-[0_14px_30px_rgba(15,23,42,0.05)]">
+                    <div className="rounded-lg border border-black/8 bg-white p-5 text-center text-[14px] text-slate-500 shadow-sm dark:border-white/8 dark:bg-white/5 dark:text-white/50">
                       {searchError}
                     </div>
                   ) : searchResults.length === 0 ? (
-                    <div className="rounded-[22px] border border-white/60 bg-white/78 p-6 text-center text-[14px] text-slate-500 shadow-[0_14px_30px_rgba(15,23,42,0.05)]">
+                    <div className="rounded-lg border border-black/8 bg-white p-5 text-center text-[14px] text-slate-500 shadow-sm dark:border-white/8 dark:bg-white/5 dark:text-white/50">
                       No results found for this query.
                     </div>
                   ) : (
@@ -919,16 +963,16 @@ export function BrowserFrame({
                       <button
                         key={`${result.url}-${index}`}
                         onClick={() => navigateToUrl(result.url, result.title)}
-                        className="w-full rounded-[22px] border border-white/65 bg-white/78 p-5 text-left shadow-[0_14px_30px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:bg-white/92 hover:shadow-[0_18px_34px_rgba(15,23,42,0.08)]"
+                        className="w-full rounded-lg border border-black/8 bg-white p-4 text-left shadow-sm transition hover:bg-black/[0.02] hover:shadow-md dark:border-white/8 dark:bg-white/5 dark:hover:bg-white/[0.08]"
                         type="button"
                       >
                         <p className="text-[12px] font-medium text-[#2563eb]">
                           {result.source}
                         </p>
-                        <h3 className="mt-1 text-[18px] font-semibold tracking-[-0.03em] text-slate-900">
+                        <h3 className="mt-1 text-[17px] font-semibold tracking-[-0.02em] text-slate-900 dark:text-white/90">
                           {result.title}
                         </h3>
-                        <p className="mt-2 text-[13px] leading-6 text-slate-500">
+                        <p className="mt-2 text-[13px] leading-6 text-slate-500 dark:text-white/50">
                           {result.snippet || result.url}
                         </p>
                         <p className="mt-3 truncate text-[12px] text-slate-400">
@@ -941,82 +985,70 @@ export function BrowserFrame({
               </div>
             </div>
           ) : activeFrameUrl ? (
-            <div className="h-full overflow-hidden rounded-[24px] border border-white/55 bg-white/82 shadow-[0_18px_38px_rgba(15,23,42,0.09)]">
-              <div className="flex items-center justify-between border-b border-black/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.78),rgba(245,247,251,0.92))] px-4 py-3">
-                <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex size-9 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#ecf6ff,#ffffff)] shadow-[inset_0_1px_0_rgba(255,255,255,0.92)]">
-                    <Image alt="" src={newIconSrc.safari} width={20} height={20} className="object-contain" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-[13px] font-semibold text-black/80">
-                      {activeTab?.title || 'Safari'}
-                    </p>
-                    <p className="truncate text-[11px] text-black/45">
-                      {getDisplayUrl(activeFrameUrl)}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleRefresh}
-                  className="flex items-center gap-2 rounded-full bg-black/[0.04] px-3 py-1.5 text-[12px] font-medium text-black/55 transition hover:bg-black/[0.07] hover:text-black/75"
-                  type="button"
-                >
-                  <IconReload stroke={1.8} className="size-3.5" />
-                  Reload
-                </button>
-              </div>
-              <iframe
-                key={`${activeTab?.id ?? 'tab'}:${activeFrameUrl}:${iframeRefreshKey}`}
-                className="h-[calc(100%-59px)] w-full border-0 bg-white"
-                src={buildProxyUrl(activeFrameUrl)}
-                title={activeTab?.title || 'Safari'}
-                allowFullScreen
-                sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation allow-popups-to-escape-sandbox allow-modals"
-                referrerPolicy="no-referrer"
-              />
-            </div>
+            <iframe
+              key={`${activeTab?.id ?? 'tab'}:${activeFrameUrl}:${iframeRefreshKey}`}
+              className="h-full w-full border-0 bg-white"
+              src={buildProxyUrl(activeFrameUrl)}
+              title={activeTab?.title || 'Safari'}
+              allowFullScreen
+              sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation allow-popups-to-escape-sandbox allow-modals"
+              referrerPolicy="no-referrer"
+            />
           ) : (
-            <div className="relative flex h-full flex-col overflow-auto rounded-[24px] border border-white/55 bg-[linear-gradient(180deg,rgba(255,255,255,0.8),rgba(244,247,251,0.92))] px-6 py-8 shadow-[0_18px_38px_rgba(15,23,42,0.08)]">
+            <div className="relative flex h-full flex-col overflow-auto bg-[#f7f7f8] px-4 py-6 sm:px-6 sm:py-8 dark:bg-[#1f1f1f]">
               <div className="relative mx-auto flex w-full max-w-[1120px] flex-1 flex-col items-center">
-                <div className="mx-auto flex min-h-[360px] w-full max-w-[840px] flex-col items-center justify-center text-center">
+                <div className="mx-auto flex min-h-[260px] w-full max-w-[760px] flex-col items-center justify-center text-center">
                   <Image
                     alt="Google"
                     src={googleIcon}
-                    width={280}
-                    height={95}
-                    className="h-auto w-[280px] object-contain"
+                    width={220}
+                    height={74}
+                    className="h-auto w-[220px] object-contain"
                   />
 
                   <form
                     onSubmit={handleHomeSearch}
-                    className="mt-10 flex w-full items-center gap-4 rounded-full border border-white/70 bg-white/92 px-8 py-[18px] shadow-[0_18px_32px_rgba(15,23,42,0.08)]"
+                    className="mt-8 flex w-full items-center gap-3 rounded-full border border-black/10 bg-white px-5 py-3.5 shadow-sm transition focus-within:border-[#007aff] focus-within:ring-2 focus-within:ring-[#007aff]/15 dark:border-white/10 dark:bg-white/[0.07]"
                   >
-                    <IconSearch stroke={1.9} className="size-6 shrink-0 text-slate-400" />
+                    <IconSearch
+                      stroke={1.9}
+                      className="size-6 shrink-0 text-slate-400"
+                    />
                     <input
                       type="text"
                       value={homeSearchQuery}
-                      onChange={(event) => setHomeSearchQuery(event.target.value)}
+                      onChange={(event) =>
+                        setHomeSearchQuery(event.target.value)
+                      }
                       placeholder="Search the web or enter a URL"
-                      className="w-full bg-transparent text-[16px] text-slate-700 outline-hidden placeholder:text-slate-400"
+                      aria-label="Search the web"
+                      className="w-full bg-transparent text-[15px] text-slate-700 outline-hidden placeholder:text-slate-400 dark:text-white/80 dark:placeholder:text-white/35"
                     />
                   </form>
                 </div>
 
-                <div className="mt-4 grid w-full gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div className="mt-5 grid w-full grid-cols-[repeat(auto-fill,minmax(138px,1fr))] gap-3">
                   {shortcuts.map((shortcut) => (
                     <button
                       key={shortcut.id}
-                      onClick={() => navigateToUrl(shortcut.url, shortcut.label)}
-                      className="group flex min-h-[176px] flex-col rounded-[22px] border border-white/65 bg-white/72 p-4 text-left shadow-[0_14px_30px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:bg-white/92 hover:shadow-[0_18px_34px_rgba(15,23,42,0.1)]"
+                      onClick={() =>
+                        navigateToUrl(shortcut.url, shortcut.label)
+                      }
+                      className="group flex min-h-[142px] flex-col rounded-[10px] border border-black/8 bg-white p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/8 dark:bg-white/5 dark:hover:bg-white/[0.08]"
                       type="button"
                     >
                       <div className="flex items-start justify-between gap-3">
                         {shortcut.thumbnail ? (
-                          <div className="relative size-14 overflow-hidden rounded-[18px] border border-white/70 shadow-[0_10px_18px_rgba(15,23,42,0.08)]">
-                            <Image alt="" src={shortcut.thumbnail} fill className="object-cover" />
+                          <div className="relative size-11 overflow-hidden rounded-lg border border-black/8 shadow-sm dark:border-white/10">
+                            <Image
+                              alt=""
+                              src={shortcut.thumbnail}
+                              fill
+                              className="object-cover"
+                            />
                           </div>
                         ) : (
-                          <div className="flex size-14 items-center justify-center rounded-[18px] border border-white/70 bg-[linear-gradient(135deg,#eef7ff,#ffffff)] shadow-[0_10px_18px_rgba(15,23,42,0.06)]">
+                          <div className="flex size-11 items-center justify-center rounded-lg border border-black/8 bg-[#eef7ff] shadow-sm dark:border-white/10 dark:bg-white/10">
                             <Image
                               alt=""
                               src={newIconSrc.safari}
@@ -1026,25 +1058,25 @@ export function BrowserFrame({
                             />
                           </div>
                         )}
-                        <span className="rounded-full bg-black/[0.04] px-2.5 py-1 text-[10px] font-semibold tracking-[0.18em] text-black/40 uppercase">
+                        <span className="hidden rounded-full bg-black/[0.04] px-2.5 py-1 text-[10px] font-semibold tracking-[0.18em] text-black/40 uppercase">
                           Shortcut
                         </span>
                       </div>
 
                       <div className="mt-4">
-                        <p className="truncate text-[16px] font-semibold tracking-[-0.03em] text-slate-900">
+                        <p className="truncate text-[14px] font-semibold tracking-[-0.02em] text-slate-900 dark:text-white/90">
                           {shortcut.label}
                         </p>
-                        <p className="mt-1 text-[12px] font-medium text-slate-500">
+                        <p className="mt-1 truncate text-[11px] font-medium text-slate-500 dark:text-white/45">
                           {shortcut.subtitle}
                         </p>
                       </div>
 
-                      <p className="mt-3 line-clamp-3 text-[12px] leading-5 text-slate-500">
+                      <p className="mt-2 line-clamp-2 text-[11px] leading-4 text-slate-500 dark:text-white/45">
                         {shortcut.description}
                       </p>
 
-                      <span className="mt-auto pt-4 text-[12px] font-semibold text-[#2563eb]">
+                      <span className="mt-auto pt-3 text-[11px] font-semibold text-[#2563eb] dark:text-[#5fa8ff]">
                         Open in current tab
                       </span>
                     </button>
@@ -1055,44 +1087,6 @@ export function BrowserFrame({
           )}
         </div>
       </div>
-    </div>
-  )
-}
-
-function TrafficLightButton({
-  children,
-  color,
-  onClick,
-}: {
-  children: ReactNode
-  color: string
-  onClick: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex size-3.5 items-center justify-center rounded-full"
-      type="button"
-    >
-      <span className={`flex size-3.5 items-center justify-center rounded-full ${color}`}>
-        {children}
-      </span>
-    </button>
-  )
-}
-
-function GlassGroup({
-  children,
-  className = '',
-}: {
-  children: ReactNode
-  className?: string
-}) {
-  return (
-    <div
-      className={`items-center gap-1 rounded-full border border-white/60 bg-white/76 px-1 py-1 shadow-[0_12px_24px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,0.86)] ${className}`}
-    >
-      {children}
     </div>
   )
 }
@@ -1113,11 +1107,12 @@ function ToolbarIconButton({
   return (
     <button
       aria-label={ariaLabel}
+      disabled={disabled}
       onClick={onClick}
       className={`flex size-8 items-center justify-center rounded-full transition ${
         disabled
-          ? 'pointer-events-none text-black/20'
-          : 'text-black/55 hover:bg-black/[0.05] hover:text-black/75'
+          ? 'text-black/20 dark:text-white/20'
+          : 'text-black/55 hover:bg-black/[0.05] hover:text-black/75 dark:text-white/55 dark:hover:bg-white/[0.08] dark:hover:text-white/80'
       }`}
       style={style}
       type="button"

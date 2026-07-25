@@ -14,6 +14,7 @@ interface InitialState {
   volume: number
   music_status: 'playing' | 'paused'
   activeApp: {
+    id?: string
     name: string
   } | null
   zIndex: number
@@ -64,7 +65,10 @@ const settingsSlice = createSlice({
     setMusicStatus: (state, actions: PayloadAction<'playing' | 'paused'>) => {
       state.music_status = actions.payload
     },
-    setActiveApp: (state, actions: PayloadAction<{ name: string } | null>) => {
+    setActiveApp: (
+      state,
+      actions: PayloadAction<{ id?: string; name: string } | null>
+    ) => {
       state.activeApp = actions.payload
     },
     setZIndex: (state, actions: PayloadAction<number>) => {
