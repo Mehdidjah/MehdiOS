@@ -45,13 +45,6 @@ export const folders: Folder[] = [
     type: 'browser',
   },
   {
-    id: 'resume',
-    name: 'Resume',
-    status: 'close',
-    placement: 'desktop',
-    type: 'pdf',
-  },
-  {
     id: 'calculator',
     name: 'Calculator',
     status: 'close',
