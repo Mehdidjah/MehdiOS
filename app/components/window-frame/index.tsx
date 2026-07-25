@@ -12,7 +12,14 @@ import {
 } from '@tabler/icons-react'
 import gsap from 'gsap'
 import { Draggable } from 'gsap/Draggable'
-import { ReactNode, useEffect, useRef, useState } from 'react'
+import {
+  createContext,
+  type ReactNode,
+  type RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { Status } from '../folder/folders'
 import { useDispatch, useSelector } from '@/app/store'
 import { closeFolder, minimizeFolder } from '@/app/features/window-slice'
@@ -21,9 +28,21 @@ import { setActiveApp, setZIndex } from '@/app/features/settings'
 import { useClickOutside } from '@/app/hooks/use-click-outside'
 import { MacTrafficLights } from './mac-traffic-lights'
 
+type WindowChromeContextValue = {
+  frameHeader: RefObject<HTMLDivElement | null>
+  isFocused: boolean
+  isFullscreen: boolean
+  onClose: () => void
+  onMinimize: () => void
+  onZoom: () => void
+}
+
+export const WindowChromeContext =
+  createContext<WindowChromeContextValue | null>(null)
+
 const DEFAULT_FRAME_SIZE: Size = { minW: 750, minH: 300 }
 const NOTES_FRAME_SIZE: Size = { minW: 980, minH: 620 }
-const SETTINGS_FRAME_SIZE: Size = { minW: 720, minH: 500 }
+const SETTINGS_FRAME_SIZE: Size = { minW: 500, minH: 380 }
 
 const getSize = (frameId: string): Size => {
   if (typeof window === 'undefined') {
@@ -61,22 +80,16 @@ const getInitialFrameBounds = (
       }
     }
 
-    const width = Math.min(
-      Math.max(720, Math.floor(screenWidth * 0.7)),
-      Math.min(1100, screenWidth - 32)
-    )
-    const height = Math.min(
-      Math.max(520, Math.floor(screenHeight * 0.76)),
-      screenHeight - topbarHeight - 24
-    )
+    const width = Math.min(520, screenWidth - 32)
+    const height = Math.min(400, screenHeight - topbarHeight - 88)
 
     return {
       width,
       height,
-      left: Math.max(0, Math.floor((screenWidth - width) / 2)),
+      left: Math.max(16, Math.min(260, screenWidth - width - 24)),
       top: Math.max(
         topbarHeight + 8,
-        Math.floor((screenHeight - height + topbarHeight) / 2)
+        Math.min(100, screenHeight - height - 80)
       ),
     }
   }
@@ -175,15 +188,15 @@ export function WindowFrame({
       frame.current,
       {
         opacity: 0,
-        scale: isSettingsFrame ? 0.9 : 0.8,
-        y: isSettingsFrame ? 20 : 0,
+        scale: isSettingsFrame ? 0.96 : 0.8,
+        y: isSettingsFrame ? 10 : 0,
       },
       {
         scale: 1,
         opacity: 1,
         y: 0,
         ease: isSettingsFrame ? 'power3.out' : 'back.inOut(1.7)',
-        duration: isSettingsFrame ? 0.25 : 0.5,
+        duration: isSettingsFrame ? 0.28 : 0.5,
       }
     )
     dragRef.current = Draggable.create(frame.current, {
@@ -235,11 +248,12 @@ export function WindowFrame({
     syncPosition()
     minimizeTL.current.to(frame.current, {
       yPercent: 100,
-      scale: 0.3,
+      scale: isSettingsFrame ? 0.6 : 0.3,
+      opacity: isSettingsFrame ? 0 : 1,
       xPercent: -50,
       left: '50%',
-      duration: 0.5,
-      ease: 'expo.in',
+      duration: isSettingsFrame ? 0.28 : 0.5,
+      ease: isSettingsFrame ? 'power3.in' : 'expo.in',
     })
     minimizeTL.current.eventCallback('onComplete', () => {
       dispatch(
@@ -270,13 +284,13 @@ export function WindowFrame({
       } else {
         fullscreenTL.current.to(frame.current, {
           width: '100vw',
-          height: `${innerHeight - 28}px`,
+          height: `${innerHeight - 28 - (isSettingsFrame && innerWidth >= 768 ? 80 : 0)}px`,
           x: 0,
           y: 0,
           left: '0px',
           top: '28px',
-          duration: 0.5,
-          ease: 'expo.inOut',
+          duration: isSettingsFrame ? 0.3 : 0.5,
+          ease: isSettingsFrame ? 'power3.inOut' : 'expo.inOut',
         })
         if (dragRef.current) {
           dragRef.current[0].kill()
@@ -405,6 +419,25 @@ export function WindowFrame({
     }
   }, [activeApp?.id, frame_id, zIndex])
 
+  const windowChromeValue: WindowChromeContextValue = {
+    frameHeader,
+    isFocused,
+    isFullscreen,
+    onClose,
+    onMinimize,
+    onZoom: onFullScreen,
+  }
+
+  const frameSurfaceClass = isNotesFrame
+    ? 'h-[calc(100vh-92px)] rounded-[21.33px] border border-white/10 bg-[#1b1c24] shadow-[0_28px_80px_rgba(0,0,0,0.48)] sm:w-[92vw] sm:min-w-[980px]'
+    : isSettingsFrame
+      ? `min-h-[380px] rounded-none border border-black/10 bg-white/82 backdrop-blur-[40px] backdrop-saturate-150 md:rounded-[20px] dark:border-white/10 dark:bg-[rgba(25,25,28,0.88)] ${
+          isFocused
+            ? 'shadow-[0_32px_100px_rgba(0,0,0,0.75),0_0_0_1px_rgba(255,255,255,0.05)]'
+            : 'shadow-[0_14px_40px_rgba(0,0,0,0.45)]'
+        }`
+      : 'h-1/2 rounded-[21.33px] bg-white/20 shadow-2xl backdrop-blur-xl sm:w-2/4 sm:min-w-[750px]'
+
   return (
     <div
       onContextMenu={(e) => {
@@ -416,13 +449,9 @@ export function WindowFrame({
         setIsFocused(true)
       }}
       ref={frame}
-      className={`absolute min-h-[300px] w-full max-w-full min-w-0 overflow-hidden ${
-        isNotesFrame
-          ? 'h-[calc(100vh-92px)] rounded-[21.33px] border border-white/10 bg-[#1b1c24] shadow-[0_28px_80px_rgba(0,0,0,0.48)] sm:w-[92vw] sm:min-w-[980px]'
-          : isSettingsFrame
-            ? `${isFullscreen ? 'rounded-none' : 'rounded-none sm:rounded-xl'} min-h-[420px] border border-black/10 bg-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.1)] dark:border-white/10 dark:bg-[#1e1e1e]`
-            : 'h-1/2 rounded-[21.33px] bg-white/20 shadow-2xl backdrop-blur-xl sm:w-2/4 sm:min-w-[750px]'
-      } ${isSettingsFrame || isFocused ? 'brightness-100' : 'brightness-90'} ${status === 'minimize' ? 'hidden' : ''}`}
+      className={`absolute min-h-[300px] w-full max-w-full min-w-0 overflow-hidden ${frameSurfaceClass} ${
+        isSettingsFrame || isFocused ? 'brightness-100' : 'brightness-90'
+      } ${status === 'minimize' ? 'hidden' : ''}`}
     >
       <div className="relative h-full">
         {!isFullscreen && (
@@ -462,11 +491,11 @@ export function WindowFrame({
           </>
         )}
         <div
-          ref={frameHeader}
+          ref={isSettingsFrame ? undefined : frameHeader}
           onDoubleClick={onFullScreen}
           className={`cursor-custom-auto! relative grid ${
             isSettingsFrame
-              ? 'h-11 grid-cols-[auto_1fr_auto] items-center border-b border-black/10 bg-[#f3f3f3] px-3 dark:border-white/10 dark:bg-[#2c2c2e]'
+              ? 'hidden'
               : 'grid-cols-[auto_1fr] sm:grid-cols-[200px_1fr] lg:grid-cols-[250px_1fr]'
           }`}
         >
@@ -628,15 +657,17 @@ export function WindowFrame({
           </div>
         </div>
         <div
-          className={`h-full max-h-[calc(100%-44px)] ${
+          className={`${isSettingsFrame ? 'h-full max-h-full' : 'h-full max-h-[calc(100%-44px)]'} ${
             isNotesFrame
               ? 'bg-[#1a1b23] text-[#eef2ff]'
               : isSettingsFrame
-                ? 'bg-[#f4f4f5] text-zinc-900 dark:bg-[#27272a] dark:text-white'
+                ? 'bg-transparent text-zinc-900 dark:text-white'
                 : 'bg-light-background text-light-text dark:bg-dark-background dark:text-dark-text'
           }`}
         >
-          {children}
+          <WindowChromeContext.Provider value={windowChromeValue}>
+            {children}
+          </WindowChromeContext.Provider>
         </div>
       </div>
     </div>

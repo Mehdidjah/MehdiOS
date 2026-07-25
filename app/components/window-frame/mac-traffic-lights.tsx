@@ -5,6 +5,7 @@ import type { MouseEvent } from 'react'
 
 type MacTrafficLightsProps = {
   appName: string
+  isActive?: boolean
   isFullscreen?: boolean
   onClose: () => void
   onMinimize: () => void
@@ -14,6 +15,7 @@ type MacTrafficLightsProps = {
 
 export function MacTrafficLights({
   appName,
+  isActive = true,
   isFullscreen = false,
   onClose,
   onMinimize,
@@ -29,7 +31,7 @@ export function MacTrafficLights({
   return (
     <div
       aria-label={`${appName} window controls`}
-      className={`group flex shrink-0 items-center gap-2 ${className}`}
+      className={`group flex shrink-0 items-center gap-0 transition-opacity ${isActive ? 'opacity-100' : 'opacity-45'} ${className}`}
       role="group"
     >
       <button

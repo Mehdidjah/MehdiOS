@@ -54,19 +54,20 @@
 }
 
 :root {
-  --mac-window-radius: 12px;
-  --mac-window-dark: #1e1e1e;
-  --mac-window-content-dark: #121212;
-  --mac-toolbar-dark: #2c2c2e;
-  --mac-toolbar-light: #f3f3f3;
-  --mac-window-light: #ffffff;
+  --mac-window-radius: 20px;
+  --mac-window-dark: rgba(25, 25, 28, 0.88);
+  --mac-window-dark-inactive: rgba(25, 25, 28, 0.75);
+  --mac-window-content-dark: rgba(30, 30, 34, 0.92);
+  --mac-toolbar-dark: rgba(36, 36, 40, 0.95);
+  --mac-toolbar-light: rgba(245, 245, 247, 0.88);
+  --mac-window-light: rgba(255, 255, 255, 0.88);
   --mac-selection: #007aff;
   --mac-border-dark: rgba(255, 255, 255, 0.1);
   --mac-border-light: rgba(0, 0, 0, 0.1);
-  --mac-window-shadow-idle:
-    0 10px 40px -10px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
-  --mac-window-shadow-drag:
-    0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --mac-window-shadow-active:
+    0 32px 100px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --mac-window-shadow-inactive: 0 14px 40px rgba(0, 0, 0, 0.45);
+  --mac-window-shadow-drag: none;
 
   /* Ported from MacTahoe-gtk-theme:
      other/plank/theme-Dark/dock.theme

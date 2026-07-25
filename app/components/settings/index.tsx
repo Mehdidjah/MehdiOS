@@ -1,20 +1,105 @@
 'use client'
 
 import { useSelector } from '@/app/store'
+import { WindowChromeContext } from '@/app/components/window-frame'
+import { MacTrafficLights } from '@/app/components/window-frame/mac-traffic-lights'
 import author from '@/public/assets/images/author.webp'
+import {
+  IconAdjustments,
+  IconPhoto,
+  IconSearch,
+  IconSettings,
+} from '@tabler/icons-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
-import { type KeyboardEvent, useState } from 'react'
+import {
+  type KeyboardEvent,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { AppearanceSettings, WallpaperGrid, wallpapers } from './wallpaper'
 
-type SettingsTab = 'overview' | 'appearance' | 'wallpapers'
+type SettingsSection = 'general' | 'appearance' | 'wallpapers'
 
-const tabs: Array<{ id: SettingsTab; label: string }> = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'appearance', label: 'Appearance' },
-  { id: 'wallpapers', label: 'Wallpapers' },
+const sections: Array<{
+  id: SettingsSection
+  label: string
+  Icon: typeof IconSettings
+  iconClassName: string
+}> = [
+  {
+    id: 'general',
+    label: 'General',
+    Icon: IconSettings,
+    iconClassName: 'bg-gradient-to-br from-[#8f8f94] to-[#55555a]',
+  },
+  {
+    id: 'appearance',
+    label: 'Appearance',
+    Icon: IconAdjustments,
+    iconClassName: 'bg-gradient-to-br from-[#5ac8fa] to-[#0a84ff]',
+  },
+  {
+    id: 'wallpapers',
+    label: 'Wallpaper',
+    Icon: IconPhoto,
+    iconClassName: 'bg-gradient-to-br from-[#30d158] to-[#00a7c7]',
+  },
 ]
+
+function SettingsGroup({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="space-y-1">
+      <h3 className="px-3 text-[10.5px] font-semibold tracking-[0.04em] text-black/35 uppercase dark:text-white/32">
+        {label}
+      </h3>
+      <div className="overflow-hidden rounded-lg border border-black/7 bg-white/75 dark:border-white/7 dark:bg-white/[0.055]">
+        {children}
+      </div>
+    </section>
+  )
+}
+
+function SettingsRow({
+  label,
+  value,
+  description,
+  children,
+}: {
+  label: string
+  value?: string
+  description?: string
+  children?: React.ReactNode
+}) {
+  return (
+    <div className="flex min-h-9 items-center justify-between gap-3 border-b border-black/7 px-3.5 py-2.5 last:border-b-0 dark:border-white/7">
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[13px] text-zinc-900 dark:text-white/92">
+          {label}
+        </p>
+        {description && (
+          <p className="mt-0.5 text-[11px] leading-[1.35] text-zinc-500 dark:text-white/52">
+            {description}
+          </p>
+        )}
+      </div>
+      {children ?? (
+        <span className="max-w-[45%] truncate text-right text-[12px] text-zinc-500 dark:text-white/52">
+          {value}
+        </span>
+      )}
+    </div>
+  )
+}
 
 function SettingsOverview() {
   const wallpaper = useSelector((state) => state.settings.wallpaper)
@@ -32,174 +117,233 @@ function SettingsOverview() {
         : 'Light'
 
   return (
-    <section aria-labelledby="settings-overview-heading" className="space-y-5">
-      <div>
+    <section
+      aria-labelledby="settings-general-heading"
+      className="mx-auto w-full max-w-[580px] px-5 pt-7 pb-10 sm:px-7"
+    >
+      <header className="mb-7 text-center">
+        <div className="mx-auto mb-3.5 flex size-[72px] items-center justify-center rounded-[18px] bg-gradient-to-br from-[#8f8f94] to-[#4d4d52] text-white shadow-[0_4px_16px_rgba(0,0,0,0.18)]">
+          <IconSettings aria-hidden className="size-11" stroke={1.5} />
+        </div>
         <h2
-          className="text-[22px] font-semibold tracking-[-0.02em] text-zinc-900 dark:text-white"
-          id="settings-overview-heading"
+          className="text-[28px] font-bold tracking-[-0.02em] text-zinc-900 dark:text-white/92"
+          id="settings-general-heading"
         >
-          MehdiOS
+          General
         </h2>
-        <p className="mt-1 text-[13px] text-zinc-500 dark:text-white/50">
-          Portfolio desktop preferences and appearance.
+        <p className="mx-auto mt-2 max-w-[420px] text-[13.5px] leading-5 text-zinc-500 dark:text-white/52">
+          Manage the portfolio desktop, appearance, and active background.
         </p>
-      </div>
+      </header>
 
-      <div className="overflow-hidden rounded-xl border border-black/8 bg-white/70 shadow-sm dark:border-white/8 dark:bg-white/5">
-        <div className="flex flex-col items-center gap-4 p-5 text-center sm:flex-row sm:text-left">
-          <Image
-            alt="Mehdi Djahraoui"
-            className="size-20 rounded-full border border-black/10 object-cover shadow-md dark:border-white/10"
-            height={80}
-            priority
-            src={author}
-            width={80}
+      <div className="space-y-4">
+        <SettingsGroup label="MehdiOS">
+          <SettingsRow label="Profile" value="Mehdi Djahraoui" />
+          <SettingsRow
+            label="Portfolio"
+            value="Ready"
+            description="Projects, applications, and content remain unchanged."
           />
-          <div className="min-w-0">
-            <h3 className="truncate text-[19px] font-semibold text-zinc-900 dark:text-white">
-              Mehdi Djahraoui
-            </h3>
-            <p className="mt-1 text-[13px] text-zinc-500 dark:text-white/50">
-              Portfolio owner
-            </p>
-            <p className="mt-3 max-w-xl text-[12px] leading-5 text-zinc-500 dark:text-white/45">
-              Personalize the desktop without changing any of the projects,
-              applications, or portfolio content.
-            </p>
-          </div>
-        </div>
-      </div>
+        </SettingsGroup>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-black/8 bg-white/70 p-4 shadow-sm dark:border-white/8 dark:bg-white/5">
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-zinc-400 uppercase dark:text-white/35">
-            Appearance
-          </p>
-          <p className="mt-2 text-[15px] font-medium text-zinc-900 dark:text-white/90">
-            {themeLabel}
-          </p>
-          <p className="mt-1 text-[12px] text-zinc-500 dark:text-white/45">
-            Theme mode currently applied to MehdiOS.
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-black/8 bg-white/70 p-4 shadow-sm dark:border-white/8 dark:bg-white/5">
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-zinc-400 uppercase dark:text-white/35">
-            Wallpaper
-          </p>
-          <p className="mt-2 text-[15px] font-medium text-zinc-900 dark:text-white/90">
-            {selectedWallpaper?.name ?? 'Custom wallpaper'}
-          </p>
-          <p className="mt-1 text-[12px] text-zinc-500 dark:text-white/45">
-            Active background for the portfolio desktop.
-          </p>
-        </div>
+        <SettingsGroup label="Personalization">
+          <SettingsRow label="Appearance" value={themeLabel} />
+          <SettingsRow
+            label="Wallpaper"
+            value={selectedWallpaper?.name ?? 'Custom wallpaper'}
+          />
+        </SettingsGroup>
       </div>
     </section>
   )
 }
 
 export function Settings() {
-  const [activeTab, setActiveTab] = useState<SettingsTab>('overview')
+  const windowChrome = useContext(WindowChromeContext)
+  const fallbackHeaderRef = useRef<HTMLDivElement>(null)
+  const [activeSection, setActiveSection] = useState<SettingsSection>('general')
+  const [searchQuery, setSearchQuery] = useState('')
 
-  const focusTab = (index: number) => {
-    const nextTab = tabs[index]
-    if (!nextTab) return
+  const visibleSections = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+    if (!normalizedQuery) return sections
+    return sections.filter((section) =>
+      section.label.toLowerCase().includes(normalizedQuery)
+    )
+  }, [searchQuery])
 
-    setActiveTab(nextTab.id)
+  const focusSection = (index: number) => {
+    const section = visibleSections[index]
+    if (!section) return
+
+    setActiveSection(section.id)
     requestAnimationFrame(() => {
-      document.getElementById(`settings-tab-${nextTab.id}`)?.focus()
+      document.getElementById(`settings-section-${section.id}`)?.focus()
     })
   }
 
-  const handleTabKeyDown = (
+  const handleSectionKeyDown = (
     event: KeyboardEvent<HTMLButtonElement>,
     index: number
   ) => {
     let nextIndex = index
 
-    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
-      nextIndex = (index + 1) % tabs.length
-    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
-      nextIndex = (index - 1 + tabs.length) % tabs.length
+    if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+      nextIndex = (index + 1) % visibleSections.length
+    } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+      nextIndex = (index - 1 + visibleSections.length) % visibleSections.length
     } else if (event.key === 'Home') {
       nextIndex = 0
     } else if (event.key === 'End') {
-      nextIndex = tabs.length - 1
+      nextIndex = visibleSections.length - 1
     } else {
       return
     }
 
     event.preventDefault()
-    focusTab(nextIndex)
+    focusSection(nextIndex)
   }
+
+  const dragHandleRef = windowChrome?.frameHeader ?? fallbackHeaderRef
 
   return (
     <div
-      className="grid h-full min-h-0 grid-rows-[48px_1fr_30px] bg-[#f4f4f5] text-zinc-900 dark:bg-[#27272a] dark:text-white"
+      className="grid h-full min-h-0 grid-cols-[92px_minmax(0,1fr)] overflow-hidden bg-white/95 text-zinc-900 sm:grid-cols-[220px_minmax(0,1fr)] dark:bg-[#141416] dark:text-white"
       style={{
         fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', sans-serif",
+          "-apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, 'Helvetica Neue', sans-serif",
       }}
     >
-      <div className="flex min-w-0 items-center justify-center border-b border-black/8 bg-white/45 px-3 dark:border-white/8 dark:bg-black/10">
+      <aside className="flex min-h-0 flex-col overflow-hidden border-r border-black/7 bg-[rgba(238,238,243,0.72)] dark:border-white/7 dark:bg-[rgba(40,40,42,0.67)]">
+        <div
+          ref={dragHandleRef}
+          className="flex h-[46px] shrink-0 items-center px-2 sm:px-3.5"
+          onDoubleClick={windowChrome?.onZoom}
+        >
+          <MacTrafficLights
+            appName="Settings"
+            isActive={windowChrome?.isFocused ?? true}
+            isFullscreen={windowChrome?.isFullscreen}
+            onClose={windowChrome?.onClose ?? (() => {})}
+            onMinimize={windowChrome?.onMinimize ?? (() => {})}
+            onZoom={windowChrome?.onZoom ?? (() => {})}
+          />
+        </div>
+
+        <label className="relative mx-2.5 mb-2 hidden shrink-0 sm:block">
+          <IconSearch
+            aria-hidden
+            className="pointer-events-none absolute top-1/2 left-2 size-[13px] -translate-y-1/2 text-black/35 dark:text-white/35"
+            stroke={2.2}
+          />
+          <input
+            aria-label="Search settings"
+            className="h-[25px] w-full rounded-[5px] border border-black/10 bg-white/75 pr-2 pl-[26px] text-[12px] outline-hidden transition placeholder:text-black/35 focus:border-black/15 focus:bg-white/90 dark:border-white/8 dark:bg-[rgba(40,40,42,0.5)] dark:text-white/92 dark:placeholder:text-white/32 dark:focus:border-white/14 dark:focus:bg-white/10"
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search"
+            type="search"
+            value={searchQuery}
+          />
+        </label>
+
+        <button
+          aria-label="Open General settings for Mehdi Djahraoui"
+          className="mx-1.5 mb-1 flex shrink-0 items-center justify-center gap-2.5 rounded-[7px] px-1.5 py-2 text-left transition hover:bg-black/5 sm:justify-start sm:px-2.5 dark:hover:bg-white/6"
+          onClick={() => setActiveSection('general')}
+          type="button"
+        >
+          <Image
+            alt=""
+            className="size-7 shrink-0 rounded-full object-cover"
+            height={28}
+            priority
+            src={author}
+            width={28}
+          />
+          <span className="hidden min-w-0 sm:block">
+            <span className="block truncate text-[12px] font-medium">
+              Mehdi Djahraoui
+            </span>
+            <span className="mt-px block truncate text-[10.5px] text-black/50 dark:text-white/52">
+              Portfolio Settings
+            </span>
+          </span>
+        </button>
+
+        <div className="mx-3 my-1 h-px shrink-0 bg-black/7 dark:bg-white/7" />
+
         <div
           aria-label="Settings sections"
-          aria-orientation="horizontal"
-          className="flex max-w-full items-center gap-1 overflow-x-auto rounded-lg p-1"
+          aria-orientation="vertical"
+          className="min-h-0 flex-1 overflow-y-auto px-1.5 pt-0.5 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           role="tablist"
         >
-          {tabs.map((tab, index) => {
-            const selected = activeTab === tab.id
+          {visibleSections.map((section, index) => {
+            const selected = activeSection === section.id
 
             return (
               <button
-                aria-controls={`settings-panel-${tab.id}`}
+                aria-controls={`settings-panel-${section.id}`}
                 aria-selected={selected}
-                className={`shrink-0 rounded-md px-3 py-1.5 text-[13px] font-medium transition focus-visible:outline-2 focus-visible:outline-[#007aff] ${
+                className={`my-px flex h-[30px] w-full items-center justify-center gap-2 rounded-md px-1.5 text-[12.5px] transition sm:justify-start sm:px-2.5 ${
                   selected
-                    ? 'bg-black/10 text-zinc-900 shadow-sm dark:bg-white/15 dark:text-white'
-                    : 'text-zinc-500 hover:bg-black/5 hover:text-zinc-800 dark:text-white/55 dark:hover:bg-white/5 dark:hover:text-white/85'
+                    ? 'bg-[#007aff] font-medium text-white'
+                    : 'text-zinc-700 hover:bg-black/5 dark:text-white/92 dark:hover:bg-white/[0.055]'
                 }`}
-                id={`settings-tab-${tab.id}`}
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                onKeyDown={(event) => handleTabKeyDown(event, index)}
+                id={`settings-section-${section.id}`}
+                key={section.id}
+                onClick={() => setActiveSection(section.id)}
+                onKeyDown={(event) => handleSectionKeyDown(event, index)}
                 role="tab"
-                tabIndex={selected ? 0 : -1}
+                tabIndex={
+                  selected ||
+                  (!visibleSections.some(
+                    (visibleSection) => visibleSection.id === activeSection
+                  ) &&
+                    index === 0)
+                    ? 0
+                    : -1
+                }
                 type="button"
               >
-                {tab.label}
+                <span
+                  className={`flex size-5 shrink-0 items-center justify-center rounded-[5px] text-white shadow-sm ${section.iconClassName}`}
+                >
+                  <section.Icon aria-hidden className="size-3.5" stroke={1.8} />
+                </span>
+                <span className="hidden truncate sm:block">
+                  {section.label}
+                </span>
               </button>
             )
           })}
-        </div>
-      </div>
 
-      <main className="min-h-0 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6">
-        <div className="mx-auto w-full max-w-[920px]">
-          <AnimatePresence initial={false} mode="wait">
-            <motion.div
-              animate={{ opacity: 1, y: 0 }}
-              aria-labelledby={`settings-tab-${activeTab}`}
-              exit={{ opacity: 0, y: -6 }}
-              id={`settings-panel-${activeTab}`}
-              initial={{ opacity: 0, y: 10 }}
-              key={activeTab}
-              role="tabpanel"
-              transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-            >
-              {activeTab === 'overview' && <SettingsOverview />}
-              {activeTab === 'appearance' && <AppearanceSettings />}
-              {activeTab === 'wallpapers' && <WallpaperGrid />}
-            </motion.div>
-          </AnimatePresence>
+          {visibleSections.length === 0 && (
+            <p className="px-2 py-4 text-center text-[11px] text-black/40 dark:text-white/40">
+              No settings found
+            </p>
+          )}
         </div>
+      </aside>
+
+      <main className="min-h-0 overflow-y-auto bg-[rgba(246,246,248,0.99)] [scrollbar-width:thin] dark:bg-[rgba(20,20,22,0.99)]">
+        <AnimatePresence initial={false} mode="wait">
+          <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            aria-labelledby={`settings-section-${activeSection}`}
+            exit={{ opacity: 0, y: -3 }}
+            id={`settings-panel-${activeSection}`}
+            initial={{ opacity: 0, y: 5 }}
+            key={activeSection}
+            role="tabpanel"
+            transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {activeSection === 'general' && <SettingsOverview />}
+            {activeSection === 'appearance' && <AppearanceSettings />}
+            {activeSection === 'wallpapers' && <WallpaperGrid />}
+          </motion.div>
+        </AnimatePresence>
       </main>
-
-      <footer className="flex items-center justify-center border-t border-black/8 text-[11px] text-zinc-400 dark:border-white/8 dark:text-white/30">
-        MehdiOS Preferences
-      </footer>
     </div>
   )
 }
