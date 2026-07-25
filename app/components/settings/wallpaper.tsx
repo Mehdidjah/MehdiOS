@@ -1,3 +1,5 @@
+'use client'
+
 import { setWallpaper } from '@/app/features/settings'
 import { useDispatch, useSelector } from '@/app/store'
 import anime1 from '@/public/assets/background/anime1.webp'
@@ -10,19 +12,26 @@ import anime7 from '@/public/assets/background/anime7.webp'
 import macosTahoe from '@/public/assets/background/macos-tahoe.jpg'
 import vd from '@/public/assets/background/ventura-dark.jpg'
 import vl from '@/public/assets/background/ventura-light.jpg'
+import { IconCheck } from '@tabler/icons-react'
+import Image, { type StaticImageData } from 'next/image'
 import { useTheme } from 'next-themes'
-import Image, { StaticImageData } from 'next/image'
+
+export type WallpaperOption = {
+  name: string
+  dark: StaticImageData
+  light: StaticImageData
+}
 
 const createWallpaper = (
   name: string,
   image: StaticImageData
-): { name: string; dark: StaticImageData; light: StaticImageData } => ({
+): WallpaperOption => ({
   name,
   dark: image,
   light: image,
 })
 
-const wallpapers = [
+export const wallpapers: WallpaperOption[] = [
   createWallpaper('macOS Tahoe', macosTahoe),
   createWallpaper('Anime 1', anime1),
   createWallpaper('Anime 2', anime2),
@@ -34,60 +43,147 @@ const wallpapers = [
   { name: 'Ventura', dark: vd, light: vl },
 ]
 
-export function Wallpaper() {
-  const dispatch = useDispatch()
+export function AppearanceSettings() {
   const wallpaper = useSelector((state) => state.settings.wallpaper)
   const { theme, resolvedTheme, setTheme } = useTheme()
 
   return (
-    <div className="p-2 sm:p-4 overflow-x-hidden">
-      <div className="border-light-border flex flex-col sm:flex-row gap-4 sm:gap-8 border-b pb-6 sm:pb-10 dark:border-[#4b4b4b]">
-        <div className="relative h-28 w-full sm:w-60">
-          {wallpaper && (
-            <Image
-              className="object-cover object-center"
-              alt="walpaper"
-              fill
-              src={resolvedTheme === 'dark' ? wallpaper.dark : wallpaper.light}
-              sizes="(max-width: 100px) 100vw"
-            />
-          )}
-        </div>
-        <div className="flex h-fit items-center justify-start gap-3 font-medium">
-          <h3>Theme Mode</h3>
-          <select
-            onChange={(e) => {
-              setTheme(e.target.value)
-            }}
-            value={theme}
-            className="bg-light-background dark:bg-dark-background px-2 py-[2px] focus:outline-hidden"
-          >
-            <option value="system">Automatic</option>
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
-          </select>
+    <section aria-labelledby="appearance-heading" className="space-y-5">
+      <div>
+        <h2
+          className="text-[22px] font-semibold tracking-[-0.02em] text-zinc-900 dark:text-white"
+          id="appearance-heading"
+        >
+          Appearance
+        </h2>
+        <p className="mt-1 text-[13px] text-zinc-500 dark:text-white/50">
+          Choose how MehdiOS looks on this device.
+        </p>
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-black/8 bg-white/70 shadow-sm dark:border-white/8 dark:bg-white/5">
+        <div className="grid gap-5 p-4 sm:grid-cols-[minmax(220px,1fr)_minmax(210px,0.7fr)] sm:p-5">
+          <div>
+            <p className="text-[13px] font-medium text-zinc-800 dark:text-white/90">
+              Current desktop
+            </p>
+            <div className="relative mt-3 aspect-video overflow-hidden rounded-lg border border-black/10 bg-zinc-200 shadow-inner dark:border-white/10 dark:bg-zinc-900">
+              {wallpaper && (
+                <Image
+                  alt="Current MehdiOS wallpaper"
+                  className="object-cover object-center"
+                  fill
+                  sizes="(max-width: 640px) 100vw, 420px"
+                  src={
+                    resolvedTheme === 'dark' ? wallpaper.dark : wallpaper.light
+                  }
+                />
+              )}
+              <div className="absolute inset-x-0 top-0 h-3 bg-black/25 backdrop-blur-sm" />
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-center">
+            <label
+              className="text-[13px] font-medium text-zinc-800 dark:text-white/90"
+              htmlFor="settings-theme-mode"
+            >
+              Theme mode
+            </label>
+            <p className="mt-1 text-[12px] leading-5 text-zinc-500 dark:text-white/45">
+              Automatic follows your operating system preference.
+            </p>
+            <select
+              className="mt-3 h-9 rounded-lg border border-black/10 bg-white px-3 text-[13px] text-zinc-800 outline-hidden transition focus:border-[#007aff] focus:ring-2 focus:ring-[#007aff]/20 dark:border-white/10 dark:bg-[#323235] dark:text-white"
+              id="settings-theme-mode"
+              onChange={(event) => setTheme(event.target.value)}
+              value={theme ?? 'system'}
+            >
+              <option value="system">Automatic</option>
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
+          </div>
         </div>
       </div>
-      <h2 className="my-4 text-base sm:text-lg font-medium">Wallpapers</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2 sm:gap-4">
-        {wallpapers.map((wp, i) => (
-          <button
-            onClick={() => {
-              dispatch(setWallpaper({ dark: wp.dark, light: wp.light }))
-            }}
-            className="relative h-28"
-            key={i}
-          >
-            <Image
-              className="object-cover object-center"
-              alt={wp.name}
-              fill
-              src={resolvedTheme === 'light' ? wp.light : wp.dark}
-              sizes="(max-width: 100px) 100vw"
-            />
-          </button>
-        ))}
+    </section>
+  )
+}
+
+export function WallpaperGrid() {
+  const dispatch = useDispatch()
+  const wallpaper = useSelector((state) => state.settings.wallpaper)
+  const { resolvedTheme } = useTheme()
+
+  return (
+    <section aria-labelledby="wallpapers-heading" className="space-y-5">
+      <div>
+        <h2
+          className="text-[22px] font-semibold tracking-[-0.02em] text-zinc-900 dark:text-white"
+          id="wallpapers-heading"
+        >
+          Wallpapers
+        </h2>
+        <p className="mt-1 text-[13px] text-zinc-500 dark:text-white/50">
+          Select a local image for the MehdiOS desktop.
+        </p>
       </div>
+
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))]">
+        {wallpapers.map((option) => {
+          const selected =
+            wallpaper?.dark.src === option.dark.src &&
+            wallpaper?.light.src === option.light.src
+
+          return (
+            <button
+              aria-label={`Use ${option.name} wallpaper`}
+              aria-pressed={selected}
+              className="group text-left"
+              key={option.name}
+              onClick={() => {
+                dispatch(
+                  setWallpaper({ dark: option.dark, light: option.light })
+                )
+              }}
+              type="button"
+            >
+              <span
+                className={`relative block aspect-video overflow-hidden rounded-lg border-2 bg-zinc-200 shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md dark:bg-zinc-900 ${
+                  selected
+                    ? 'border-[#007aff] ring-2 ring-[#007aff]/20'
+                    : 'border-transparent group-hover:border-black/10 dark:group-hover:border-white/15'
+                }`}
+              >
+                <Image
+                  alt=""
+                  className="object-cover object-center"
+                  fill
+                  sizes="(max-width: 640px) 50vw, 220px"
+                  src={resolvedTheme === 'light' ? option.light : option.dark}
+                />
+                {selected && (
+                  <span className="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full bg-[#007aff] text-white shadow-md">
+                    <IconCheck aria-hidden className="size-4" stroke={2.4} />
+                  </span>
+                )}
+              </span>
+              <span className="mt-2 block truncate text-[12px] font-medium text-zinc-700 dark:text-white/75">
+                {option.name}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+export function Wallpaper() {
+  return (
+    <div className="space-y-8">
+      <AppearanceSettings />
+      <WallpaperGrid />
     </div>
   )
 }
