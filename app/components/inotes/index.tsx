@@ -7,20 +7,34 @@ import {
 } from '@/app/features/notes'
 import { useCopy } from '@/app/hooks/use-copy'
 import { useDispatch, useSelector } from '@/app/store'
+import { WindowChromeContext } from '@/app/components/window-frame'
+import { MacTrafficLights } from '@/app/components/window-frame/mac-traffic-lights'
 import {
+  IconChecklist,
   IconCloud,
+  IconDots,
   IconFolder,
   IconHash,
-  IconLayoutGrid,
-  IconListDetails,
+  IconLayoutSidebarLeftCollapse,
+  IconLayoutSidebarLeftExpand,
+  IconLock,
   IconNotes,
+  IconPaperclip,
   IconPencil,
   IconPlus,
   IconSearch,
   IconShare,
+  IconTable,
   IconTrash,
 } from '@tabler/icons-react'
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  ChangeEvent,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 
 type IconComponent = typeof IconNotes
 
@@ -182,7 +196,8 @@ const groupNotesByUpdatedAt = (notes: INote[]): NoteGroup[] => {
     (note) => !isSameDay(note.updatedAt) && isWithinDays(note.updatedAt, 7)
   )
   const previousMonthNotes = notes.filter(
-    (note) => !isWithinDays(note.updatedAt, 7) && isWithinDays(note.updatedAt, 30)
+    (note) =>
+      !isWithinDays(note.updatedAt, 7) && isWithinDays(note.updatedAt, 30)
   )
   const olderNotes = notes.filter((note) => !isWithinDays(note.updatedAt, 30))
 
@@ -274,15 +289,15 @@ const folderSections: FolderSection[] = [
 ]
 
 const toolbarButtonClass =
-  'flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/3 text-[#c8d0ef] transition-colors hover:bg-white/8 hover:text-white'
-const toolbarButtonActiveClass =
-  'border-white/12 bg-white/9 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]'
+  'flex size-8 items-center justify-center rounded-full border border-black/5 bg-white/40 text-zinc-500 shadow-xs backdrop-blur-md transition hover:bg-white/70 hover:text-zinc-800 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white'
 const noteActionButtonClass =
-  'flex size-8 items-center justify-center rounded-lg text-[#98a1c4] transition-colors hover:bg-white/6 hover:text-white'
+  'flex size-8 items-center justify-center rounded-full border border-black/5 bg-white/40 text-zinc-500 shadow-xs backdrop-blur-md transition hover:bg-white/70 hover:text-zinc-800 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white'
 
 export function INotes() {
+  const windowChrome = useContext(WindowChromeContext)
   const inotes = useSelector((state) => state.iNotes.notes)
   const [tab, setTab] = useState('')
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true)
   const [selectedFolderId, setSelectedFolderId] = useState('all-notes')
   const [mode, setMode] = useState<'readonly' | 'edit'>('readonly')
   const [searchTerm, setSearchTerm] = useState('')
@@ -304,7 +319,8 @@ export function INotes() {
     () =>
       [...inotes].sort(
         (left, right) =>
-          new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime()
+          new Date(right.updatedAt).getTime() -
+          new Date(left.updatedAt).getTime()
       ),
     [inotes]
   )
@@ -332,7 +348,9 @@ export function INotes() {
       folderSections
         .flatMap((section) => section.items)
         .reduce<Record<string, number>>((counts, item) => {
-          counts[item.id] = sortedNotes.filter((note) => item.matches(note)).length
+          counts[item.id] = sortedNotes.filter((note) =>
+            item.matches(note)
+          ).length
           return counts
         }, {}),
     [sortedNotes]
@@ -495,300 +513,338 @@ export function INotes() {
   }
 
   return (
-    <div className="h-full overflow-hidden bg-[#1a1b23] text-[#f4f6fb]">
-      <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)]">
-        <div className="grid grid-cols-1 border-b border-white/8 bg-[#252734] md:grid-cols-[240px_280px_minmax(0,1fr)] xl:grid-cols-[280px_320px_minmax(0,1fr)]">
-          <div className="flex items-center gap-2 border-b border-white/8 px-4 py-3 md:border-b-0 md:border-r md:border-white/8">
+    <div
+      className="flex h-full w-full overflow-hidden bg-white text-zinc-900 select-none dark:bg-[#1e1e1e] dark:text-white"
+      style={{
+        fontFamily:
+          "-apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif",
+      }}
+    >
+      {isSidebarVisible && (
+        <aside className="m-2 mr-0 flex w-[88px] shrink-0 flex-col overflow-hidden rounded-2xl border border-black/8 bg-[rgba(250,250,248,0.9)] shadow-sm md:w-52 dark:border-white/8 dark:bg-[rgba(37,37,37,0.9)]">
+          <div
+            ref={windowChrome?.frameHeader}
+            className="flex h-[60px] shrink-0 items-center justify-center px-1 md:justify-between md:px-4"
+            onDoubleClick={windowChrome?.onZoom}
+          >
+            <MacTrafficLights
+              appName="Notes"
+              isActive={windowChrome?.isFocused ?? true}
+              isFullscreen={windowChrome?.isFullscreen}
+              onClose={windowChrome?.onClose ?? (() => {})}
+              onMinimize={windowChrome?.onMinimize ?? (() => {})}
+              onZoom={windowChrome?.onZoom ?? (() => {})}
+            />
             <button
-              className={toolbarButtonClass}
+              aria-label="Hide Notes sidebar"
+              className="hidden rounded-md p-1 text-zinc-500 transition hover:bg-black/5 hover:text-zinc-800 md:flex dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white"
+              onClick={() => setIsSidebarVisible(false)}
+              type="button"
+            >
+              <IconLayoutSidebarLeftCollapse className="size-4" stroke={1.7} />
+            </button>
+          </div>
+
+          <nav
+            aria-label="Notes folders"
+            className="min-h-0 flex-1 overflow-y-auto px-2 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {folderSections.map((section) => (
+              <section className="mb-4 last:mb-0" key={section.name}>
+                <h2 className="hidden px-3 pb-1 text-[10px] font-semibold tracking-[0.08em] text-zinc-400 uppercase md:block dark:text-zinc-500">
+                  {section.name}
+                </h2>
+                <div className="space-y-0.5">
+                  {section.items.map((item) => {
+                    const isActive = selectedFolderId === item.id
+
+                    return (
+                      <button
+                        aria-label={`${item.name}, ${folderCounts[item.id] ?? 0} notes`}
+                        className={`flex w-full items-center justify-center gap-2 rounded-lg px-2 py-1.5 text-[13px] font-medium transition md:justify-start md:px-3 ${
+                          isActive
+                            ? 'bg-amber-500/12 text-amber-600 dark:text-amber-400'
+                            : 'text-zinc-700 hover:bg-black/4 dark:text-zinc-300 dark:hover:bg-white/5'
+                        }`}
+                        key={item.id}
+                        onClick={() => handleFolderSelect(item.id)}
+                        type="button"
+                      >
+                        <item.icon
+                          aria-hidden
+                          className={`size-4 shrink-0 ${
+                            isActive
+                              ? 'text-amber-500'
+                              : 'text-zinc-400 dark:text-zinc-500'
+                          }`}
+                          stroke={1.7}
+                        />
+                        <span className="hidden min-w-0 flex-1 truncate text-left md:block">
+                          {item.name}
+                        </span>
+                        <span className="hidden text-[11px] opacity-45 md:block">
+                          {folderCounts[item.id] ?? 0}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </section>
+            ))}
+          </nav>
+        </aside>
+      )}
+
+      <section className="flex h-full w-[190px] shrink-0 flex-col border-r border-black/8 bg-white md:w-56 dark:border-white/8 dark:bg-[#1e1e1e]">
+        <header className="mt-2 flex h-[60px] shrink-0 items-center justify-between border-b border-black/5 px-4 dark:border-white/5">
+          <div className="min-w-0">
+            <h2 className="truncate text-[14px] font-semibold text-zinc-800 dark:text-white">
+              Notes
+            </h2>
+            <p className="mt-1 text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
+              {filteredNotes.length}{' '}
+              {filteredNotes.length === 1 ? 'note' : 'notes'}
+            </p>
+          </div>
+          <IconDots aria-hidden className="size-4 text-zinc-400" stroke={1.7} />
+        </header>
+
+        <label className="mx-2 mt-2 flex shrink-0 items-center gap-1.5 rounded-full bg-black/4 px-3 py-1.5 dark:bg-white/6">
+          <IconSearch
+            aria-hidden
+            className="size-3.5 text-zinc-400"
+            stroke={1.8}
+          />
+          <input
+            aria-label="Search notes"
+            className="min-w-0 flex-1 bg-transparent text-[12px] text-zinc-800 outline-hidden placeholder:text-zinc-400 dark:text-white dark:placeholder:text-zinc-500"
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Search"
+            type="search"
+            value={searchTerm}
+          />
+        </label>
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {noteGroups.length ? (
+            noteGroups.map((group) => (
+              <section className="mb-4 last:mb-0" key={group.id}>
+                <h3 className="mb-1 px-2 text-[10px] font-semibold text-zinc-400 uppercase dark:text-zinc-500">
+                  {group.label}
+                </h3>
+                <div className="space-y-1">
+                  {group.notes.map((note) => {
+                    const isActive = tab === note.id
+
+                    return (
+                      <button
+                        aria-label={`Open ${getDisplayTitle(note.content)}`}
+                        className={`w-full rounded-xl border p-2 text-left transition ${
+                          isActive
+                            ? 'border-amber-500/25 bg-amber-500/20 shadow-sm'
+                            : 'border-transparent hover:bg-black/4 dark:hover:bg-white/5'
+                        }`}
+                        key={note.id}
+                        onClick={() => {
+                          setTab(note.id)
+                          setMode('readonly')
+                        }}
+                        type="button"
+                      >
+                        <p className="truncate text-[12px] font-semibold text-zinc-800 dark:text-white">
+                          {getDisplayTitle(note.content)}
+                        </p>
+                        <div className="mt-0.5 flex items-center gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">
+                          <span className="shrink-0 font-semibold">
+                            {formatUpdatedAt(note.updatedAt)}
+                          </span>
+                          <span className="truncate">
+                            {getNotePreview(note.content)}
+                          </span>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </section>
+            ))
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center px-4 text-center">
+              <IconNotes
+                className="size-8 text-zinc-300 dark:text-zinc-700"
+                stroke={1.5}
+              />
+              <p className="mt-2 text-[12px] font-medium text-zinc-500 dark:text-zinc-400">
+                No notes found
+              </p>
+              <button
+                className="mt-3 rounded-full bg-amber-500 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-amber-600"
+                onClick={onNewNote}
+                type="button"
+              >
+                Create Note
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-white dark:bg-[#1e1e1e]">
+        <header
+          ref={isSidebarVisible ? undefined : windowChrome?.frameHeader}
+          className="flex h-[60px] shrink-0 items-center justify-between gap-3 border-b border-black/8 px-4 md:px-5 dark:border-white/8"
+          onDoubleClick={windowChrome?.onZoom}
+        >
+          <div className="flex min-w-0 items-center gap-2">
+            {!isSidebarVisible && (
+              <>
+                <MacTrafficLights
+                  appName="Notes"
+                  isActive={windowChrome?.isFocused ?? true}
+                  isFullscreen={windowChrome?.isFullscreen}
+                  onClose={windowChrome?.onClose ?? (() => {})}
+                  onMinimize={windowChrome?.onMinimize ?? (() => {})}
+                  onZoom={windowChrome?.onZoom ?? (() => {})}
+                />
+                <button
+                  aria-label="Show Notes sidebar"
+                  className={toolbarButtonClass}
+                  onClick={() => setIsSidebarVisible(true)}
+                  type="button"
+                >
+                  <IconLayoutSidebarLeftExpand
+                    className="size-4"
+                    stroke={1.7}
+                  />
+                </button>
+              </>
+            )}
+            <button
+              aria-label="New Note"
+              className={`${toolbarButtonClass} text-amber-500`}
               onClick={onNewNote}
               type="button"
             >
               <IconPlus className="size-4" stroke={1.8} />
             </button>
-            <button className={toolbarButtonClass} type="button">
-              <IconNotes className="size-4" stroke={1.8} />
-            </button>
-            <div className="ml-auto text-sm text-[#8f96b8]">
-              {folderCounts['all-notes'] ?? 0} notes
-            </div>
           </div>
 
-          <div className="flex items-center gap-2 border-b border-white/8 px-4 py-3 md:border-b-0 md:border-r md:border-white/8">
+          <div className="hidden items-center gap-0.5 rounded-full border border-black/5 bg-black/3 px-2 py-1 md:flex dark:border-white/5 dark:bg-white/4">
             <button
-              className={`${toolbarButtonClass} ${toolbarButtonActiveClass}`}
+              aria-label="Text formatting"
+              className="rounded-md px-2 py-1 text-xs font-semibold text-zinc-500 hover:bg-black/5 dark:text-zinc-400 dark:hover:bg-white/5"
               type="button"
             >
-              <IconLayoutGrid className="size-4" stroke={1.8} />
+              Aa
             </button>
-            <button className={toolbarButtonClass} type="button">
-              <IconListDetails className="size-4" stroke={1.8} />
+            <button
+              aria-label="Checklist"
+              className="rounded-md p-1.5 text-zinc-500 hover:bg-black/5 dark:text-zinc-400 dark:hover:bg-white/5"
+              type="button"
+            >
+              <IconChecklist className="size-3.5" stroke={1.7} />
             </button>
-            <div className="ml-auto rounded-full border border-white/10 bg-white/4 px-3 py-1 text-xs font-medium text-[#b3bbda]">
-              {selectedFolder.name}
-            </div>
+            <button
+              aria-label="Table"
+              className="rounded-md p-1.5 text-zinc-500 hover:bg-black/5 dark:text-zinc-400 dark:hover:bg-white/5"
+              type="button"
+            >
+              <IconTable className="size-3.5" stroke={1.7} />
+            </button>
+            <button
+              aria-label="Attachment"
+              className="rounded-md p-1.5 text-zinc-500 hover:bg-black/5 dark:text-zinc-400 dark:hover:bg-white/5"
+              type="button"
+            >
+              <IconPaperclip className="size-3.5" stroke={1.7} />
+            </button>
+            <button
+              aria-label="Lock Note"
+              className="rounded-md p-1.5 text-zinc-500 hover:bg-black/5 dark:text-zinc-400 dark:hover:bg-white/5"
+              type="button"
+            >
+              <IconLock className="size-3.5" stroke={1.7} />
+            </button>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-            <div className="flex items-center gap-2">
-              {isCopied && (
-                <span className="rounded-full border border-[#0a84ff]/30 bg-[#0a84ff]/12 px-2.5 py-1 text-[11px] font-medium text-[#9fd3ff]">
-                  Copied
-                </span>
-              )}
-              <button
-                className={noteActionButtonClass}
-                onClick={onEdit}
-                type="button"
-              >
-                <IconPencil className="size-4" stroke={1.7} />
-              </button>
-              <button
-                className={noteActionButtonClass}
-                onClick={onShare}
-                type="button"
-              >
-                <IconShare className="size-4" stroke={1.7} />
-              </button>
-              {activeNote && (
-                <button
-                  className={noteActionButtonClass}
-                  onClick={() => onDelete(activeNote.id)}
-                  type="button"
-                >
-                  <IconTrash className="size-4" stroke={1.7} />
-                </button>
-              )}
-            </div>
-
-            <div className="relative w-full min-w-[220px] max-w-[320px] flex-1">
-              <IconSearch
-                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#6f7694]"
-                stroke={1.8}
-              />
-              <input
-                className="w-full rounded-full border border-white/10 bg-[#1b1d27] py-2.5 pl-9 pr-4 text-[13px] text-[#eef2ff] outline-hidden placeholder:text-[#6f7694]"
-                onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Search"
-                type="text"
-                value={searchTerm}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="grid min-h-0 grid-cols-1 grid-rows-[240px_320px_minmax(0,1fr)] md:grid-cols-[240px_280px_minmax(0,1fr)] md:grid-rows-1 xl:grid-cols-[280px_320px_minmax(0,1fr)]">
-          <aside className="flex min-h-0 flex-col border-b border-white/8 bg-[#20222d] md:border-b-0 md:border-r md:border-white/8">
-            <div className="border-b border-white/8 px-5 py-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#727893]">
-                iCloud
-              </p>
-              <h2 className="mt-3 text-[30px] font-semibold tracking-tight text-[#f4f6fb]">
-                All iCloud
-              </h2>
-              <p className="mt-1 text-sm text-[#8f96b8]">
-                {folderCounts['all-notes'] ?? 0} notes
-              </p>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-3 py-4">
-              {folderSections.map((section) => (
-                <div className="mb-6" key={section.name}>
-                  <div className="mb-2 px-2">
-                    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#727893]">
-                      {section.icon && (
-                        <section.icon className="size-3.5" stroke={1.7} />
-                      )}
-                      <span>{section.name}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    {section.items.map((item) => {
-                      const isActive = selectedFolderId === item.id
-
-                      return (
-                        <button
-                          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
-                            isActive
-                              ? 'bg-white/8 text-[#0a84ff] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]'
-                              : 'text-[#eef2ff] hover:bg-white/4'
-                          }`}
-                          key={item.id}
-                          onClick={() => handleFolderSelect(item.id)}
-                          type="button"
-                        >
-                          <item.icon
-                            className={`size-4 ${
-                              isActive ? 'text-[#0a84ff]' : 'text-[#9ca5c8]'
-                            }`}
-                            stroke={1.7}
-                          />
-                          <span className="flex-1 truncate">{item.name}</span>
-                          <span
-                            className={`text-sm ${
-                              isActive ? 'text-[#cfe7ff]' : 'text-[#6f7694]'
-                            }`}
-                          >
-                            {folderCounts[item.id] ?? 0}
-                          </span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </aside>
-
-          <section className="flex min-h-0 min-w-0 flex-col border-b border-white/8 bg-[#1d1f2a] md:border-b-0 md:border-r md:border-white/8">
-            <div className="border-b border-white/8 px-4 py-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#727893]">
-                Notes
-              </p>
-              <div className="mt-2 flex items-end justify-between gap-4">
-                <h3 className="text-[28px] font-semibold tracking-tight text-[#f4f6fb]">
-                  {selectedFolder.name}
-                </h3>
-                <span className="rounded-full border border-white/10 bg-white/4 px-3 py-1 text-xs font-medium text-[#a7afcf]">
-                  {filteredNotes.length}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-3 py-4">
-              {noteGroups.length ? (
-                noteGroups.map((group) => (
-                  <div className="mb-6" key={group.id}>
-                    <div className="px-2 pb-2 text-[13px] font-semibold text-[#7c84a4]">
-                      {group.label}
-                    </div>
-
-                    <div className="space-y-2">
-                      {group.notes.map((note) => {
-                        const isActive = tab === note.id
-
-                        return (
-                          <button
-                            className={`w-full rounded-2xl border px-4 py-3 text-left transition-all ${
-                              isActive
-                                ? 'border-[#2997ff]/50 bg-[#0a84ff] text-white shadow-[0_18px_30px_rgba(10,132,255,0.28)]'
-                                : 'border-white/6 bg-white/3 text-[#f3f5ff] hover:bg-white/6'
-                            }`}
-                            key={note.id}
-                            onClick={() => {
-                              setTab(note.id)
-                              setMode('readonly')
-                            }}
-                            type="button"
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <h4 className="line-clamp-2 flex-1 text-[16px] font-semibold leading-6">
-                                {getDisplayTitle(note.content)}
-                              </h4>
-                              <span
-                                className={`whitespace-nowrap text-[12px] ${
-                                  isActive ? 'text-white/80' : 'text-[#7c84a4]'
-                                }`}
-                              >
-                                {formatUpdatedAt(note.updatedAt)}
-                              </span>
-                            </div>
-                            <p
-                              className={`mt-2 line-clamp-2 text-[13px] leading-6 ${
-                                isActive ? 'text-white/80' : 'text-[#98a1c4]'
-                              }`}
-                            >
-                              {getNotePreview(note.content)}
-                            </p>
-                            <div
-                              className={`mt-3 flex items-center gap-2 text-[12px] ${
-                                isActive ? 'text-white/75' : 'text-[#7c84a4]'
-                              }`}
-                            >
-                              <IconFolder className="size-3.5" stroke={1.7} />
-                              <span>
-                                {selectedFolder.id === 'all-notes'
-                                  ? 'Notes'
-                                  : selectedFolder.name}
-                              </span>
-                            </div>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="flex h-full min-h-[260px] flex-col items-center justify-center gap-3 px-6 text-center">
-                  <IconNotes className="size-9 text-[#5b6280]" stroke={1.5} />
-                  <div>
-                    <p className="text-sm font-medium text-[#eef2ff]">
-                      No notes in this view
-                    </p>
-                    <p className="mt-1 text-[13px] text-[#7c84a4]">
-                      Try another folder or create a new note.
-                    </p>
-                  </div>
-                  <button
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[13px] font-medium text-[#eef2ff] transition-colors hover:bg-white/8"
-                    onClick={onNewNote}
-                    type="button"
-                  >
-                    Create Note
-                  </button>
-                </div>
-              )}
-            </div>
-          </section>
-
-          <section className="flex min-h-0 min-w-0 flex-col bg-[#1a1b23]">
-            {activeNote && activeNoteParts ? (
-              <>
-                <div className="border-b border-white/8 px-6 py-4">
-                  <p className="text-center text-sm text-[#7c84a4]">
-                    {activeNoteTimestamp}
-                  </p>
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                  <div className="mx-auto flex min-h-full w-full max-w-[980px] min-w-0 flex-col px-6 py-8 sm:px-10 sm:py-10">
-                    <input
-                      className="mb-8 w-full bg-transparent text-[34px] font-semibold tracking-tight text-[#f7f8ff] outline-hidden placeholder:text-[#5f6785]"
-                      onChange={handleTitleChange}
-                      onDoubleClick={onEdit}
-                      placeholder="Untitled Note"
-                      readOnly={mode === 'readonly'}
-                      ref={titleRef}
-                      type="text"
-                      value={activeNoteParts.title}
-                    />
-                    <textarea
-                      className="min-h-[420px] flex-1 resize-none bg-transparent text-[17px] leading-8 text-[#d6dcf3] outline-hidden placeholder:text-[#5f6785]"
-                      onChange={handleBodyChange}
-                      onDoubleClick={onEdit}
-                      placeholder="Start writing..."
-                      readOnly={mode === 'readonly'}
-                      ref={textareaRef}
-                      value={activeNoteParts.body}
-                    />
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="flex flex-1 items-center justify-center px-6 text-center">
-                <div>
-                  <p className="text-[18px] font-medium text-[#eef2ff]">
-                    Select a note
-                  </p>
-                  <p className="mt-2 text-[14px] text-[#7c84a4]">
-                    Choose one from the list or create a new note.
-                  </p>
-                </div>
-              </div>
+          <div className="flex items-center gap-1.5">
+            {isCopied && (
+              <span className="hidden rounded-full bg-amber-500/12 px-2 py-1 text-[10px] font-medium text-amber-600 sm:block dark:text-amber-400">
+                Copied
+              </span>
             )}
-          </section>
-        </div>
-      </div>
+            <button
+              aria-label="Edit Note"
+              className={noteActionButtonClass}
+              onClick={onEdit}
+              type="button"
+            >
+              <IconPencil className="size-3.5" stroke={1.7} />
+            </button>
+            <button
+              aria-label="Share Note"
+              className={noteActionButtonClass}
+              onClick={onShare}
+              type="button"
+            >
+              <IconShare className="size-3.5" stroke={1.7} />
+            </button>
+            {activeNote && (
+              <button
+                aria-label="Delete Note"
+                className="flex size-8 items-center justify-center rounded-full border border-red-500/10 bg-red-500/5 text-red-500 transition hover:bg-red-500/10 dark:border-red-500/20 dark:bg-red-500/10 dark:hover:bg-red-500/20"
+                onClick={() => onDelete(activeNote.id)}
+                type="button"
+              >
+                <IconTrash className="size-3.5" stroke={1.7} />
+              </button>
+            )}
+          </div>
+        </header>
+
+        {activeNote && activeNoteParts ? (
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6 [scrollbar-width:none] sm:px-8 dark:[&::-webkit-scrollbar]:hidden">
+            <div className="mx-auto flex min-h-full w-full max-w-xl flex-col">
+              <p className="mb-4 text-center text-[11px] text-zinc-400 dark:text-zinc-500">
+                {activeNoteTimestamp}
+              </p>
+              <input
+                className="mb-4 w-full bg-transparent text-[22px] leading-tight font-bold text-zinc-800 outline-hidden placeholder:text-zinc-300 dark:text-white dark:placeholder:text-zinc-700"
+                onChange={handleTitleChange}
+                onDoubleClick={onEdit}
+                onFocus={() => setMode('edit')}
+                placeholder="New Note"
+                readOnly={mode === 'readonly'}
+                ref={titleRef}
+                type="text"
+                value={activeNoteParts.title}
+              />
+              <textarea
+                className="min-h-[300px] flex-1 resize-none bg-transparent text-[14px] leading-relaxed text-zinc-700 outline-hidden placeholder:text-zinc-300 dark:text-zinc-200 dark:placeholder:text-zinc-700"
+                onChange={handleBodyChange}
+                onDoubleClick={onEdit}
+                onFocus={() => setMode('edit')}
+                placeholder="Start writing..."
+                readOnly={mode === 'readonly'}
+                ref={textareaRef}
+                value={activeNoteParts.body}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-1 flex-col items-center justify-center text-center text-zinc-400 dark:text-zinc-500">
+            <IconNotes className="size-12 opacity-40" stroke={1.4} />
+            <p className="mt-3 text-[14px] font-medium">No Note Selected</p>
+            <button
+              className="mt-3 rounded-lg bg-amber-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-amber-600"
+              onClick={onNewNote}
+              type="button"
+            >
+              Create Note
+            </button>
+          </div>
+        )}
+      </main>
     </div>
   )
 }

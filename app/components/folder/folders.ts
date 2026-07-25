@@ -25,7 +25,7 @@ export const folders: Folder[] = [
   },
   {
     id: 'inotes',
-    name: 'iNotes',
+    name: 'Notes',
     status: 'close',
     placement: 'taskbar',
     type: 'folder',
