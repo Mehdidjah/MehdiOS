@@ -708,7 +708,7 @@ export function FinderFrame({
       }}
       ref={frame}
       className={`absolute min-h-[420px] max-w-full min-w-0 overflow-hidden border border-white/15 bg-[rgba(25,25,28,0.88)] text-[#f5f5f7] backdrop-blur-[40px] ${
-        isFullscreen ? 'rounded-none' : 'rounded-none sm:rounded-[20px]'
+        isFullscreen ? 'rounded-none' : 'rounded-none md:rounded-[20px]'
       } ${
         isFocused
           ? 'shadow-[0_32px_100px_rgba(0,0,0,0.75),0_0_0_1px_rgba(255,255,255,0.05)]'
@@ -755,13 +755,13 @@ export function FinderFrame({
           />
         </>
       )}
-      <div className="grid h-full min-h-0 grid-cols-[88px_minmax(0,1fr)] grid-rows-[52px_minmax(0,1fr)] sm:grid-cols-[200px_minmax(0,1fr)]">
+      <div className="grid h-full min-h-0 grid-cols-[88px_minmax(0,1fr)] grid-rows-[52px_minmax(0,1fr)] md:grid-cols-[200px_minmax(0,1fr)]">
         <div
           ref={frameHeader}
           onDoubleClick={onFullScreen}
-          className="relative z-20 col-span-2 grid grid-cols-[88px_minmax(0,1fr)] border-b border-white/10 bg-white/[0.055] sm:grid-cols-[200px_minmax(0,1fr)]"
+          className="relative z-20 col-span-2 grid grid-cols-[88px_minmax(0,1fr)] border-b border-white/10 bg-white/[0.055] md:grid-cols-[200px_minmax(0,1fr)]"
         >
-          <div className="flex items-center px-1 sm:px-3">
+          <div className="flex items-center px-1 md:px-3">
             <MacTrafficLights
               appName="Finder"
               isActive={isFocused}
@@ -771,7 +771,7 @@ export function FinderFrame({
               onZoom={onFullScreen}
             />
           </div>
-          <div className="flex min-w-0 items-center gap-1 overflow-visible border-l border-white/10 px-1 sm:gap-2 sm:px-3">
+          <div className="flex min-w-0 items-center gap-1 overflow-visible border-l border-white/10 px-1 md:gap-2 md:px-3">
             <div className="flex overflow-hidden rounded-md bg-white/[0.045] p-0.5">
               <ToolbarButton
                 ariaLabel="Back"
@@ -790,7 +790,7 @@ export function FinderFrame({
                 <IconChevronRight aria-hidden stroke={2} className="size-4" />
               </ToolbarButton>
             </div>
-            <span className="hidden min-w-[76px] flex-1 truncate text-center text-[13px] font-semibold sm:block">
+            <span className="hidden min-w-[76px] flex-1 truncate text-center text-[13px] font-semibold md:block">
               {currentLocation.label}
             </span>
             <div className="flex overflow-hidden rounded-md border border-white/10 bg-black/20">
@@ -882,7 +882,7 @@ export function FinderFrame({
                 {primaryActionLabel}
               </button>
             )}
-            <label className="hidden w-[140px] shrink-0 items-center gap-1.5 rounded-[8px] border border-white/10 bg-white/[0.08] px-2 py-1.5 sm:flex">
+            <label className="hidden w-[140px] shrink-0 items-center gap-1.5 rounded-[8px] border border-white/10 bg-white/[0.08] px-2 py-1.5 md:flex">
               <IconSearch
                 aria-hidden
                 stroke={2}
@@ -901,9 +901,9 @@ export function FinderFrame({
         </div>
         <aside
           aria-label="Finder locations"
-          className="min-h-0 overflow-auto border-r border-white/[0.08] bg-white/[0.035] px-1 py-2 sm:px-2"
+          className="min-h-0 overflow-auto border-r border-white/[0.08] bg-white/[0.035] px-1 py-2 md:px-2"
         >
-          <p className="hidden px-2 pb-1 text-[10px] font-bold tracking-[0.08em] text-white/30 uppercase sm:block">
+          <p className="hidden px-2 pb-1 text-[10px] font-bold tracking-[0.08em] text-white/30 uppercase md:block">
             Favorites
           </p>
           <div className="space-y-0.5">
@@ -1023,7 +1023,7 @@ function SidebarItem({
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center justify-center gap-2 rounded-r-md px-1 py-1.5 text-left transition sm:justify-start sm:px-3 ${
+      className={`flex w-full items-center justify-center gap-2 rounded-r-md px-1 py-1.5 text-left transition md:justify-start md:px-3 ${
         active
           ? 'bg-[#0a84ff]/25 text-white'
           : 'text-white/65 hover:bg-white/[0.06] hover:text-white/85'
@@ -1047,7 +1047,7 @@ function SidebarItem({
         />
       </div>
       <span
-        className={`hidden text-[13px] sm:inline ${active ? 'font-medium' : 'font-normal'}`}
+        className={`hidden text-[13px] md:inline ${active ? 'font-medium' : 'font-normal'}`}
       >
         {label}
       </span>

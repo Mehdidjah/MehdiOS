@@ -756,7 +756,7 @@ export function BrowserFrame({
       }}
       ref={frame}
       className={`absolute min-h-[420px] max-w-full min-w-0 overflow-hidden border border-white/[0.14] bg-[rgba(25,25,28,0.88)] backdrop-blur-[40px] md:min-h-[480px] md:min-w-[720px] ${
-        isFullscreen ? 'rounded-none' : 'sm:rounded-[20px]'
+        isFullscreen ? 'rounded-none' : 'md:rounded-[20px]'
       } ${
         isFocused
           ? 'shadow-[0_28px_80px_rgba(0,0,0,0.48),0_1px_0_rgba(255,255,255,0.12)_inset]'
@@ -921,7 +921,7 @@ export function BrowserFrame({
 
         {isTabStripVisible && (
           <div
-            className="flex h-8 items-center gap-1 overflow-x-auto border-b border-white/[0.08] bg-[rgba(30,30,35,0.86)] px-2 backdrop-blur-[40px]"
+            className="flex h-8 items-center gap-1 overflow-x-auto border-b border-white/[0.08] bg-[rgba(30,30,35,0.86)] px-2 backdrop-blur-[40px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             role="tablist"
             aria-label="Safari tabs"
           >
