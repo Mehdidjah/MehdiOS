@@ -20,8 +20,8 @@ const icons: Record<FinderSidebarIconName, ReactNode> = {
   ),
   recents: (
     <>
-      <circle cx="12" cy="12" r="9" />
-      <polyline points="12 6 12 12 16 14" />
+      <path d="M12 6v6l4 2" />
+      <circle cx="12" cy="12" r="10" />
     </>
   ),
   applications: (
@@ -46,9 +46,9 @@ const icons: Record<FinderSidebarIconName, ReactNode> = {
   ),
   downloads: (
     <>
+      <path d="M12 15V3" />
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" x2="12" y1="15" y2="3" />
+      <path d="m7 10 5 5 5-5" />
     </>
   ),
   macos: (
@@ -85,7 +85,7 @@ export function FinderSidebarIcon({
         stroke="currentColor"
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth="1.8"
+        strokeWidth="2"
         viewBox="0 0 24 24"
       >
         {icons[name]}
