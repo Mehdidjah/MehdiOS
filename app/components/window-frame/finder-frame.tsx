@@ -32,6 +32,10 @@ import { Folder, Status } from '../folder/folders'
 import acrobat from '@/public/assets/icons/Acrobat.png'
 import typingMasterIcon from '@/public/assets/icons/typing-master.png'
 import { newIconSrc } from '@/app/utils/icon-paths'
+import {
+  FinderSidebarIcon,
+  type FinderSidebarIconName,
+} from './finder-sidebar-icon'
 import { MacTrafficLights } from './mac-traffic-lights'
 
 type FinderLocationId = 'projects' | 'skills' | 'trash'
@@ -41,7 +45,7 @@ type FinderLocation = {
   id: FinderLocationId
   label: string
   description: string
-  iconSrc: string
+  icon: FinderSidebarIconName
 }
 
 type FinderItem = {
@@ -75,20 +79,20 @@ const FINDER_LOCATIONS: FinderLocation[] = [
     id: 'projects',
     label: 'Projects',
     description: 'Shipped work, experiments, and product case studies.',
-    iconSrc: '/assets/icons/windowicon/project.svg',
+    icon: 'recents',
   },
   {
     id: 'skills',
     label: 'Skills',
     description:
       'Core engineering strengths across frontend, backend, and tooling.',
-    iconSrc: '/assets/icons/windowicon/skill.svg',
+    icon: 'applications',
   },
   {
     id: 'trash',
     label: 'Trash',
     description: 'Items removed from the desktop that can still be recovered.',
-    iconSrc: '/assets/icons/windowicon/trash.svg',
+    icon: 'downloads',
   },
 ]
 
@@ -912,7 +916,7 @@ export function FinderFrame({
                 key={location.id}
                 active={location.id === currentLocationId}
                 label={location.label}
-                iconSrc={location.iconSrc}
+                icon={location.icon}
                 onClick={() => navigateTo(location.id)}
               />
             ))}
@@ -1011,12 +1015,12 @@ export function FinderFrame({
 }
 function SidebarItem({
   active,
-  iconSrc,
+  icon,
   label,
   onClick,
 }: {
   active: boolean
-  iconSrc: string
+  icon: FinderSidebarIconName
   label: string
   onClick: () => void
 }) {
@@ -1031,21 +1035,8 @@ function SidebarItem({
       }`}
       type="button"
     >
-      <div className="flex size-5 shrink-0 items-center justify-center">
-        <span
-          aria-hidden
-          className={`${active ? 'bg-[#5ac8fa]' : 'bg-[#5ac8fa]/80'} size-4`}
-          style={{
-            WebkitMaskImage: `url(${iconSrc})`,
-            maskImage: `url(${iconSrc})`,
-            WebkitMaskRepeat: 'no-repeat',
-            maskRepeat: 'no-repeat',
-            WebkitMaskPosition: 'center',
-            maskPosition: 'center',
-            WebkitMaskSize: 'contain',
-            maskSize: 'contain',
-          }}
-        />
+      <div className="flex size-5 shrink-0 items-center justify-center text-[#00b9ff]">
+        <FinderSidebarIcon name={icon} />
       </div>
       <span
         className={`hidden text-[13px] md:inline ${active ? 'font-medium' : 'font-normal'}`}
