@@ -21,12 +21,12 @@ export const macwebSettingsSectionIconSrc = {
 export const newIconSrc = {
   calculator: `${NEW_ICON_STYLE_BASE_PATH}/Calculator26.svg`,
   contact: `${NEW_ICON_STYLE_BASE_PATH}/Contacts26.svg`,
-  finder: macwebAppIconSrc.finder.dark,
+  finder: macwebAppIconSrc.finder.light,
   folder: `${NEW_ICON_STYLE_BASE_PATH}/Folder26.svg`,
   messages: `${NEW_ICON_STYLE_BASE_PATH}/Messages26.svg`,
   notes: `${NEW_ICON_STYLE_BASE_PATH}/Notes26.svg`,
   safari: `${NEW_ICON_STYLE_BASE_PATH}/Safari26.svg`,
-  settings: macwebAppIconSrc.settings.dark,
+  settings: macwebAppIconSrc.settings.light,
   terminal: `${NEW_ICON_STYLE_BASE_PATH}/terminal26.svg`,
   trash: `${NEW_ICON_STYLE_BASE_PATH}/Trash26empty.svg`,
 } as const
