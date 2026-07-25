@@ -18,7 +18,7 @@ export const folders: Folder[] = [
   },
   {
     id: 'contact',
-    name: 'Contact',
+    name: 'Contacts',
     status: 'close',
     placement: 'taskbar',
     type: 'folder',
