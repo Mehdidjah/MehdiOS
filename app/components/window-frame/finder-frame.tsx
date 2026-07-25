@@ -699,19 +699,21 @@ export function FinderFrame({
                 <FinderToolbarIcon name="chevron-down" size={10} />
               </button>
 
-              <div className="hidden items-center gap-1.5 lg:flex">
-                <FinderToolbarButton
-                  ariaLabel="Share selected item unavailable"
-                  disabled
-                  icon="share"
-                  onClick={() => undefined}
-                />
-                <FinderToolbarButton
-                  ariaLabel="Show item details"
-                  disabled={!selectedItem}
-                  icon="tag"
-                  onClick={() => setViewMode('columns')}
-                />
+              <div className="flex items-center gap-1.5">
+                <div className="hidden items-center gap-1.5 lg:flex">
+                  <FinderToolbarButton
+                    ariaLabel="Share selected item unavailable"
+                    disabled
+                    icon="share"
+                    onClick={() => undefined}
+                  />
+                  <FinderToolbarButton
+                    ariaLabel="Show item details"
+                    disabled={!selectedItem}
+                    icon="tag"
+                    onClick={() => setViewMode('columns')}
+                  />
+                </div>
                 <div
                   className="relative flex shrink-0 items-center"
                   ref={windowActionsMenu}
@@ -727,6 +729,37 @@ export function FinderFrame({
                       className="absolute top-9 right-0 z-50 w-40 rounded-lg border border-[#D5D5D5] bg-white py-1 text-[12px] text-gray-700 shadow-lg dark:border-white/10 dark:bg-[#1E1E1E] dark:text-gray-300"
                       role="menu"
                     >
+                      <div className="md:hidden">
+                        <FinderMenuButton
+                          label="Icon View"
+                          onClick={() => {
+                            setViewMode('grid')
+                            setIsWindowActionsOpen(false)
+                          }}
+                        />
+                        <FinderMenuButton
+                          label="List View"
+                          onClick={() => {
+                            setViewMode('list')
+                            setIsWindowActionsOpen(false)
+                          }}
+                        />
+                        <FinderMenuButton
+                          label="Column View"
+                          onClick={() => {
+                            setViewMode('columns')
+                            setIsWindowActionsOpen(false)
+                          }}
+                        />
+                        <FinderMenuButton
+                          label="Gallery View"
+                          onClick={() => {
+                            setViewMode('gallery')
+                            setIsWindowActionsOpen(false)
+                          }}
+                        />
+                        <div className="my-1 border-t border-[#E5E5E5] dark:border-white/10" />
+                      </div>
                       <FinderMenuButton
                         label="New Tab"
                         onClick={() => {
@@ -791,6 +824,24 @@ export function FinderFrame({
               </label>
             </div>
           </header>
+
+          <label className="flex h-9 shrink-0 items-center border-b border-[#E5E5E5] bg-[#F9F9F9] px-3 xl:hidden dark:border-white/10 dark:bg-[#191919]">
+            <span className="relative flex w-full items-center">
+              <FinderToolbarIcon
+                className="pointer-events-none absolute left-2.5 text-gray-400"
+                name="search"
+                size={13}
+              />
+              <input
+                aria-label={`Search ${currentLocation.label}`}
+                className="h-7 w-full rounded-full border border-[#D0D0D0] bg-[#EAEAEA] pr-2.5 pl-8 text-[11px] text-gray-800 transition outline-none placeholder:text-gray-500 focus:bg-white focus:ring-1 focus:ring-blue-400 dark:border-white/10 dark:bg-[#1E1E1E] dark:text-white dark:placeholder:text-gray-500 dark:focus:bg-[#2D2D2D] dark:focus:ring-blue-500"
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search"
+                type="search"
+                value={searchQuery}
+              />
+            </span>
+          </label>
 
           {tabs.length > 1 && (
             <div className="flex h-8 min-w-0 shrink-0 items-stretch border-b border-[#E5E5E5] bg-[#F9F9F9] dark:border-white/10 dark:bg-[#191919]">
