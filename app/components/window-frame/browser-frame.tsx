@@ -14,14 +14,20 @@ import { useClickOutside } from '@/app/hooks/use-click-outside'
 import { useDispatch, useSelector } from '@/app/store'
 import { newIconSrc } from '@/app/utils/icon-paths'
 import { useGSAP } from '@gsap/react'
+import { useTheme } from 'next-themes'
 import {
   IconArrowLeft,
   IconArrowRight,
-  IconDotsVertical,
+  IconBookmark,
+  IconCheck,
   IconHome,
+  IconLayoutSidebarLeftExpand,
+  IconLock,
   IconPlus,
   IconReload,
   IconSearch,
+  IconShare,
+  IconShieldCheck,
   IconX,
 } from '@tabler/icons-react'
 import gsap from 'gsap'
@@ -37,7 +43,6 @@ import {
   useRef,
   useState,
 } from 'react'
-import googleIcon from '@/public/assets/icons/google_logo.svg'
 import { MacTrafficLights } from './mac-traffic-lights'
 import { projects } from '../projects/projects'
 import { Status } from '../folder/folders'
@@ -66,6 +71,7 @@ type SearchResult = {
 }
 
 const BROWSER_FRAME_SIZE: Size = { minW: 720, minH: 480 }
+const DESKTOP_DOCK_SPACE = 80
 
 const getBrowserSize = () => {
   if (typeof window === 'undefined') {
@@ -94,23 +100,11 @@ const getInitialFrameBounds = (screenWidth: number, screenHeight: number) => {
     }
   }
 
-  const width = Math.min(
-    Math.max(720, Math.floor(screenWidth * 0.7)),
-    screenWidth - 32
-  )
-  const height = Math.min(
-    Math.max(480, Math.floor(screenHeight * 0.76)),
-    screenHeight - topbarHeight - 34
-  )
-
   return {
-    width,
-    height,
-    left: Math.max(0, Math.floor((screenWidth - width) / 2)),
-    top: Math.max(
-      topbarHeight + 10,
-      Math.floor((screenHeight - height + topbarHeight) / 2)
-    ),
+    width: 780,
+    height: 520,
+    left: 100,
+    top: 60,
   }
 }
 
@@ -167,6 +161,20 @@ const getSearchQuery = (rawUrl: string) =>
     ? decodeURIComponent(rawUrl.slice(SEARCH_URL_PREFIX.length))
     : ''
 
+const normalizeHistoryUrl = (rawUrl?: string) => {
+  if (!rawUrl) return ''
+  if (isSearchUrl(rawUrl)) return rawUrl
+
+  try {
+    return new URL(rawUrl).href
+  } catch {
+    return rawUrl
+  }
+}
+
+const areHistoryUrlsEqual = (left: string | undefined, right: string) =>
+  normalizeHistoryUrl(left) === normalizeHistoryUrl(right)
+
 export function BrowserFrame({
   frameName,
   frame_id,
@@ -183,22 +191,30 @@ export function BrowserFrame({
   const fullscreenTL = useRef<gsap.core.Timeline>(gsap.timeline())
   const dragRef = useRef<globalThis.Draggable[] | null>(null)
   const dispatch = useDispatch()
-  const { activeApp, zIndex } = useSelector((state) => state.settings)
+  const { activeApp, zIndex, wallpaper } = useSelector(
+    (state) => state.settings
+  )
+  const { resolvedTheme } = useTheme()
   const { focusedTab, tabs } = useSelector((state) => state.chrome)
   const [isFocused, setIsFocused] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [urlInput, setUrlInput] = useState('')
-  const [homeSearchQuery, setHomeSearchQuery] = useState('')
   const [iframeRefreshKey, setIframeRefreshKey] = useState(0)
   const [historyByTab, setHistoryByTab] = useState<TabHistoryMap>({})
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [searchError, setSearchError] = useState<string | null>(null)
   const [searchRefreshKey, setSearchRefreshKey] = useState(0)
+  const [isTabStripVisible, setIsTabStripVisible] = useState(true)
+  const [isBookmarked, setIsBookmarked] = useState(false)
+  const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle')
   const size = getBrowserSize()
   const activeTab = tabs.find((tab) => tab.id === focusedTab)
   const activeSearchQuery = activeTab ? getSearchQuery(activeTab.url) : ''
   const activeFrameUrl = activeTab?.iframe_url || activeTab?.url || ''
+  const wallpaperSrc = wallpaper
+    ? (resolvedTheme === 'dark' ? wallpaper.dark : wallpaper.light).src
+    : undefined
 
   const { contextSafe } = useGSAP(() => {
     const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1920
@@ -319,9 +335,10 @@ export function BrowserFrame({
       return
     }
 
+    const isMobile = window.innerWidth < 768
     fullscreenTL.current.to(frame.current, {
       width: '100vw',
-      height: `${window.innerHeight - 28}px`,
+      height: `${window.innerHeight - 28 - (isMobile ? 0 : DESKTOP_DOCK_SPACE)}px`,
       x: 0,
       y: 0,
       left: '0px',
@@ -390,11 +407,13 @@ export function BrowserFrame({
       }
 
       const currentEntry = existing.entries[existing.index]
-      if (currentEntry === rawUrl) {
+      if (areHistoryUrlsEqual(currentEntry, rawUrl)) {
         return prev
       }
 
-      const knownIndex = existing.entries.lastIndexOf(rawUrl)
+      const knownIndex = existing.entries.findLastIndex((entry) =>
+        areHistoryUrlsEqual(entry, rawUrl)
+      )
       if (knownIndex !== -1) {
         return {
           ...prev,
@@ -443,7 +462,6 @@ export function BrowserFrame({
           })
         )
         setUrlInput(trimmedInput)
-        setHomeSearchQuery('')
         return
       }
 
@@ -459,7 +477,6 @@ export function BrowserFrame({
         })
       )
       setUrlInput(formattedUrl)
-      setHomeSearchQuery('')
     },
     [activeTab, dispatch, seedHistoryForTab]
   )
@@ -467,11 +484,6 @@ export function BrowserFrame({
   const handleUrlSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     navigateToUrl(urlInput)
-  }
-
-  const handleHomeSearch = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    navigateToUrl(homeSearchQuery)
   }
 
   const activeTabHistory = (activeTab && historyByTab[activeTab.id]) || {
@@ -510,7 +522,6 @@ export function BrowserFrame({
       })
     )
     setUrlInput(isSearchUrl(nextUrl) ? getSearchQuery(nextUrl) : nextUrl)
-    setHomeSearchQuery('')
   }
 
   const handleHome = () => {
@@ -526,7 +537,6 @@ export function BrowserFrame({
 
     dispatch(updateTab({ iframe_url: '', url: '', title: 'Start Page' }))
     setUrlInput('')
-    setHomeSearchQuery('')
   }
 
   const handleRefresh = () => {
@@ -542,7 +552,31 @@ export function BrowserFrame({
   const handleNewTab = () => {
     dispatch(addNewtab())
     setUrlInput('')
-    setHomeSearchQuery('')
+  }
+
+  const handleShare = async () => {
+    const url = activeTab?.iframe_url || activeTab?.url
+    if (!url || isSearchUrl(url)) return
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: activeTab?.title || 'MehdiOS Safari',
+          url,
+        })
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url)
+        setShareStatus('copied')
+        window.setTimeout(() => setShareStatus('idle'), 1800)
+      }
+    } catch {
+      // A cancelled native share sheet does not need browser feedback.
+    }
+  }
+
+  const handleBookmark = () => {
+    if (!activeFrameUrl || activeSearchQuery) return
+    setIsBookmarked((previous) => !previous)
   }
 
   const handleCloseTab = (tabId: string) => {
@@ -603,10 +637,6 @@ export function BrowserFrame({
     if (!activeTab) return
 
     setUrlInput(activeSearchQuery || activeTab.url || '')
-    if (!activeTab.iframe_url) {
-      setHomeSearchQuery('')
-    }
-
     seedHistoryForTab(activeTab.id, activeTab.iframe_url || activeTab.url)
   }, [activeSearchQuery, activeTab, seedHistoryForTab])
 
@@ -718,21 +748,19 @@ export function BrowserFrame({
 
   return (
     <div
-      onContextMenu={(event) => {
-        event.stopPropagation()
-      }}
+      onContextMenu={(event) => event.stopPropagation()}
       onMouseDown={() => {
         dispatch(setActiveApp({ id: frame_id, name: frameName }))
         handleZIndex()
         setIsFocused(true)
       }}
       ref={frame}
-      className={`absolute min-h-[420px] max-w-full min-w-0 overflow-hidden rounded-none border border-black/15 bg-[#f5f5f7] md:min-h-[480px] md:min-w-[720px] dark:border-white/15 dark:bg-[#292929] ${
-        isFullscreen ? 'rounded-none' : 'sm:rounded-xl'
+      className={`absolute min-h-[420px] max-w-full min-w-0 overflow-hidden border border-white/[0.14] bg-[rgba(25,25,28,0.88)] backdrop-blur-[40px] md:min-h-[480px] md:min-w-[720px] ${
+        isFullscreen ? 'rounded-none' : 'sm:rounded-[20px]'
       } ${
         isFocused
-          ? 'shadow-[0_24px_60px_rgba(0,0,0,0.24)]'
-          : 'shadow-[0_12px_36px_rgba(0,0,0,0.2)]'
+          ? 'shadow-[0_28px_80px_rgba(0,0,0,0.48),0_1px_0_rgba(255,255,255,0.12)_inset]'
+          : 'shadow-[0_16px_44px_rgba(0,0,0,0.32),0_1px_0_rgba(255,255,255,0.06)_inset]'
       } ${status === 'minimize' ? 'hidden' : ''}`}
       style={{
         fontFamily:
@@ -743,48 +771,55 @@ export function BrowserFrame({
         <>
           <div
             ref={t}
-            className="absolute top-0 z-20 h-1 w-full cursor-ns-resize bg-transparent"
+            className="absolute top-0 z-20 h-1 w-full cursor-ns-resize"
           />
           <div
             ref={b}
-            className="absolute bottom-0 z-20 h-1 w-full cursor-ns-resize bg-transparent"
+            className="absolute bottom-0 z-20 h-1 w-full cursor-ns-resize"
           />
           <div
             ref={r}
-            className="absolute right-0 z-20 h-full w-1 cursor-ew-resize bg-transparent"
+            className="absolute right-0 z-20 h-full w-1 cursor-ew-resize"
           />
           <div
             ref={l}
-            className="absolute left-0 z-20 h-full w-1 cursor-ew-resize bg-transparent"
+            className="absolute left-0 z-20 h-full w-1 cursor-ew-resize"
           />
           <div
             ref={tl}
-            className="absolute top-0 left-0 z-20 size-2 cursor-nwse-resize bg-transparent"
+            className="absolute top-0 left-0 z-20 size-2 cursor-nwse-resize"
           />
           <div
             ref={tr}
-            className="absolute top-0 right-0 z-20 size-2 cursor-nesw-resize bg-transparent"
+            className="absolute top-0 right-0 z-20 size-2 cursor-nesw-resize"
           />
           <div
             ref={bl}
-            className="absolute bottom-0 left-0 z-20 size-2 cursor-nesw-resize bg-transparent"
+            className="absolute bottom-0 left-0 z-20 size-2 cursor-nesw-resize"
           />
           <div
             ref={br}
-            className="absolute right-0 bottom-0 z-20 size-2 cursor-nwse-resize bg-transparent"
+            className="absolute right-0 bottom-0 z-20 size-2 cursor-nwse-resize"
           />
         </>
       )}
 
-      <div className="relative grid h-full grid-rows-[44px_34px_1fr]">
+      <div
+        className={`relative grid h-full bg-[rgba(25,25,28,0.88)] ${
+          isTabStripVisible
+            ? 'grid-rows-[44px_32px_1fr]'
+            : 'grid-rows-[44px_1fr]'
+        }`}
+      >
         <div
           ref={frameHeader}
           onDoubleClick={onFullScreen}
-          className="cursor-custom-auto! grid grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-black/10 bg-[#ececee] px-3 dark:border-white/10 dark:bg-[#323232]"
+          className="grid grid-cols-[100px_minmax(0,1fr)_100px] items-center border-b border-white/[0.1] bg-[rgba(30,30,35,0.86)] px-3 backdrop-blur-[40px]"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex w-[100px] items-center gap-2">
             <MacTrafficLights
               appName={frameName}
+              isActive={isFocused}
               isFullscreen={isFullscreen}
               onClose={() => {
                 dispatch(resetChrome())
@@ -793,101 +828,117 @@ export function BrowserFrame({
               onMinimize={onMinimize}
               onZoom={onFullScreen}
             />
+            <ToolbarIconButton
+              ariaLabel={isTabStripVisible ? 'Hide tab bar' : 'Show tab bar'}
+              onClick={() => setIsTabStripVisible((visible) => !visible)}
+            >
+              <IconLayoutSidebarLeftExpand className="size-4" stroke={1.8} />
+            </ToolbarIconButton>
+          </div>
 
-            <div className="hidden items-center sm:flex">
+          <div className="flex min-w-0 items-center justify-center gap-2">
+            <div className="hidden shrink-0 items-center sm:flex">
               <ToolbarIconButton
                 ariaLabel="Back"
                 disabled={!canGoBack}
                 onClick={() => handleHistoryMove(-1)}
               >
-                <IconArrowLeft stroke={2} className="size-4" />
+                <IconArrowLeft className="size-3.5" stroke={2} />
               </ToolbarIconButton>
-              <div className="h-4 w-px bg-black/10" />
               <ToolbarIconButton
                 ariaLabel="Forward"
                 disabled={!canGoForward}
                 onClick={() => handleHistoryMove(1)}
               >
-                <IconArrowRight stroke={2} className="size-4" />
+                <IconArrowRight className="size-3.5" stroke={2} />
               </ToolbarIconButton>
             </div>
+            <form
+              onSubmit={handleUrlSubmit}
+              className="flex h-[30px] w-full max-w-[500px] min-w-0 items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.12] px-2.5 transition focus-within:border-[#0a84ff]/60 focus-within:bg-white/[0.17] focus-within:ring-2 focus-within:ring-[#0a84ff]/20"
+            >
+              {activeSearchQuery || !activeTab?.iframe_url ? (
+                <IconSearch
+                  className="size-3.5 shrink-0 text-white/40"
+                  stroke={2}
+                />
+              ) : (
+                <IconLock
+                  className="size-3.5 shrink-0 text-white/45"
+                  stroke={2}
+                />
+              )}
+              <input
+                value={urlInput}
+                onChange={(event) => setUrlInput(event.target.value)}
+                type="text"
+                placeholder="Search or enter website name"
+                aria-label="Safari address and search"
+                className="w-full min-w-0 bg-transparent text-center text-[12.5px] text-white/90 outline-hidden placeholder:text-white/35 focus:text-left"
+              />
+              <button
+                type="button"
+                onClick={handleRefresh}
+                className={`flex size-5 shrink-0 items-center justify-center rounded text-white/45 transition hover:bg-white/[0.1] hover:text-white/85 ${
+                  activeSearchQuery || activeFrameUrl
+                    ? ''
+                    : 'pointer-events-none opacity-40'
+                }`}
+                aria-label="Refresh page"
+              >
+                <IconReload className="size-3.5" stroke={1.8} />
+              </button>
+            </form>
           </div>
 
-          <form
-            onSubmit={handleUrlSubmit}
-            className="mx-auto flex h-7 w-full max-w-3xl min-w-0 items-center gap-2 rounded-md border border-black/10 bg-white/80 px-3 dark:border-white/10 dark:bg-black/20"
-          >
-            <Image
-              alt=""
-              src={
-                activeSearchQuery || !activeTab?.iframe_url
-                  ? googleIcon
-                  : newIconSrc.safari
+          <div className="flex w-[100px] items-center justify-end gap-0.5">
+            <ToolbarIconButton
+              ariaLabel={
+                shareStatus === 'copied' ? 'Link copied' : 'Share page'
               }
-              width={activeSearchQuery || !activeTab?.iframe_url ? 20 : 18}
-              height={activeSearchQuery || !activeTab?.iframe_url ? 20 : 18}
-              className="shrink-0 object-contain"
-            />
-            <IconSearch
-              stroke={1.9}
-              className="size-4 shrink-0 text-black/35 dark:text-white/35"
-            />
-            <input
-              value={urlInput}
-              onChange={(event) => setUrlInput(event.target.value)}
-              type="text"
-              placeholder="Search or enter website name"
-              aria-label="Safari address and search"
-              className="w-full min-w-0 bg-transparent text-[13px] text-black/75 outline-hidden placeholder:text-black/35 dark:text-white/80 dark:placeholder:text-white/35"
-            />
-            <button
-              type="button"
-              onClick={handleRefresh}
-              className={`flex size-7 items-center justify-center rounded-full transition ${
-                activeSearchQuery || activeFrameUrl
-                  ? 'text-black/55 hover:bg-black/[0.05] hover:text-black/75 dark:text-white/55 dark:hover:bg-white/[0.08] dark:hover:text-white/80'
-                  : 'pointer-events-none text-black/20 dark:text-white/20'
-              }`}
-              aria-label="Refresh page"
+              onClick={handleShare}
             >
-              <IconReload stroke={1.8} className="size-4" />
-            </button>
-          </form>
-
-          <div className="hidden items-center md:flex">
-            <ToolbarIconButton ariaLabel="Home" onClick={handleHome}>
-              <IconHome stroke={1.9} className="size-4" />
+              {shareStatus === 'copied' ? (
+                <IconCheck className="size-4" stroke={2} />
+              ) : (
+                <IconShare className="size-4" stroke={1.8} />
+              )}
             </ToolbarIconButton>
-            <ToolbarIconButton ariaLabel="New tab" onClick={handleNewTab}>
-              <IconPlus stroke={1.9} className="size-4" />
+            <ToolbarIconButton
+              ariaLabel={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+              onClick={handleBookmark}
+            >
+              <IconBookmark
+                className={`size-4 ${isBookmarked ? 'fill-current' : ''}`}
+                stroke={1.8}
+              />
             </ToolbarIconButton>
-            <ToolbarIconButton ariaLabel="Window actions">
-              <IconDotsVertical stroke={1.9} className="size-4" />
+            <ToolbarIconButton ariaLabel="Open start page" onClick={handleHome}>
+              <IconHome className="size-4" stroke={1.8} />
             </ToolbarIconButton>
           </div>
         </div>
 
-        <div className="border-b border-black/10 bg-[#e5e5e7] px-2 dark:border-white/10 dark:bg-[#292929]">
+        {isTabStripVisible && (
           <div
-            className="flex h-[33px] min-w-0 items-end gap-0.5 overflow-x-auto"
+            className="flex h-8 items-center gap-1 overflow-x-auto border-b border-white/[0.08] bg-[rgba(30,30,35,0.86)] px-2 backdrop-blur-[40px]"
             role="tablist"
+            aria-label="Safari tabs"
           >
             {tabs.map((tab) => {
               const active = tab.id === focusedTab
-              const tabSearchQuery = getSearchQuery(tab.url)
-
               return (
                 <div
-                  className={`group relative flex h-7 max-w-[220px] min-w-[130px] items-center rounded-t-md border border-b-0 transition ${
+                  className={`group flex h-6 max-w-[200px] min-w-[104px] items-center rounded-md border px-1 transition ${
                     active
-                      ? 'border-black/10 bg-[#f5f5f7] dark:border-white/10 dark:bg-[#1f1f1f]'
-                      : 'border-transparent bg-black/[0.03] hover:bg-black/[0.06] dark:bg-white/[0.03] dark:hover:bg-white/[0.07]'
+                      ? 'border-white/[0.12] bg-white/[0.18] text-white'
+                      : 'border-transparent bg-white/[0.06] text-white/70 hover:bg-white/[0.12]'
                   }`}
                   key={tab.id}
                 >
                   <button
                     aria-selected={active}
-                    className="flex min-w-0 flex-1 items-center gap-2 px-2.5 text-left"
+                    className="flex min-w-0 flex-1 items-center gap-1.5 px-1.5 text-left"
                     onClick={() => dispatch(focusTab(tab.id))}
                     role="tab"
                     type="button"
@@ -895,87 +946,68 @@ export function BrowserFrame({
                     <Image
                       alt=""
                       className="shrink-0 object-contain"
-                      height={tabSearchQuery || !tab.iframe_url ? 16 : 14}
-                      src={
-                        tabSearchQuery || !tab.iframe_url
-                          ? googleIcon
-                          : newIconSrc.safari
-                      }
-                      width={tabSearchQuery || !tab.iframe_url ? 16 : 14}
+                      height={13}
+                      src={newIconSrc.safari}
+                      width={13}
                     />
-                    <span className="truncate text-[12px] font-medium text-black/75 dark:text-white/75">
+                    <span className="truncate text-[11px] font-medium">
                       {tab.title || 'New Tab'}
                     </span>
                   </button>
                   <button
                     aria-label={`Close ${tab.title || 'tab'}`}
-                    className="mr-1 flex size-5 shrink-0 items-center justify-center rounded-full text-black/30 transition hover:bg-black/[0.06] hover:text-black/65 dark:text-white/30 dark:hover:bg-white/[0.08] dark:hover:text-white/65"
+                    className="flex size-4 shrink-0 items-center justify-center rounded text-white/45 hover:bg-white/[0.14] hover:text-white"
                     onClick={() => handleCloseTab(tab.id)}
                     type="button"
                   >
-                    <IconX aria-hidden className="size-3.5" stroke={2} />
+                    <IconX aria-hidden className="size-3" stroke={2} />
                   </button>
                 </div>
               )
             })}
+            <ToolbarIconButton ariaLabel="New tab" onClick={handleNewTab}>
+              <IconPlus className="size-3.5" stroke={2} />
+            </ToolbarIconButton>
           </div>
-        </div>
+        )}
 
-        <div className="min-h-0 overflow-hidden bg-white dark:bg-[#1f1f1f]">
+        <div className="min-h-0 overflow-hidden bg-[#16161a]">
           {activeSearchQuery ? (
-            <div className="relative flex h-full flex-col overflow-auto bg-[#f7f7f8] px-4 py-6 sm:px-6 sm:py-8 dark:bg-[#1f1f1f]">
-              <div className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col">
-                <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-                  <Image
-                    alt="Google"
-                    src={googleIcon}
-                    width={140}
-                    height={48}
-                    className="h-auto w-[140px] object-contain"
-                  />
-                  <p className="mt-6 text-[11px] font-semibold tracking-[0.22em] text-[#2563eb] uppercase">
-                    Research
-                  </p>
-                  <h2 className="mt-2 text-[30px] font-semibold tracking-[-0.04em] text-slate-900 dark:text-white">
-                    {activeSearchQuery}
-                  </h2>
-                  <p className="mt-3 max-w-2xl text-[14px] leading-6 text-slate-500 dark:text-white/50">
-                    Search results open inside the Safari window so you can keep
-                    researching without leaving the desktop.
-                  </p>
-                </div>
-
-                <div className="mt-10 flex-1 space-y-4">
+            <div className="h-full overflow-auto bg-[#1a1a1e] px-4 py-5 text-white sm:px-7">
+              <div className="mx-auto w-full max-w-3xl">
+                <p className="text-[11px] font-medium tracking-[0.12em] text-white/45 uppercase">
+                  Search results
+                </p>
+                <h2 className="mt-1 truncate text-xl font-semibold tracking-[-0.03em]">
+                  {activeSearchQuery}
+                </h2>
+                <div className="mt-5 space-y-2.5">
                   {isSearching ? (
-                    <div className="rounded-lg border border-black/8 bg-white p-5 text-center text-[14px] text-slate-500 shadow-sm dark:border-white/8 dark:bg-white/5 dark:text-white/50">
-                      Searching for results...
-                    </div>
+                    <SearchStatus>Searching for results...</SearchStatus>
                   ) : searchError ? (
-                    <div className="rounded-lg border border-black/8 bg-white p-5 text-center text-[14px] text-slate-500 shadow-sm dark:border-white/8 dark:bg-white/5 dark:text-white/50">
-                      {searchError}
-                    </div>
+                    <SearchStatus>{searchError}</SearchStatus>
                   ) : searchResults.length === 0 ? (
-                    <div className="rounded-lg border border-black/8 bg-white p-5 text-center text-[14px] text-slate-500 shadow-sm dark:border-white/8 dark:bg-white/5 dark:text-white/50">
+                    <SearchStatus>
                       No results found for this query.
-                    </div>
+                    </SearchStatus>
                   ) : (
                     searchResults.map((result, index) => (
                       <button
                         key={`${result.url}-${index}`}
                         onClick={() => navigateToUrl(result.url, result.title)}
-                        className="w-full rounded-lg border border-black/8 bg-white p-4 text-left shadow-sm transition hover:bg-black/[0.02] hover:shadow-md dark:border-white/8 dark:bg-white/5 dark:hover:bg-white/[0.08]"
+                        className="w-full rounded-xl border border-white/[0.1] bg-white/[0.07] p-3.5 text-left transition hover:bg-white/[0.12]"
                         type="button"
                       >
-                        <p className="text-[12px] font-medium text-[#2563eb]">
+                        <p className="text-[11px] font-medium text-[#64b5ff]">
                           {result.source}
                         </p>
-                        <h3 className="mt-1 text-[17px] font-semibold tracking-[-0.02em] text-slate-900 dark:text-white/90">
+                        <h3 className="mt-1 text-[15px] font-semibold text-white">
                           {result.title}
                         </h3>
-                        <p className="mt-2 text-[13px] leading-6 text-slate-500 dark:text-white/50">
+                        <p className="mt-1.5 line-clamp-2 text-[12px] leading-5 text-white/55">
                           {result.snippet || result.url}
                         </p>
-                        <p className="mt-3 truncate text-[12px] text-slate-400">
+                        <p className="mt-2 truncate text-[11px] text-white/35">
                           {result.url}
                         </p>
                       </button>
@@ -987,7 +1019,7 @@ export function BrowserFrame({
           ) : activeFrameUrl ? (
             <iframe
               key={`${activeTab?.id ?? 'tab'}:${activeFrameUrl}:${iframeRefreshKey}`}
-              className="h-full w-full border-0 bg-white"
+              className="block h-full w-full border-0 bg-white"
               src={buildProxyUrl(activeFrameUrl)}
               title={activeTab?.title || 'Safari'}
               allowFullScreen
@@ -995,98 +1027,118 @@ export function BrowserFrame({
               referrerPolicy="no-referrer"
             />
           ) : (
-            <div className="relative flex h-full flex-col overflow-auto bg-[#f7f7f8] px-4 py-6 sm:px-6 sm:py-8 dark:bg-[#1f1f1f]">
-              <div className="relative mx-auto flex w-full max-w-[1120px] flex-1 flex-col items-center">
-                <div className="mx-auto flex min-h-[260px] w-full max-w-[760px] flex-col items-center justify-center text-center">
-                  <Image
-                    alt="Google"
-                    src={googleIcon}
-                    width={220}
-                    height={74}
-                    className="h-auto w-[220px] object-contain"
-                  />
-
-                  <form
-                    onSubmit={handleHomeSearch}
-                    className="mt-8 flex w-full items-center gap-3 rounded-full border border-black/10 bg-white px-5 py-3.5 shadow-sm transition focus-within:border-[#007aff] focus-within:ring-2 focus-within:ring-[#007aff]/15 dark:border-white/10 dark:bg-white/[0.07]"
+            <div
+              className="relative h-full overflow-auto bg-cover bg-center [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              style={{
+                backgroundImage: wallpaperSrc
+                  ? `url(${wallpaperSrc})`
+                  : undefined,
+              }}
+            >
+              <div className="absolute inset-0 bg-black/[0.42] backdrop-blur-[3px]" />
+              <div className="relative mx-auto flex w-full max-w-[760px] flex-col gap-5 px-5 py-5 text-white sm:px-8">
+                <section aria-labelledby="favorites-heading">
+                  <h2
+                    id="favorites-heading"
+                    className="mb-3 text-[15px] font-semibold drop-shadow"
                   >
-                    <IconSearch
-                      stroke={1.9}
-                      className="size-6 shrink-0 text-slate-400"
-                    />
-                    <input
-                      type="text"
-                      value={homeSearchQuery}
-                      onChange={(event) =>
-                        setHomeSearchQuery(event.target.value)
-                      }
-                      placeholder="Search the web or enter a URL"
-                      aria-label="Search the web"
-                      className="w-full bg-transparent text-[15px] text-slate-700 outline-hidden placeholder:text-slate-400 dark:text-white/80 dark:placeholder:text-white/35"
-                    />
-                  </form>
-                </div>
-
-                <div className="mt-5 grid w-full grid-cols-[repeat(auto-fill,minmax(138px,1fr))] gap-3">
-                  {shortcuts.map((shortcut) => (
-                    <button
-                      key={shortcut.id}
-                      onClick={() =>
-                        navigateToUrl(shortcut.url, shortcut.label)
-                      }
-                      className="group flex min-h-[142px] flex-col rounded-[10px] border border-black/8 bg-white p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/8 dark:bg-white/5 dark:hover:bg-white/[0.08]"
-                      type="button"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        {shortcut.thumbnail ? (
-                          <div className="relative size-11 overflow-hidden rounded-lg border border-black/8 shadow-sm dark:border-white/10">
+                    Favorites
+                  </h2>
+                  <div className="flex flex-wrap gap-x-4 gap-y-3">
+                    {shortcuts.map((shortcut) => (
+                      <button
+                        key={shortcut.id}
+                        onClick={() =>
+                          navigateToUrl(shortcut.url, shortcut.label)
+                        }
+                        className="group flex w-[62px] flex-col items-center gap-1.5"
+                        type="button"
+                      >
+                        <span className="relative flex size-11 items-center justify-center overflow-hidden rounded-xl border border-white/20 bg-white/[0.16] shadow-[0_4px_14px_rgba(0,0,0,0.32)] transition group-hover:-translate-y-0.5 group-hover:bg-white/[0.26]">
+                          {shortcut.thumbnail ? (
                             <Image
                               alt=""
-                              src={shortcut.thumbnail}
                               fill
+                              src={shortcut.thumbnail}
                               className="object-cover"
                             />
-                          </div>
-                        ) : (
-                          <div className="flex size-11 items-center justify-center rounded-lg border border-black/8 bg-[#eef7ff] shadow-sm dark:border-white/10 dark:bg-white/10">
-                            <Image
-                              alt=""
-                              src={newIconSrc.safari}
-                              width={28}
-                              height={28}
-                              className="object-contain"
-                            />
-                          </div>
-                        )}
-                        <span className="hidden rounded-full bg-black/[0.04] px-2.5 py-1 text-[10px] font-semibold tracking-[0.18em] text-black/40 uppercase">
-                          Shortcut
+                          ) : (
+                            <span className="text-lg font-semibold text-white/85">
+                              {shortcut.label.slice(0, 1)}
+                            </span>
+                          )}
                         </span>
-                      </div>
-
-                      <div className="mt-4">
-                        <p className="truncate text-[14px] font-semibold tracking-[-0.02em] text-slate-900 dark:text-white/90">
+                        <span className="w-full truncate text-center text-[10px] font-medium text-white/90 drop-shadow">
                           {shortcut.label}
-                        </p>
-                        <p className="mt-1 truncate text-[11px] font-medium text-slate-500 dark:text-white/45">
-                          {shortcut.subtitle}
-                        </p>
-                      </div>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
 
-                      <p className="mt-2 line-clamp-2 text-[11px] leading-4 text-slate-500 dark:text-white/45">
-                        {shortcut.description}
-                      </p>
+                <section aria-labelledby="privacy-heading">
+                  <h2
+                    id="privacy-heading"
+                    className="mb-3 text-[15px] font-semibold drop-shadow"
+                  >
+                    Privacy Report
+                  </h2>
+                  <div className="flex items-center gap-3 rounded-[13px] border border-white/[0.14] bg-[rgba(40,40,46,0.62)] px-4 py-3.5 shadow-[0_2px_12px_rgba(0,0,0,0.2)] backdrop-blur-[20px]">
+                    <IconShieldCheck
+                      className="size-5 shrink-0 text-white/55"
+                      stroke={1.7}
+                    />
+                    <p className="text-[12.5px] leading-5 text-white/70">
+                      MehdiOS keeps browsing inside this window. Sites are
+                      loaded through its browser proxy, and this start page does
+                      not claim tracker blocking or IP masking.
+                    </p>
+                  </div>
+                </section>
 
-                      <span className="mt-auto pt-3 text-[11px] font-semibold text-[#2563eb] dark:text-[#5fa8ff]">
-                        Open in current tab
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                <section aria-labelledby="portfolio-heading">
+                  <h2
+                    id="portfolio-heading"
+                    className="mb-3 text-[15px] font-semibold drop-shadow"
+                  >
+                    Continue exploring
+                  </h2>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {shortcuts
+                      .filter((shortcut) => shortcut.id !== 'apple')
+                      .slice(0, 3)
+                      .map((shortcut) => (
+                        <button
+                          key={`continue-${shortcut.id}`}
+                          onClick={() =>
+                            navigateToUrl(shortcut.url, shortcut.label)
+                          }
+                          className="rounded-[10px] border border-white/[0.12] bg-[rgba(40,40,46,0.6)] px-3 py-2.5 text-left shadow-[0_1px_4px_rgba(0,0,0,0.18)] backdrop-blur-[16px] transition hover:-translate-y-0.5 hover:bg-[rgba(55,55,62,0.78)]"
+                          type="button"
+                        >
+                          <p className="truncate text-[12px] font-medium text-white/85">
+                            {shortcut.label}
+                          </p>
+                          <p className="mt-0.5 truncate text-[11px] text-white/50">
+                            {shortcut.subtitle}
+                          </p>
+                        </button>
+                      ))}
+                  </div>
+                </section>
               </div>
             </div>
           )}
         </div>
       </div>
+    </div>
+  )
+}
+
+function SearchStatus({ children }: { children: ReactNode }) {
+  return (
+    <div className="rounded-xl border border-white/[0.1] bg-white/[0.07] p-4 text-center text-[13px] text-white/55">
+      {children}
     </div>
   )
 }
@@ -1111,8 +1163,8 @@ function ToolbarIconButton({
       onClick={onClick}
       className={`flex size-8 items-center justify-center rounded-full transition ${
         disabled
-          ? 'text-black/20 dark:text-white/20'
-          : 'text-black/55 hover:bg-black/[0.05] hover:text-black/75 dark:text-white/55 dark:hover:bg-white/[0.08] dark:hover:text-white/80'
+          ? 'text-white/20'
+          : 'text-white/55 hover:bg-white/[0.08] hover:text-white/80'
       }`}
       style={style}
       type="button"
