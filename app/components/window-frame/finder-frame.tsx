@@ -15,8 +15,11 @@ import { useGSAP } from '@gsap/react'
 import {
   IconChevronLeft,
   IconChevronRight,
+  IconColumns3,
+  IconDots,
   IconLayoutGrid,
   IconListDetails,
+  IconPlus,
   IconSearch,
 } from '@tabler/icons-react'
 import gsap from 'gsap'
@@ -32,7 +35,7 @@ import { newIconSrc } from '@/app/utils/icon-paths'
 import { MacTrafficLights } from './mac-traffic-lights'
 
 type FinderLocationId = 'projects' | 'skills' | 'trash'
-type FinderViewMode = 'list' | 'grid'
+type FinderViewMode = 'list' | 'grid' | 'columns'
 
 type FinderLocation = {
   id: FinderLocationId
@@ -239,20 +242,11 @@ const getInitialFrameBounds = (screenWidth: number, screenHeight: number) => {
     }
   }
 
-  const width = Math.min(Math.max(720, Math.floor(screenWidth * 0.58)), 1180)
-  const height = Math.min(
-    Math.max(500, Math.floor(screenHeight * 0.72)),
-    screenHeight - topbarHeight - 32
-  )
-
   return {
-    width,
-    height,
-    left: Math.max(0, Math.floor((screenWidth - width) / 2)),
-    top: Math.max(
-      topbarHeight + 10,
-      Math.floor((screenHeight - height + topbarHeight) / 2)
-    ),
+    width: 740,
+    height: 500,
+    left: 80,
+    top: 56,
   }
 }
 
@@ -292,6 +286,7 @@ export function FinderFrame({
   const timeline = useRef<gsap.core.Timeline>(gsap.timeline())
   const frame = useRef<HTMLDivElement>(null)
   const frameHeader = useRef<HTMLDivElement>(null)
+  const windowActionsMenu = useRef<HTMLDivElement>(null)
   const minimizeTL = useRef<gsap.core.Timeline>(gsap.timeline())
   const fullscreenTL = useRef<gsap.core.Timeline>(gsap.timeline())
   const dragRef = useRef<globalThis.Draggable[] | null>(null)
@@ -300,12 +295,15 @@ export function FinderFrame({
   const trashItems = useSelector((state) => state.trash.items)
   const [isFocused, setIsFocused] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [viewMode, setViewMode] = useState<FinderViewMode>('grid')
+  const [isWindowActionsOpen, setIsWindowActionsOpen] = useState(false)
+  const [viewMode, setViewMode] = useState<FinderViewMode>('list')
   const initialLocation = FINDER_LOCATIONS.some(
     (location) => location.id === frame_id
   )
     ? (frame_id as FinderLocationId)
     : 'projects'
+  const [tabs, setTabs] = useState([{ id: 0, location: initialLocation }])
+  const [activeTabId, setActiveTabId] = useState(0)
   const [navigationStack, setNavigationStack] = useState<FinderLocationId[]>([
     initialLocation,
   ])
@@ -440,7 +438,7 @@ export function FinderFrame({
 
     fullscreenTL.current.to(frame.current, {
       width: '100vw',
-      height: `${window.innerHeight - 28}px`,
+      height: `${window.innerHeight - (window.innerWidth < 768 ? 28 : 80)}px`,
       x: 0,
       y: 0,
       left: '0px',
@@ -462,7 +460,7 @@ export function FinderFrame({
     fullscreenTL.current.clear()
     gsap.to(frame.current, {
       width: '50vw',
-      height: `${window.innerHeight - 28}px`,
+      height: `${window.innerHeight - 80}px`,
       x: 0,
       y: 0,
       left: '0px',
@@ -478,7 +476,7 @@ export function FinderFrame({
     fullscreenTL.current.clear()
     gsap.to(frame.current, {
       width: '50vw',
-      height: `${window.innerHeight - 28}px`,
+      height: `${window.innerHeight - 80}px`,
       x: 0,
       y: 0,
       left: '50%',
@@ -525,6 +523,10 @@ export function FinderFrame({
     setIsFocused(false)
   }, frame)
 
+  useClickOutside(() => {
+    setIsWindowActionsOpen(false)
+  }, windowActionsMenu)
+
   useEffect(() => {
     if (activeApp?.id === frame_id && frame.current) {
       frame.current.style.zIndex = `${zIndex}`
@@ -534,6 +536,14 @@ export function FinderFrame({
   useEffect(() => {
     setSelectedItemId(null)
   }, [currentLocationId, searchQuery, viewMode])
+
+  useEffect(() => {
+    setTabs((currentTabs) =>
+      currentTabs.map((tab) =>
+        tab.id === activeTabId ? { ...tab, location: currentLocationId } : tab
+      )
+    )
+  }, [activeTabId, currentLocationId])
 
   const navigateTo = (locationId: FinderLocationId) => {
     if (locationId === currentLocationId) return
@@ -556,6 +566,23 @@ export function FinderFrame({
 
     setNavigationIndex(nextIndex)
     setSelectedItemId(null)
+  }
+
+  const addTab = () => {
+    const id = Date.now()
+    setTabs((currentTabs) => [
+      ...currentTabs,
+      { id, location: currentLocationId },
+    ])
+    setActiveTabId(id)
+  }
+
+  const selectTab = (id: number, location: FinderLocationId) => {
+    setActiveTabId(id)
+    setNavigationStack([location])
+    setNavigationIndex(0)
+    setSelectedItemId(null)
+    setSearchQuery('')
   }
 
   const openProject = (projectIndex: number) => {
@@ -680,12 +707,12 @@ export function FinderFrame({
         setIsFocused(true)
       }}
       ref={frame}
-      className={`absolute min-h-[420px] max-w-full min-w-0 overflow-hidden border border-black/10 bg-[#f7f7f8] text-[#1d1d1f] dark:border-white/10 dark:bg-[#28282a] dark:text-[#f5f5f7] ${
-        isFullscreen ? 'rounded-none' : 'rounded-none sm:rounded-[12px]'
+      className={`absolute min-h-[420px] max-w-full min-w-0 overflow-hidden border border-white/15 bg-[rgba(25,25,28,0.88)] text-[#f5f5f7] backdrop-blur-[40px] ${
+        isFullscreen ? 'rounded-none' : 'rounded-none sm:rounded-[20px]'
       } ${
         isFocused
-          ? 'shadow-[0_24px_60px_rgba(0,0,0,0.28)]'
-          : 'shadow-[0_12px_36px_rgba(0,0,0,0.22)]'
+          ? 'shadow-[0_32px_100px_rgba(0,0,0,0.75),0_0_0_1px_rgba(255,255,255,0.05)]'
+          : 'shadow-[0_14px_40px_rgba(0,0,0,0.45)]'
       } ${status === 'minimize' ? 'hidden' : ''}`}
       style={{
         fontFamily:
@@ -728,23 +755,24 @@ export function FinderFrame({
           />
         </>
       )}
-      <div className="grid h-full min-h-0 grid-cols-[92px_minmax(0,1fr)] grid-rows-[48px_minmax(0,1fr)] sm:grid-cols-[208px_minmax(0,1fr)]">
+      <div className="grid h-full min-h-0 grid-cols-[88px_minmax(0,1fr)] grid-rows-[52px_minmax(0,1fr)] sm:grid-cols-[200px_minmax(0,1fr)]">
         <div
           ref={frameHeader}
           onDoubleClick={onFullScreen}
-          className="col-span-2 grid grid-cols-[92px_minmax(0,1fr)] border-b border-black/10 bg-[#ededee] sm:grid-cols-[208px_minmax(0,1fr)] dark:border-white/10 dark:bg-[#323234]"
+          className="relative z-20 col-span-2 grid grid-cols-[88px_minmax(0,1fr)] border-b border-white/10 bg-white/[0.055] sm:grid-cols-[200px_minmax(0,1fr)]"
         >
           <div className="flex items-center px-1 sm:px-3">
             <MacTrafficLights
               appName="Finder"
+              isActive={isFocused}
               isFullscreen={isFullscreen}
               onClose={onClose}
               onMinimize={onMinimize}
               onZoom={onFullScreen}
             />
           </div>
-          <div className="flex min-w-0 items-center gap-1 overflow-hidden border-l border-black/10 px-1 sm:gap-2 sm:px-3 dark:border-white/10">
-            <div className="flex overflow-hidden rounded-md border border-black/10 bg-white/70 dark:border-white/10 dark:bg-black/20">
+          <div className="flex min-w-0 items-center gap-1 overflow-visible border-l border-white/10 px-1 sm:gap-2 sm:px-3">
+            <div className="flex overflow-hidden rounded-md bg-white/[0.045] p-0.5">
               <ToolbarButton
                 ariaLabel="Back"
                 active={false}
@@ -762,10 +790,10 @@ export function FinderFrame({
                 <IconChevronRight aria-hidden stroke={2} className="size-4" />
               </ToolbarButton>
             </div>
-            <span className="hidden min-w-0 flex-1 truncate text-center text-[13px] font-semibold xl:block">
+            <span className="hidden min-w-[76px] flex-1 truncate text-center text-[13px] font-semibold sm:block">
               {currentLocation.label}
             </span>
-            <div className="flex overflow-hidden rounded-md border border-black/10 bg-white/70 dark:border-white/10 dark:bg-black/20">
+            <div className="flex overflow-hidden rounded-md border border-white/10 bg-black/20">
               <ToolbarButton
                 ariaLabel="List view"
                 active={viewMode === 'list'}
@@ -780,38 +808,65 @@ export function FinderFrame({
               >
                 <IconLayoutGrid aria-hidden stroke={2} className="size-4" />
               </ToolbarButton>
+              <ToolbarButton
+                ariaLabel="Column view"
+                active={viewMode === 'columns'}
+                onClick={() => setViewMode('columns')}
+              >
+                <IconColumns3 aria-hidden stroke={2} className="size-4" />
+              </ToolbarButton>
             </div>
-            <div className="hidden overflow-hidden rounded-md border border-black/10 bg-white/70 xl:flex dark:border-white/10 dark:bg-black/20">
+            <div className="relative shrink-0" ref={windowActionsMenu}>
               <ToolbarButton
-                ariaLabel="Tile Finder left"
-                active={false}
-                onClick={onLeftScreen}
+                ariaLabel="Window actions"
+                active={isWindowActionsOpen}
+                onClick={() => setIsWindowActionsOpen((isOpen) => !isOpen)}
               >
-                <span
-                  aria-hidden
-                  className="relative h-3.5 w-4 rounded-[3px] border border-current"
-                >
-                  <span className="absolute inset-y-0 left-0 w-1/2 border-r border-current bg-current/20" />
-                </span>
+                <IconDots aria-hidden className="size-4" stroke={2} />
               </ToolbarButton>
-              <ToolbarButton
-                ariaLabel="Tile Finder right"
-                active={false}
-                onClick={onRightScreen}
-              >
-                <span
-                  aria-hidden
-                  className="relative h-3.5 w-4 rounded-[3px] border border-current"
+              {isWindowActionsOpen && (
+                <div
+                  className="absolute top-8 right-0 z-30 w-36 overflow-hidden rounded-lg border border-white/10 bg-[rgba(36,36,40,0.96)] p-1 text-[11px] shadow-2xl backdrop-blur-2xl"
+                  role="menu"
                 >
-                  <span className="absolute inset-y-0 right-0 w-1/2 border-l border-current bg-current/20" />
-                </span>
-              </ToolbarButton>
+                  <button
+                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-white/75 hover:bg-[#0a84ff] hover:text-white"
+                    onClick={() => {
+                      onLeftScreen()
+                      setIsWindowActionsOpen(false)
+                    }}
+                    role="menuitem"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden
+                      className="h-3.5 w-4 rounded-[3px] border border-current bg-[linear-gradient(to_right,currentColor_50%,transparent_50%)] opacity-75"
+                    />
+                    Tile Left
+                  </button>
+                  <button
+                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-white/75 hover:bg-[#0a84ff] hover:text-white"
+                    onClick={() => {
+                      onRightScreen()
+                      setIsWindowActionsOpen(false)
+                    }}
+                    role="menuitem"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden
+                      className="h-3.5 w-4 rounded-[3px] border border-current bg-[linear-gradient(to_left,currentColor_50%,transparent_50%)] opacity-75"
+                    />
+                    Tile Right
+                  </button>
+                </div>
+              )}
             </div>
             {currentLocationId === 'trash' && trashItems.length > 0 && (
               <button
                 aria-label="Empty Trash"
                 onClick={() => dispatch(cleanTrash())}
-                className="hidden rounded-md border border-black/10 bg-white/70 px-2 py-1.5 text-[11px] font-medium text-black/70 transition hover:bg-white md:block dark:border-white/10 dark:bg-black/20 dark:text-white/70 dark:hover:bg-white/10"
+                className="hidden rounded-md border border-white/10 bg-black/20 px-2 py-1.5 text-[11px] font-medium text-white/70 transition hover:bg-white/10 md:block"
                 type="button"
               >
                 Empty
@@ -821,24 +876,24 @@ export function FinderFrame({
               <button
                 aria-label={primaryActionLabel}
                 onClick={runPrimaryAction}
-                className="hidden rounded-md border border-black/10 bg-white/70 px-2 py-1.5 text-[11px] font-medium text-black/70 transition hover:bg-white md:block dark:border-white/10 dark:bg-black/20 dark:text-white/70 dark:hover:bg-white/10"
+                className="hidden rounded-md border border-white/10 bg-black/20 px-2 py-1.5 text-[11px] font-medium text-white/70 transition hover:bg-white/10 md:block"
                 type="button"
               >
                 {primaryActionLabel}
               </button>
             )}
-            <label className="hidden w-[148px] shrink-0 items-center gap-1.5 rounded-md border border-black/10 bg-white/75 px-2 py-1.5 sm:flex dark:border-white/10 dark:bg-black/20">
+            <label className="hidden w-[140px] shrink-0 items-center gap-1.5 rounded-[8px] border border-white/10 bg-white/[0.08] px-2 py-1.5 sm:flex">
               <IconSearch
                 aria-hidden
                 stroke={2}
-                className="size-3.5 text-black/45 dark:text-white/45"
+                className="size-3.5 text-white/45"
               />
               <input
                 aria-label={`Search ${currentLocation.label}`}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search"
-                className="w-full min-w-0 bg-transparent text-[12px] outline-hidden placeholder:text-black/40 dark:placeholder:text-white/40"
+                className="w-full min-w-0 bg-transparent text-[12px] outline-hidden placeholder:text-white/35"
                 type="search"
               />
             </label>
@@ -846,9 +901,9 @@ export function FinderFrame({
         </div>
         <aside
           aria-label="Finder locations"
-          className="min-h-0 overflow-auto border-r border-black/10 bg-[#e8e8ea] px-1 py-3 sm:px-2 dark:border-white/10 dark:bg-[#252527]"
+          className="min-h-0 overflow-auto border-r border-white/[0.08] bg-white/[0.035] px-1 py-2 sm:px-2"
         >
-          <p className="hidden px-2 pb-1 text-[10px] font-semibold tracking-wide text-black/45 uppercase sm:block dark:text-white/45">
+          <p className="hidden px-2 pb-1 text-[10px] font-bold tracking-[0.08em] text-white/30 uppercase sm:block">
             Favorites
           </p>
           <div className="space-y-0.5">
@@ -863,16 +918,50 @@ export function FinderFrame({
             ))}
           </div>
         </aside>
-        <main className="grid min-h-0 grid-rows-[minmax(0,1fr)_28px] overflow-hidden bg-[#fbfbfc] dark:bg-[#1e1e20]">
+        <main className="grid min-h-0 grid-rows-[32px_26px_minmax(0,1fr)_24px] overflow-hidden bg-black/[0.08]">
+          <div className="flex min-w-0 items-stretch border-b border-white/[0.08] bg-white/[0.025]">
+            {tabs.map((tab) => {
+              const label =
+                FINDER_LOCATIONS.find(
+                  (location) => location.id === tab.location
+                )?.label || 'Finder'
+              return (
+                <button
+                  key={tab.id}
+                  aria-label={`${label} tab`}
+                  onClick={() => selectTab(tab.id, tab.location)}
+                  className={`min-w-[104px] border-r border-white/[0.07] px-4 text-center text-[12px] transition ${tab.id === activeTabId ? 'bg-white/[0.07] text-white shadow-[inset_0_-1px_0_rgba(255,255,255,0.24)]' : 'text-white/50 hover:bg-white/[0.04] hover:text-white/80'}`}
+                  type="button"
+                >
+                  <span className="truncate">{label}</span>
+                </button>
+              )
+            })}
+            <button
+              aria-label="New Tab"
+              className="flex w-10 shrink-0 items-center justify-center text-white/45 transition hover:bg-white/[0.05] hover:text-white/85"
+              onClick={addTab}
+              type="button"
+            >
+              <IconPlus aria-hidden className="size-3.5" stroke={2.5} />
+            </button>
+          </div>
+          <div className="flex items-center gap-1 border-b border-white/[0.07] bg-white/[0.02] px-3 text-[11px] text-white/45">
+            <span>MehdiOS</span>
+            <span className="text-white/25">›</span>
+            <span className="font-medium text-white/75">
+              {currentLocation.label}
+            </span>
+          </div>
           <div className="min-h-0 overflow-auto">
             {filteredItems.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center text-black/50 dark:text-white/50">
+              <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center text-white/40">
                 <IconSearch aria-hidden stroke={1.7} className="size-6" />
                 <p className="text-[13px]">No matching items</p>
               </div>
             ) : viewMode === 'list' ? (
-              <div className="min-w-[500px]">
-                <div className="sticky top-0 z-10 grid grid-cols-[minmax(0,1fr)_130px_110px] border-b border-black/10 bg-[#f2f2f3] px-3 py-1.5 text-[10px] font-medium text-black/50 dark:border-white/10 dark:bg-[#29292b] dark:text-white/50">
+              <div className="min-w-[440px]">
+                <div className="sticky top-0 z-10 grid grid-cols-[minmax(0,1fr)_116px_96px] border-b border-white/[0.07] bg-[#29292c]/95 px-3 py-1.5 text-[10px] font-bold tracking-[0.04em] text-white/35 uppercase backdrop-blur-xl">
                   <span>{columnLabels.primary}</span>
                   <span>{columnLabels.secondary}</span>
                   <span>{columnLabels.tertiary}</span>
@@ -887,8 +976,8 @@ export function FinderFrame({
                   />
                 ))}
               </div>
-            ) : (
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(104px,1fr))] gap-x-2 gap-y-4 px-4 py-4 sm:grid-cols-[repeat(auto-fill,minmax(116px,1fr))]">
+            ) : viewMode === 'grid' ? (
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-x-2 gap-y-3 px-4 py-4 sm:grid-cols-[repeat(auto-fill,minmax(108px,1fr))]">
                 {filteredItems.map((item) => (
                   <FinderGridCard
                     key={item.id}
@@ -899,9 +988,15 @@ export function FinderFrame({
                   />
                 ))}
               </div>
+            ) : (
+              <FinderColumnView
+                items={filteredItems}
+                selectedItem={selectedItem}
+                onSelect={setSelectedItemId}
+              />
             )}
           </div>
-          <div className="flex items-center justify-between border-t border-black/10 bg-[#f2f2f3] px-3 text-[10px] text-black/50 dark:border-white/10 dark:bg-[#29292b] dark:text-white/50">
+          <div className="flex items-center justify-between border-t border-white/[0.07] bg-white/[0.025] px-3 text-[10px] text-white/38">
             <span>{itemCountLabel}</span>
             {selectedItem && (
               <span className="hidden max-w-[60%] truncate sm:block">
@@ -928,23 +1023,17 @@ function SidebarItem({
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center justify-center gap-3 rounded-[8px] px-1 py-2 text-left transition sm:justify-start sm:px-2.5 ${
+      className={`flex w-full items-center justify-center gap-2 rounded-r-md px-1 py-1.5 text-left transition sm:justify-start sm:px-3 ${
         active
-          ? 'bg-[#2962d9]/12 text-[#2962d9] shadow-[inset_0_0_0_1px_rgba(41,98,217,0.1)]'
-          : 'text-black/70 hover:bg-black/[0.04] dark:text-white/70 dark:hover:bg-white/[0.06]'
+          ? 'bg-[#0a84ff]/25 text-white'
+          : 'text-white/65 hover:bg-white/[0.06] hover:text-white/85'
       }`}
       type="button"
     >
-      <div
-        className={`flex size-7 shrink-0 items-center justify-center rounded-lg transition ${
-          active
-            ? 'bg-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.92),0_4px_10px_rgba(41,98,217,0.12)]'
-            : 'bg-white/65 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] dark:bg-white/10'
-        }`}
-      >
+      <div className="flex size-5 shrink-0 items-center justify-center">
         <span
           aria-hidden
-          className={`${active ? 'bg-[#2962d9]' : 'bg-black/55 dark:bg-white/60'} size-[18px]`}
+          className={`${active ? 'bg-[#5ac8fa]' : 'bg-[#5ac8fa]/80'} size-4`}
           style={{
             WebkitMaskImage: `url(${iconSrc})`,
             maskImage: `url(${iconSrc})`,
@@ -958,7 +1047,7 @@ function SidebarItem({
         />
       </div>
       <span
-        className={`hidden text-[13px] sm:inline ${active ? 'font-semibold' : 'font-medium'}`}
+        className={`hidden text-[13px] sm:inline ${active ? 'font-medium' : 'font-normal'}`}
       >
         {label}
       </span>
@@ -984,7 +1073,7 @@ function ToolbarButton({
       aria-label={ariaLabel}
       disabled={disabled}
       onClick={onClick}
-      className={`flex h-7 w-8 items-center justify-center transition ${active ? 'bg-[#d8d8da] text-black/80 dark:bg-white/20 dark:text-white' : 'bg-transparent text-black/55 hover:bg-black/[0.06] hover:text-black/80 dark:text-white/55 dark:hover:bg-white/[0.08] dark:hover:text-white'} ${disabled ? 'opacity-30' : ''}`}
+      className={`flex h-7 w-8 items-center justify-center rounded transition ${active ? 'bg-white/[0.14] text-white' : 'bg-transparent text-white/50 hover:bg-white/[0.08] hover:text-white/85'} ${disabled ? 'opacity-30' : ''}`}
       type="button"
     >
       {children}
@@ -1007,10 +1096,10 @@ function FinderListRow({
     <button
       onClick={onClick}
       onDoubleClick={onDoubleClick}
-      className={`grid w-full grid-cols-[minmax(0,1fr)_130px_110px] items-center px-3 py-1.5 text-left transition ${
+      className={`grid w-full grid-cols-[minmax(0,1fr)_116px_96px] items-center px-3 py-1 text-left transition ${
         selected
-          ? 'bg-[#2962d9] text-white'
-          : 'bg-transparent text-black/75 hover:bg-black/[0.035] dark:text-white/75 dark:hover:bg-white/[0.04]'
+          ? 'bg-[#0a84ff]/75 text-white'
+          : 'bg-transparent text-white/75 hover:bg-white/[0.045]'
       }`}
       type="button"
     >
@@ -1019,23 +1108,88 @@ function FinderListRow({
         <div className="min-w-0">
           <p className="truncate text-[13px] font-medium">{item.name}</p>
           <p
-            className={`truncate text-[11px] ${selected ? 'text-white/72' : 'text-black/40 dark:text-white/40'}`}
+            className={`truncate text-[11px] ${selected ? 'text-white/72' : 'text-white/40'}`}
           >
             {item.description}
           </p>
         </div>
       </div>
       <span
-        className={`truncate text-[12px] ${selected ? 'text-white/78' : 'text-black/52 dark:text-white/52'}`}
+        className={`truncate text-[12px] ${selected ? 'text-white/78' : 'text-white/45'}`}
       >
         {item.meta}
       </span>
       <span
-        className={`truncate text-[12px] ${selected ? 'text-white/78' : 'text-black/52 dark:text-white/52'}`}
+        className={`truncate text-[12px] ${selected ? 'text-white/78' : 'text-white/45'}`}
       >
         {item.detail}
       </span>
     </button>
+  )
+}
+
+function FinderColumnView({
+  items,
+  selectedItem,
+  onSelect,
+}: {
+  items: FinderItem[]
+  selectedItem: FinderItem | null
+  onSelect: (id: string) => void
+}) {
+  return (
+    <div className="grid h-full min-w-[440px] grid-cols-[220px_minmax(0,1fr)]">
+      <div className="overflow-auto border-r border-white/[0.08] py-1">
+        {items.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => onSelect(item.id)}
+            className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-[12px] transition ${selectedItem?.id === item.id ? 'bg-[#0a84ff]/35 text-white' : 'text-white/72 hover:bg-white/[0.05]'}`}
+            type="button"
+          >
+            <FinderItemIcon
+              item={item}
+              selected={selectedItem?.id === item.id}
+              compact
+            />
+            <span className="min-w-0 flex-1 truncate">{item.name}</span>
+            <span className="text-white/35">›</span>
+          </button>
+        ))}
+      </div>
+      {selectedItem ? (
+        <div className="overflow-auto bg-white/[0.018] p-5">
+          <div className="flex items-center gap-4">
+            <FinderItemIcon item={selectedItem} selected compact={false} />
+            <div className="min-w-0">
+              <p className="truncate text-[15px] font-semibold text-white">
+                {selectedItem.name}
+              </p>
+              <p className="mt-0.5 text-[11px] tracking-wide text-white/40 uppercase">
+                {selectedItem.meta}
+              </p>
+            </div>
+          </div>
+          <dl className="mt-5 space-y-2 border-y border-white/[0.08] py-3 text-[12px] text-white/55">
+            <div className="flex justify-between gap-4">
+              <dt>Kind</dt>
+              <dd className="text-white/80">{selectedItem.meta}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt>Location</dt>
+              <dd className="text-white/80">{selectedItem.detail}</dd>
+            </div>
+          </dl>
+          <p className="mt-4 text-[12px] leading-5 text-white/55">
+            {selectedItem.description}
+          </p>
+        </div>
+      ) : (
+        <div className="flex items-center justify-center text-[12px] text-white/35">
+          Select an item
+        </div>
+      )}
+    </div>
   )
 }
 
