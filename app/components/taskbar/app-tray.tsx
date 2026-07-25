@@ -7,10 +7,11 @@ import {
   FolderControler,
 } from '@/app/features/window-slice'
 import { useDispatch, useSelector } from '@/app/store'
-import { newIconSrc } from '@/app/utils/icon-paths'
+import { macwebAppIconSrc, newIconSrc } from '@/app/utils/icon-paths'
 import acrobat from '@/public/assets/icons/Acrobat.png'
 import typingMaterIcon from '@/public/assets/icons/typing-master.png'
 import { IconBrandGithub } from '@tabler/icons-react'
+import { useTheme } from 'next-themes'
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { isDesktopDevice } from './dock-magnification'
 import { DockItem } from './dock-item'
@@ -19,9 +20,13 @@ import { LiquidGlassStudio } from '../ui/liquid-glass-studio'
 const NEW_STYLE_DOCK_ICON_CLASS =
   'object-contain object-center p-[4px] sm:p-[5px]'
 
-const getFolderIcon = (type: string, id: string): string | null => {
+const getFolderIcon = (
+  type: string,
+  id: string,
+  iconTheme: 'dark' | 'light'
+): string | null => {
   if (type === 'folder') {
-    if (id === 'settings') return newIconSrc.settings
+    if (id === 'settings') return macwebAppIconSrc.settings[iconTheme]
     if (id === 'contact') return newIconSrc.contact
     if (id === 'trash') return newIconSrc.trash
     if (id === 'inotes') return newIconSrc.notes
@@ -64,6 +69,8 @@ const getWindowApp = (folder: FolderControler) => ({
 export default function AppTray() {
   const folders = useSelector((state) => state.windowFrame)
   const dispatch = useDispatch()
+  const { resolvedTheme } = useTheme()
+  const appIconTheme = resolvedTheme === 'light' ? 'light' : 'dark'
   const taskbarApps = folders.filter((f) => f.placement === 'taskbar')
   const finderFolder =
     folders.find((folder) => folder.id === 'projects') ??
@@ -166,19 +173,19 @@ export default function AppTray() {
         id: 'finder',
         type: 'static',
         name: 'Finder',
-        iconSrc: newIconSrc.finder,
+        iconSrc: macwebAppIconSrc.finder[appIconTheme],
         onClick: finderFolder
           ? () => handleFolderClick(finderFolder)
           : undefined,
         showIndicator:
           finderFolder?.status === 'open' ||
           finderFolder?.status === 'minimize',
-        customClassName: NEW_STYLE_DOCK_ICON_CLASS,
+        customClassName: 'object-contain object-center',
       },
     ]
 
     taskbarApps.forEach((folder) => {
-      const iconSrc = getFolderIcon(folder.type, folder.id)
+      const iconSrc = getFolderIcon(folder.type, folder.id, appIconTheme)
 
       if (iconSrc) {
         icons.push({
@@ -240,6 +247,7 @@ export default function AppTray() {
   }, [
     taskbarApps,
     minimizeFolders,
+    appIconTheme,
     finderFolder,
     handleFolderClick,
     dispatch,
