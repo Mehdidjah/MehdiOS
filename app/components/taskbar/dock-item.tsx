@@ -91,7 +91,7 @@ export function DockItem({
         {name}
       </span>
       {showIndicator && (
-        <span className="absolute -bottom-[7px] left-1/2 z-10 size-[4px] -translate-x-1/2 rounded-full bg-white/85"></span>
+        <span className="absolute -bottom-[2px] left-1/2 z-10 size-[4px] -translate-x-1/2 rounded-full bg-white/85"></span>
       )}
     </button>
   )
