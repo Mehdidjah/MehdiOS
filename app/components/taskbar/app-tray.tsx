@@ -16,8 +16,7 @@ import { isDesktopDevice } from './dock-magnification'
 import { DockItem } from './dock-item'
 import { LiquidGlassStudio } from '../ui/liquid-glass-studio'
 
-const NEW_STYLE_DOCK_ICON_CLASS =
-  'object-contain object-center p-[4px] sm:p-[5px]'
+const INSET_DOCK_ICON_CLASS = 'object-contain object-center p-[4px] sm:p-[5px]'
 
 const getFolderIcon = (type: string, id: string): string | null => {
   if (type === 'folder') {
@@ -173,7 +172,7 @@ export default function AppTray() {
         showIndicator:
           finderFolder?.status === 'open' ||
           finderFolder?.status === 'minimize',
-        customClassName: 'object-contain object-center',
+        customClassName: INSET_DOCK_ICON_CLASS,
       },
     ]
 
@@ -190,9 +189,10 @@ export default function AppTray() {
           onClick: () => handleFolderClick(folder),
           showIndicator:
             folder.status === 'open' || folder.status === 'minimize',
-          customClassName: isNewStyleIcon(iconSrc)
-            ? NEW_STYLE_DOCK_ICON_CLASS
-            : undefined,
+          customClassName:
+            folder.id === 'settings' || isNewStyleIcon(iconSrc)
+              ? INSET_DOCK_ICON_CLASS
+              : undefined,
         })
       }
     })
@@ -223,7 +223,7 @@ export default function AppTray() {
           folder.type === 'pdf' || folder.id === 'typing-master'
             ? 'object-cover object-center p-[6px]'
             : isNewStyleIcon(iconSrc)
-              ? NEW_STYLE_DOCK_ICON_CLASS
+              ? INSET_DOCK_ICON_CLASS
               : 'object-cover object-center',
       })
     })
