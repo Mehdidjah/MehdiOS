@@ -41,12 +41,12 @@ export const WindowChromeContext =
   createContext<WindowChromeContextValue | null>(null)
 
 const DEFAULT_FRAME_SIZE: Size = { minW: 750, minH: 300 }
-const NOTES_FRAME_SIZE: Size = { minW: 980, minH: 620 }
+const MEDIA_FRAME_SIZE: Size = { minW: 720, minH: 520 }
 const SETTINGS_FRAME_SIZE: Size = { minW: 500, minH: 380 }
 
 const getSize = (frameId: string): Size => {
   if (typeof window === 'undefined') {
-    if (frameId === 'inotes') return NOTES_FRAME_SIZE
+    if (frameId === 'inotes' || frameId === 'music') return MEDIA_FRAME_SIZE
     if (frameId === 'settings') return SETTINGS_FRAME_SIZE
     return DEFAULT_FRAME_SIZE
   }
@@ -54,11 +54,16 @@ const getSize = (frameId: string): Size => {
   if (window.innerWidth < 768) {
     return {
       minW: 320,
-      minH: frameId === 'inotes' ? 480 : frameId === 'settings' ? 420 : 300,
+      minH:
+        frameId === 'inotes' || frameId === 'music'
+          ? 480
+          : frameId === 'settings'
+            ? 420
+            : 300,
     }
   }
 
-  if (frameId === 'inotes') return NOTES_FRAME_SIZE
+  if (frameId === 'inotes' || frameId === 'music') return MEDIA_FRAME_SIZE
   if (frameId === 'settings') return SETTINGS_FRAME_SIZE
   return DEFAULT_FRAME_SIZE
 }
@@ -68,6 +73,38 @@ const getInitialFrameBounds = (
   screenWidth: number,
   screenHeight: number
 ) => {
+  if (frameId === 'inotes' || frameId === 'music') {
+    const topbarHeight = 28
+
+    if (screenWidth < 768) {
+      return {
+        width: screenWidth,
+        height: screenHeight - topbarHeight,
+        left: 0,
+        top: topbarHeight,
+      }
+    }
+
+    const width = Math.min(
+      screenWidth - 32,
+      Math.max(760, Math.round(screenWidth * 0.7))
+    )
+    const height = Math.min(
+      screenHeight - topbarHeight - 72,
+      Math.max(520, Math.round(screenHeight * 0.76))
+    )
+
+    return {
+      width,
+      height,
+      left: Math.max(16, Math.floor((screenWidth - width) / 2)),
+      top: Math.max(
+        topbarHeight + 12,
+        Math.floor((screenHeight - height) / 2 - 20)
+      ),
+    }
+  }
+
   if (frameId === 'settings') {
     const topbarHeight = 28
 
@@ -91,32 +128,6 @@ const getInitialFrameBounds = (
         topbarHeight + 8,
         Math.min(100, screenHeight - height - 80)
       ),
-    }
-  }
-
-  if (frameId === 'inotes') {
-    const topbarHeight = 28
-    const width =
-      screenWidth < 768 ? screenWidth : Math.min(screenWidth - 32, 1600)
-    const height =
-      screenWidth < 768
-        ? screenHeight - topbarHeight
-        : Math.max(620, screenHeight - topbarHeight - 52)
-
-    return {
-      width,
-      height,
-      left:
-        screenWidth < 768
-          ? 0
-          : Math.max(0, Math.floor((screenWidth - width) / 2)),
-      top:
-        screenWidth < 768
-          ? topbarHeight
-          : Math.max(
-              topbarHeight + 12,
-              Math.floor((screenHeight - height + topbarHeight) / 2)
-            ),
     }
   }
 
@@ -154,7 +165,10 @@ export function WindowFrame({
   const { activeApp, zIndex } = useSelector((state) => state.settings)
   const [isFocused, setIsFocused] = useState(true)
   const isNotesFrame = frame_id === 'inotes'
+  const isMusicFrame = frame_id === 'music'
+  const isMediaFrame = isNotesFrame || isMusicFrame
   const isSettingsFrame = frame_id === 'settings'
+  const isIntegratedFrame = isSettingsFrame || isMediaFrame
   const size = getSize(frame_id)
 
   const { contextSafe } = useGSAP(() => {
@@ -188,15 +202,15 @@ export function WindowFrame({
       frame.current,
       {
         opacity: 0,
-        scale: isSettingsFrame ? 0.96 : 0.8,
-        y: isSettingsFrame ? 10 : 0,
+        scale: isIntegratedFrame ? 0.92 : 0.8,
+        y: isIntegratedFrame ? 18 : 0,
       },
       {
         scale: 1,
         opacity: 1,
         y: 0,
-        ease: isSettingsFrame ? 'power3.out' : 'back.inOut(1.7)',
-        duration: isSettingsFrame ? 0.28 : 0.5,
+        ease: isIntegratedFrame ? 'power3.out' : 'back.inOut(1.7)',
+        duration: isIntegratedFrame ? 0.28 : 0.5,
       }
     )
     dragRef.current = Draggable.create(frame.current, {
@@ -284,13 +298,13 @@ export function WindowFrame({
       } else {
         fullscreenTL.current.to(frame.current, {
           width: '100vw',
-          height: `${innerHeight - 28 - (isSettingsFrame && innerWidth >= 768 ? 80 : 0)}px`,
+          height: `${innerHeight - 28 - ((isSettingsFrame || isMediaFrame) && innerWidth >= 768 ? 80 : 0)}px`,
           x: 0,
           y: 0,
           left: '0px',
           top: '28px',
-          duration: isSettingsFrame ? 0.3 : 0.5,
-          ease: isSettingsFrame ? 'power3.inOut' : 'expo.inOut',
+          duration: isIntegratedFrame ? 0.3 : 0.5,
+          ease: isIntegratedFrame ? 'power3.inOut' : 'expo.inOut',
         })
         if (dragRef.current) {
           dragRef.current[0].kill()
@@ -428,8 +442,12 @@ export function WindowFrame({
     onZoom: onFullScreen,
   }
 
-  const frameSurfaceClass = isNotesFrame
-    ? 'h-[calc(100vh-92px)] rounded-[21.33px] border border-white/10 bg-[#1b1c24] shadow-[0_28px_80px_rgba(0,0,0,0.48)] sm:w-[92vw] sm:min-w-[980px]'
+  const frameSurfaceClass = isMediaFrame
+    ? `min-h-[480px] ${isFullscreen ? 'rounded-none' : 'rounded-none md:rounded-xl'} border border-black/10 bg-white text-zinc-900 dark:border-white/10 dark:bg-[#1e1e1e] dark:text-white ${
+        isFocused
+          ? 'shadow-[0_28px_80px_rgba(0,0,0,0.48)]'
+          : 'shadow-[0_14px_40px_rgba(0,0,0,0.3)]'
+      }`
     : isSettingsFrame
       ? `min-h-[380px] rounded-none border border-black/10 bg-white/82 backdrop-blur-[40px] backdrop-saturate-150 md:rounded-[20px] dark:border-white/10 dark:bg-[rgba(25,25,28,0.88)] ${
           isFocused
@@ -451,7 +469,7 @@ export function WindowFrame({
       }}
       ref={frame}
       className={`absolute min-h-[300px] w-full max-w-full min-w-0 overflow-hidden ${frameSurfaceClass} ${
-        isSettingsFrame || isFocused ? 'brightness-100' : 'brightness-90'
+        isIntegratedFrame || isFocused ? 'brightness-100' : 'brightness-90'
       } ${status === 'minimize' ? 'hidden' : ''}`}
     >
       <div className="relative h-full">
@@ -492,17 +510,17 @@ export function WindowFrame({
           </>
         )}
         <div
-          ref={isSettingsFrame ? undefined : frameHeader}
+          ref={isIntegratedFrame ? undefined : frameHeader}
           onDoubleClick={onFullScreen}
           className={`cursor-custom-auto! relative grid ${
-            isSettingsFrame
+            isIntegratedFrame
               ? 'hidden'
               : 'grid-cols-[auto_1fr] sm:grid-cols-[200px_1fr] lg:grid-cols-[250px_1fr]'
           }`}
         >
           <div
             className={`group flex items-center ${
-              isSettingsFrame
+              isIntegratedFrame
                 ? ''
                 : `p-3 ${
                     isNotesFrame
@@ -513,7 +531,7 @@ export function WindowFrame({
                   }`
             }`}
           >
-            {isSettingsFrame ? (
+            {isIntegratedFrame ? (
               <MacTrafficLights
                 appName={frameName}
                 isFullscreen={isFullscreen}
@@ -613,7 +631,7 @@ export function WindowFrame({
           )}
           <div
             className={
-              isSettingsFrame
+              isIntegratedFrame
                 ? 'flex min-w-[60px] items-center justify-end'
                 : `text-light-text items-center px-2 sm:px-4 ${
                     isNotesFrame
@@ -658,9 +676,9 @@ export function WindowFrame({
           </div>
         </div>
         <div
-          className={`${isSettingsFrame ? 'h-full max-h-full' : 'h-full max-h-[calc(100%-44px)]'} ${
-            isNotesFrame
-              ? 'bg-[#1a1b23] text-[#eef2ff]'
+          className={`${isIntegratedFrame ? 'h-full max-h-full' : 'h-full max-h-[calc(100%-44px)]'} ${
+            isMediaFrame
+              ? 'bg-transparent text-zinc-900 dark:text-white'
               : isSettingsFrame
                 ? 'bg-transparent text-zinc-900 dark:text-white'
                 : 'bg-light-background text-light-text dark:bg-dark-background dark:text-dark-text'
