@@ -42,11 +42,16 @@ export const WindowChromeContext =
 
 const DEFAULT_FRAME_SIZE: Size = { minW: 750, minH: 300 }
 const MEDIA_FRAME_SIZE: Size = { minW: 720, minH: 520 }
+const COMMUNICATION_FRAME_SIZE: Size = { minW: 700, minH: 520 }
 const SETTINGS_FRAME_SIZE: Size = { minW: 500, minH: 380 }
 
 const getSize = (frameId: string): Size => {
+  const isMediaFrame = frameId === 'inotes' || frameId === 'music'
+  const isCommunicationFrame = frameId === 'messages' || frameId === 'contact'
+
   if (typeof window === 'undefined') {
-    if (frameId === 'inotes' || frameId === 'music') return MEDIA_FRAME_SIZE
+    if (isMediaFrame) return MEDIA_FRAME_SIZE
+    if (isCommunicationFrame) return COMMUNICATION_FRAME_SIZE
     if (frameId === 'settings') return SETTINGS_FRAME_SIZE
     return DEFAULT_FRAME_SIZE
   }
@@ -55,7 +60,7 @@ const getSize = (frameId: string): Size => {
     return {
       minW: 320,
       minH:
-        frameId === 'inotes' || frameId === 'music'
+        isMediaFrame || isCommunicationFrame
           ? 480
           : frameId === 'settings'
             ? 420
@@ -63,7 +68,8 @@ const getSize = (frameId: string): Size => {
     }
   }
 
-  if (frameId === 'inotes' || frameId === 'music') return MEDIA_FRAME_SIZE
+  if (isMediaFrame) return MEDIA_FRAME_SIZE
+  if (isCommunicationFrame) return COMMUNICATION_FRAME_SIZE
   if (frameId === 'settings') return SETTINGS_FRAME_SIZE
   return DEFAULT_FRAME_SIZE
 }
@@ -93,6 +99,32 @@ const getInitialFrameBounds = (
       screenHeight - topbarHeight - 72,
       Math.max(520, Math.round(screenHeight * 0.76))
     )
+
+    return {
+      width,
+      height,
+      left: Math.max(16, Math.floor((screenWidth - width) / 2)),
+      top: Math.max(
+        topbarHeight + 12,
+        Math.floor((screenHeight - height) / 2 - 20)
+      ),
+    }
+  }
+
+  if (frameId === 'messages' || frameId === 'contact') {
+    const topbarHeight = 28
+
+    if (screenWidth < 768) {
+      return {
+        width: screenWidth,
+        height: screenHeight - topbarHeight,
+        left: 0,
+        top: topbarHeight,
+      }
+    }
+
+    const width = Math.min(792, screenWidth - 32)
+    const height = Math.min(648, screenHeight - topbarHeight - 72)
 
     return {
       width,
@@ -167,8 +199,11 @@ export function WindowFrame({
   const isNotesFrame = frame_id === 'inotes'
   const isMusicFrame = frame_id === 'music'
   const isMediaFrame = isNotesFrame || isMusicFrame
+  const isCommunicationFrame = frame_id === 'messages' || frame_id === 'contact'
+  const isContentFrame = isMediaFrame || isCommunicationFrame
   const isSettingsFrame = frame_id === 'settings'
-  const isIntegratedFrame = isSettingsFrame || isMediaFrame
+  const isIntegratedFrame =
+    isSettingsFrame || isMediaFrame || isCommunicationFrame
   const size = getSize(frame_id)
 
   const { contextSafe } = useGSAP(() => {
@@ -298,7 +333,7 @@ export function WindowFrame({
       } else {
         fullscreenTL.current.to(frame.current, {
           width: '100vw',
-          height: `${innerHeight - 28 - ((isSettingsFrame || isMediaFrame) && innerWidth >= 768 ? 80 : 0)}px`,
+          height: `${innerHeight - 28 - (isIntegratedFrame && innerWidth >= 768 ? 80 : 0)}px`,
           x: 0,
           y: 0,
           left: '0px',
@@ -442,7 +477,7 @@ export function WindowFrame({
     onZoom: onFullScreen,
   }
 
-  const frameSurfaceClass = isMediaFrame
+  const frameSurfaceClass = isContentFrame
     ? `min-h-[480px] ${isFullscreen ? 'rounded-none' : 'rounded-none md:rounded-xl'} border border-black/10 bg-white text-zinc-900 dark:border-white/10 dark:bg-[#1e1e1e] dark:text-white ${
         isFocused
           ? 'shadow-[0_28px_80px_rgba(0,0,0,0.48)]'
@@ -677,7 +712,7 @@ export function WindowFrame({
         </div>
         <div
           className={`${isIntegratedFrame ? 'h-full max-h-full' : 'h-full max-h-[calc(100%-44px)]'} ${
-            isMediaFrame
+            isContentFrame
               ? 'bg-transparent text-zinc-900 dark:text-white'
               : isSettingsFrame
                 ? 'bg-transparent text-zinc-900 dark:text-white'
