@@ -116,6 +116,7 @@ export function ContextMenu({
           label="Sort By"
           onClick={() => setActiveSubmenu('sort')}
           submenu
+          submenuExpanded={activeSubmenu === 'sort'}
         />
         {activeSubmenu === 'sort' && (
           <MacContextSubmenu ariaLabel="Sort desktop by" side={subPosition}>
@@ -123,11 +124,13 @@ export function ContextMenu({
               checked={desktop.sort === 'name'}
               label="Name"
               onClick={() => dispatch(setSortOption('name'))}
+              radio
             />
             <MacContextMenuItem
               checked={desktop.sort === 'date'}
               label="Date Created"
               onClick={() => dispatch(setSortOption('date'))}
+              radio
             />
           </MacContextSubmenu>
         )}
@@ -158,9 +161,11 @@ export function ContextMenu({
           label="Show View Options"
           onClick={() => setActiveSubmenu('view')}
           submenu
+          submenuExpanded={activeSubmenu === 'view'}
         />
         {activeSubmenu === 'view' && (
           <MacContextSubmenu
+            align="bottom"
             ariaLabel="Desktop view options"
             side={subPosition}
           >
@@ -168,11 +173,13 @@ export function ContextMenu({
               checked={desktop.view === 'vertical'}
               label="Vertical"
               onClick={() => dispatch(setViewOption('vertical'))}
+              radio
             />
             <MacContextMenuItem
               checked={desktop.view === 'horizontal'}
               label="Horizontal"
               onClick={() => dispatch(setViewOption('horizontal'))}
+              radio
             />
           </MacContextSubmenu>
         )}

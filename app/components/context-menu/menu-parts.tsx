@@ -72,10 +72,12 @@ export function MacContextMenu({
 }
 
 export function MacContextSubmenu({
+  align = 'top',
   ariaLabel,
   children,
   side,
 }: {
+  align?: 'bottom' | 'top'
   ariaLabel: string
   children: ReactNode
   side: 'left' | 'right'
@@ -84,9 +86,9 @@ export function MacContextSubmenu({
     <motion.div
       animate={{ opacity: 1, x: 0 }}
       aria-label={ariaLabel}
-      className={`absolute top-0 z-10 min-w-[170px] rounded-xl border px-1 py-1 ${menuSurfaceClass} ${
-        side === 'right' ? 'left-full ml-1' : 'right-full mr-1'
-      }`}
+      className={`absolute z-10 min-w-[170px] rounded-xl border px-1 py-1 ${menuSurfaceClass} ${
+        align === 'top' ? 'top-0' : 'bottom-0'
+      } ${side === 'right' ? 'left-full ml-1' : 'right-full mr-1'}`}
       initial={{ opacity: 0, x: side === 'right' ? -5 : 5 }}
       role="menu"
       transition={{ duration: 0.1 }}
@@ -103,8 +105,10 @@ export function MacContextMenuItem({
   keepOpen = false,
   label,
   onClick,
+  radio = false,
   shortcut,
   submenu = false,
+  submenuExpanded = false,
 }: {
   checked?: boolean
   disabled?: boolean
@@ -112,8 +116,10 @@ export function MacContextMenuItem({
   keepOpen?: boolean
   label: string
   onClick?: () => void
+  radio?: boolean
   shortcut?: string
   submenu?: boolean
+  submenuExpanded?: boolean
 }) {
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     if (keepOpen) event.stopPropagation()
@@ -122,12 +128,14 @@ export function MacContextMenuItem({
 
   return (
     <button
-      aria-checked={checked || undefined}
+      aria-checked={radio ? checked : undefined}
       aria-disabled={disabled || undefined}
+      aria-expanded={submenu ? submenuExpanded : undefined}
+      aria-haspopup={submenu ? 'menu' : undefined}
       className="group flex h-8 w-full items-center gap-3 rounded-lg px-3 text-sm text-gray-900 transition-colors hover:bg-[#007aff] hover:text-white focus-visible:bg-[#007aff] focus-visible:text-white focus-visible:outline-none disabled:cursor-default disabled:text-gray-400 disabled:hover:bg-transparent disabled:hover:text-gray-400 dark:text-white/90 dark:disabled:text-white/30 dark:disabled:hover:text-white/30"
       disabled={disabled}
       onClick={handleClick}
-      role={checked ? 'menuitemradio' : 'menuitem'}
+      role={radio ? 'menuitemradio' : 'menuitem'}
       type="button"
     >
       {icon && (
