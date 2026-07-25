@@ -34,6 +34,8 @@ export interface LiquidGlassStudioProps {
   children: ReactNode
   className?: string
   style?: CSSProperties
+  /** Opacity of the WebGL glass layer; children remain fully opaque */
+  canvasOpacity?: number
   /** Extra canvas margin (CSS px) so edge refraction can sample outside the shapes */
   bleed?: number
   /** Glass tint as [r, g, b, a] in 0..1 */
@@ -82,6 +84,7 @@ export function LiquidGlassStudio({
   children,
   className = '',
   style,
+  canvasOpacity = 1,
   bleed = 56,
   tint = [1, 1, 1, 0.04],
   refThickness = 20,
@@ -407,6 +410,7 @@ export function LiquidGlassStudio({
           left: -bleed,
           top: -bleed,
           display: isSupported ? undefined : 'none',
+          opacity: canvasOpacity,
         }}
       />
       <div className="relative z-10 h-full w-full">{children}</div>

@@ -264,13 +264,14 @@ export default function AppTray() {
       >
         <LiquidGlassStudio
           bleed={72}
-          tint={[1, 1, 1, 0.12]}
-          refThickness={18}
+          canvasOpacity={0.72}
+          tint={[1, 1, 1, 0.04]}
+          refThickness={14}
           refDispersion={7}
           blurRadius={25}
-          mergeRatePx={4}
-          shadowFactor={0.14}
-          shadowPosition={{ x: 0, y: -8 }}
+          mergeRatePx={6}
+          shadowFactor={0.16}
+          shadowPosition={{ x: 0, y: -6 }}
         >
           <div
             data-liquid-glass
