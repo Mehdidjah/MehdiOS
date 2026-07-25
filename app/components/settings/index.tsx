@@ -208,7 +208,7 @@ export function Settings() {
 
   return (
     <div
-      className="grid h-full min-h-0 grid-cols-[92px_minmax(0,1fr)] overflow-hidden bg-white/95 text-zinc-900 sm:grid-cols-[220px_minmax(0,1fr)] dark:bg-[#141416] dark:text-white"
+      className="grid h-full min-h-0 grid-cols-[92px_minmax(0,1fr)] overflow-hidden bg-white/95 text-zinc-900 md:grid-cols-[220px_minmax(0,1fr)] dark:bg-[#141416] dark:text-white"
       style={{
         fontFamily:
           "-apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, 'Helvetica Neue', sans-serif",
@@ -217,7 +217,7 @@ export function Settings() {
       <aside className="flex min-h-0 flex-col overflow-hidden border-r border-black/7 bg-[rgba(238,238,243,0.72)] dark:border-white/7 dark:bg-[rgba(40,40,42,0.67)]">
         <div
           ref={dragHandleRef}
-          className="flex h-[46px] shrink-0 items-center px-2 sm:px-3.5"
+          className="flex h-[46px] shrink-0 items-center px-2 md:px-3.5"
           onDoubleClick={windowChrome?.onZoom}
         >
           <MacTrafficLights
@@ -230,7 +230,7 @@ export function Settings() {
           />
         </div>
 
-        <label className="relative mx-2.5 mb-2 hidden shrink-0 sm:block">
+        <label className="relative mx-2.5 mb-2 hidden shrink-0 md:block">
           <IconSearch
             aria-hidden
             className="pointer-events-none absolute top-1/2 left-2 size-[13px] -translate-y-1/2 text-black/35 dark:text-white/35"
@@ -248,7 +248,7 @@ export function Settings() {
 
         <button
           aria-label="Open General settings for Mehdi Djahraoui"
-          className="mx-1.5 mb-1 flex shrink-0 items-center justify-center gap-2.5 rounded-[7px] px-1.5 py-2 text-left transition hover:bg-black/5 sm:justify-start sm:px-2.5 dark:hover:bg-white/6"
+          className="mx-1.5 mb-1 flex shrink-0 items-center justify-center gap-2.5 rounded-[7px] px-1.5 py-2 text-left transition hover:bg-black/5 md:justify-start md:px-2.5 dark:hover:bg-white/6"
           onClick={() => setActiveSection('general')}
           type="button"
         >
@@ -260,7 +260,7 @@ export function Settings() {
             src={author}
             width={28}
           />
-          <span className="hidden min-w-0 sm:block">
+          <span className="hidden min-w-0 md:block">
             <span className="block truncate text-[12px] font-medium">
               Mehdi Djahraoui
             </span>
@@ -285,7 +285,7 @@ export function Settings() {
               <button
                 aria-controls={`settings-panel-${section.id}`}
                 aria-selected={selected}
-                className={`my-px flex h-[30px] w-full items-center justify-center gap-2 rounded-md px-1.5 text-[12.5px] transition sm:justify-start sm:px-2.5 ${
+                className={`my-px flex h-[30px] w-full items-center justify-center gap-2 rounded-md px-1.5 text-[12.5px] transition md:justify-start md:px-2.5 ${
                   selected
                     ? 'bg-[#007aff] font-medium text-white'
                     : 'text-zinc-700 hover:bg-black/5 dark:text-white/92 dark:hover:bg-white/[0.055]'
@@ -311,7 +311,7 @@ export function Settings() {
                 >
                   <section.Icon aria-hidden className="size-3.5" stroke={1.8} />
                 </span>
-                <span className="hidden truncate sm:block">
+                <span className="hidden truncate md:block">
                   {section.label}
                 </span>
               </button>
