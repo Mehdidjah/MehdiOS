@@ -211,7 +211,6 @@ export default function Home() {
 
             if (
               frame.id === 'projects' ||
-              frame.id === 'skills' ||
               frame.id === 'trash'
             ) {
               return (
@@ -224,7 +223,6 @@ export default function Home() {
             }
 
             const enableSidebar =
-              frame.id === 'skills' ||
               frame.id === 'trash' ||
               frame.id === 'inotes' ||
               frame.id === 'music' ||

@@ -56,7 +56,7 @@ const HIDDEN_DOCK_THRESHOLD = 30
 const getWindowApp = (folder: FolderControler) => ({
   id: folder.id,
   name:
-    folder.id === 'projects' || folder.id === 'skills' || folder.id === 'trash'
+    folder.id === 'projects' || folder.id === 'trash'
       ? 'Finder'
       : folder.name,
 })
@@ -67,7 +67,6 @@ export default function AppTray() {
   const taskbarApps = folders.filter((f) => f.placement === 'taskbar')
   const finderFolder =
     folders.find((folder) => folder.id === 'projects') ??
-    folders.find((folder) => folder.id === 'skills') ??
     folders.find((folder) => folder.id === 'trash')
   const minimizeFolders = folders.filter(
     (folder) =>

@@ -66,13 +66,6 @@ export const folders: Folder[] = [
     type: 'folder',
   },
   {
-    id: 'skills',
-    name: 'Skills',
-    status: 'close',
-    placement: 'desktop',
-    type: 'folder',
-  },
-  {
     id: 'typing-master',
     name: 'Typing Master',
     status: 'close',

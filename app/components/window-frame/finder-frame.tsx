@@ -38,7 +38,7 @@ import {
 } from './finder-sidebar-icon'
 import { MacTrafficLights } from './mac-traffic-lights'
 
-type FinderLocationId = 'projects' | 'skills' | 'trash'
+type FinderLocationId = 'projects' | 'trash'
 type FinderViewMode = 'list' | 'grid' | 'columns'
 
 type FinderLocation = {
@@ -57,19 +57,9 @@ type FinderItem = {
   accent: string
   initials?: string
   thumbnail?: StaticImageData
-  source?: 'project' | 'skill' | 'trash'
+  source?: 'project' | 'trash'
   trashItem?: Folder
   onOpen?: () => void
-}
-
-type SkillRecord = {
-  id: string
-  name: string
-  group: string
-  level: string
-  description: string
-  accent: string
-  initials: string
 }
 
 const FINDER_FRAME_SIZE: Size = { minW: 720, minH: 500 }
@@ -82,140 +72,10 @@ const FINDER_LOCATIONS: FinderLocation[] = [
     icon: 'recents',
   },
   {
-    id: 'skills',
-    label: 'Skills',
-    description:
-      'Core engineering strengths across frontend, backend, and tooling.',
-    icon: 'applications',
-  },
-  {
     id: 'trash',
     label: 'Trash',
     description: 'Items removed from the desktop that can still be recovered.',
     icon: 'downloads',
-  },
-]
-
-const SKILL_RECORDS: SkillRecord[] = [
-  {
-    id: 'typescript',
-    name: 'TypeScript',
-    group: 'Languages',
-    level: '90%',
-    description:
-      'Strong day-to-day typing discipline for React, Next.js, and API work.',
-    accent: 'from-[#2f74c0] to-[#4ea7ff]',
-    initials: 'TS',
-  },
-  {
-    id: 'javascript',
-    name: 'JavaScript',
-    group: 'Languages',
-    level: '84%',
-    description:
-      'Comfortable across browser APIs, app architecture, and runtime debugging.',
-    accent: 'from-[#d19b00] to-[#f5d85f]',
-    initials: 'JS',
-  },
-  {
-    id: 'react',
-    name: 'React',
-    group: 'Frontend',
-    level: '88%',
-    description:
-      'Component systems, state composition, and polished interaction design.',
-    accent: 'from-[#0a6f90] to-[#63d5ff]',
-    initials: 'R',
-  },
-  {
-    id: 'nextjs',
-    name: 'Next.js',
-    group: 'Frontend',
-    level: '82%',
-    description:
-      'App Router, hybrid rendering, and deployment-oriented architecture.',
-    accent: 'from-[#111111] to-[#545454]',
-    initials: 'N',
-  },
-  {
-    id: 'tailwind',
-    name: 'Tailwind CSS',
-    group: 'Frontend',
-    level: '87%',
-    description:
-      'Rapid UI implementation with deliberate visual systems and responsive layouts.',
-    accent: 'from-[#0891b2] to-[#67e8f9]',
-    initials: 'TW',
-  },
-  {
-    id: 'redux',
-    name: 'Redux Toolkit',
-    group: 'Frontend',
-    level: '78%',
-    description:
-      'Predictable state flows for multi-window interfaces and complex UI state.',
-    accent: 'from-[#5f3dc4] to-[#9f7aea]',
-    initials: 'RT',
-  },
-  {
-    id: 'node',
-    name: 'Node.js',
-    group: 'Backend',
-    level: '81%',
-    description:
-      'Server logic, tooling automation, and API integrations in TypeScript.',
-    accent: 'from-[#2f855a] to-[#68d391]',
-    initials: 'N',
-  },
-  {
-    id: 'nestjs',
-    name: 'NestJS',
-    group: 'Backend',
-    level: '72%',
-    description:
-      'Structured backend services with modules, DI, and maintainable organization.',
-    accent: 'from-[#be123c] to-[#fb7185]',
-    initials: 'NE',
-  },
-  {
-    id: 'graphql',
-    name: 'GraphQL',
-    group: 'Backend',
-    level: '45%',
-    description:
-      'Comfortable shipping practical schemas and typed client integrations.',
-    accent: 'from-[#b5179e] to-[#f472b6]',
-    initials: 'G',
-  },
-  {
-    id: 'docker',
-    name: 'Docker',
-    group: 'Tools',
-    level: '52%',
-    description:
-      'Enough containerization experience for local orchestration and deployment workflows.',
-    accent: 'from-[#0f5db8] to-[#60a5fa]',
-    initials: 'D',
-  },
-  {
-    id: 'figma',
-    name: 'Figma',
-    group: 'Tools',
-    level: '70%',
-    description:
-      'Can bridge design systems, flows, and implementation details without handoff friction.',
-    accent: 'from-[#f97316] to-[#f43f5e]',
-    initials: 'F',
-  },
-  {
-    id: 'git',
-    name: 'Git',
-    group: 'Tools',
-    level: '86%',
-    description:
-      'Comfortable with clean branching, review workflows, and change isolation.',
-    accent: 'from-[#ea580c] to-[#fdba74]',
-    initials: 'G',
   },
 ]
 
@@ -618,17 +478,6 @@ export function FinderFrame({
     onOpen: () => openProject(index),
   }))
 
-  const skillItems: FinderItem[] = SKILL_RECORDS.map((skill) => ({
-    id: `skill-${skill.id}`,
-    name: skill.name,
-    meta: skill.group,
-    detail: skill.level,
-    description: skill.description,
-    accent: skill.accent,
-    initials: skill.initials,
-    source: 'skill',
-  }))
-
   const trashFinderItems: FinderItem[] = trashItems.map((item) => ({
     id: `trash-${item.id}-${item.name}`,
     name: item.name,
@@ -649,15 +498,6 @@ export function FinderFrame({
     primary: 'Name',
     secondary: 'Kind',
     tertiary: 'Location',
-  }
-
-  if (currentLocationId === 'skills') {
-    items = skillItems
-    columnLabels = {
-      primary: 'Skill',
-      secondary: 'Category',
-      tertiary: 'Level',
-    }
   }
 
   if (currentLocationId === 'trash') {

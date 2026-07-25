@@ -99,7 +99,7 @@ export function Folder({
       setActiveApp({
         id,
         name:
-          id === 'projects' || id === 'skills' || id === 'trash'
+          id === 'projects' || id === 'trash'
             ? 'Finder'
             : name,
       })
