@@ -17,6 +17,8 @@ import { DockItem } from './dock-item'
 import { LiquidGlassStudio } from '../ui/liquid-glass-studio'
 
 const INSET_DOCK_ICON_CLASS = 'object-contain object-center p-[4px] sm:p-[5px]'
+const FINDER_SETTINGS_DOCK_ICON_CLASS =
+  'object-contain object-center p-[5px] sm:p-[6px]'
 
 const getFolderIcon = (type: string, id: string): string | null => {
   if (type === 'folder') {
@@ -172,7 +174,7 @@ export default function AppTray() {
         showIndicator:
           finderFolder?.status === 'open' ||
           finderFolder?.status === 'minimize',
-        customClassName: INSET_DOCK_ICON_CLASS,
+        customClassName: FINDER_SETTINGS_DOCK_ICON_CLASS,
       },
     ]
 
@@ -190,9 +192,11 @@ export default function AppTray() {
           showIndicator:
             folder.status === 'open' || folder.status === 'minimize',
           customClassName:
-            folder.id === 'settings' || isNewStyleIcon(iconSrc)
-              ? INSET_DOCK_ICON_CLASS
-              : undefined,
+            folder.id === 'settings'
+              ? FINDER_SETTINGS_DOCK_ICON_CLASS
+              : isNewStyleIcon(iconSrc)
+                ? INSET_DOCK_ICON_CLASS
+                : undefined,
         })
       }
     })
