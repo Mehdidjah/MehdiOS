@@ -1,15 +1,11 @@
 'use client'
 
 import { useSelector } from '@/app/store'
+import { macwebSettingsSectionIconSrc } from '@/app/utils/icon-paths'
 import { WindowChromeContext } from '@/app/components/window-frame'
 import { MacTrafficLights } from '@/app/components/window-frame/mac-traffic-lights'
 import author from '@/public/assets/images/author.webp'
-import {
-  IconAdjustments,
-  IconPhoto,
-  IconSearch,
-  IconSettings,
-} from '@tabler/icons-react'
+import { IconSearch } from '@tabler/icons-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
@@ -27,26 +23,22 @@ type SettingsSection = 'general' | 'appearance' | 'wallpapers'
 const sections: Array<{
   id: SettingsSection
   label: string
-  Icon: typeof IconSettings
-  iconClassName: string
+  iconSrc: string
 }> = [
   {
     id: 'general',
     label: 'General',
-    Icon: IconSettings,
-    iconClassName: 'bg-gradient-to-br from-[#8f8f94] to-[#55555a]',
+    iconSrc: macwebSettingsSectionIconSrc.general,
   },
   {
     id: 'appearance',
     label: 'Appearance',
-    Icon: IconAdjustments,
-    iconClassName: 'bg-gradient-to-br from-[#5ac8fa] to-[#0a84ff]',
+    iconSrc: macwebSettingsSectionIconSrc.appearance,
   },
   {
     id: 'wallpapers',
     label: 'Wallpaper',
-    Icon: IconPhoto,
-    iconClassName: 'bg-gradient-to-br from-[#30d158] to-[#00a7c7]',
+    iconSrc: macwebSettingsSectionIconSrc.wallpaper,
   },
 ]
 
@@ -122,9 +114,13 @@ function SettingsOverview() {
       className="mx-auto w-full max-w-[580px] px-5 pt-7 pb-10 sm:px-7"
     >
       <header className="mb-7 text-center">
-        <div className="mx-auto mb-3.5 flex size-[72px] items-center justify-center rounded-[18px] bg-gradient-to-br from-[#8f8f94] to-[#4d4d52] text-white shadow-[0_4px_16px_rgba(0,0,0,0.18)]">
-          <IconSettings aria-hidden className="size-11" stroke={1.5} />
-        </div>
+        <Image
+          alt=""
+          className="mx-auto mb-3.5 size-[72px] object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.22)]"
+          height={72}
+          src={macwebSettingsSectionIconSrc.general}
+          width={72}
+        />
         <h2
           className="text-[28px] font-bold tracking-[-0.02em] text-zinc-900 dark:text-white/92"
           id="settings-general-heading"
@@ -307,11 +303,13 @@ export function Settings() {
                 }
                 type="button"
               >
-                <span
-                  className={`flex size-5 shrink-0 items-center justify-center rounded-[5px] text-white shadow-sm ${section.iconClassName}`}
-                >
-                  <section.Icon aria-hidden className="size-3.5" stroke={1.8} />
-                </span>
+                <Image
+                  alt=""
+                  className="size-5 shrink-0 object-contain"
+                  height={20}
+                  src={section.iconSrc}
+                  width={20}
+                />
                 <span className="hidden truncate md:block">
                   {section.label}
                 </span>

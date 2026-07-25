@@ -2,6 +2,7 @@
 
 import { setWallpaper } from '@/app/features/settings'
 import { useDispatch, useSelector } from '@/app/store'
+import { macwebSettingsSectionIconSrc } from '@/app/utils/icon-paths'
 import anime1 from '@/public/assets/background/anime1.webp'
 import anime2 from '@/public/assets/background/anime2.webp'
 import anime3 from '@/public/assets/background/anime3.webp'
@@ -12,7 +13,7 @@ import anime7 from '@/public/assets/background/anime7.webp'
 import macosTahoe from '@/public/assets/background/macos-tahoe.jpg'
 import vd from '@/public/assets/background/ventura-dark.jpg'
 import vl from '@/public/assets/background/ventura-light.jpg'
-import { IconAdjustments, IconCheck, IconPhoto } from '@tabler/icons-react'
+import { IconCheck } from '@tabler/icons-react'
 import Image, { type StaticImageData } from 'next/image'
 import { useTheme } from 'next-themes'
 
@@ -52,19 +53,20 @@ function PanelHeader({
   title: string
   type: 'appearance' | 'wallpaper'
 }) {
-  const Icon = type === 'appearance' ? IconAdjustments : IconPhoto
+  const iconSrc =
+    type === 'appearance'
+      ? macwebSettingsSectionIconSrc.appearance
+      : macwebSettingsSectionIconSrc.wallpaper
 
   return (
     <header className="mb-7 text-center">
-      <div
-        className={`mx-auto mb-3.5 flex size-[72px] items-center justify-center rounded-[18px] text-white shadow-[0_4px_16px_rgba(0,0,0,0.18)] ${
-          type === 'appearance'
-            ? 'bg-gradient-to-br from-[#5ac8fa] to-[#0a84ff]'
-            : 'bg-gradient-to-br from-[#30d158] to-[#00a7c7]'
-        }`}
-      >
-        <Icon aria-hidden className="size-11" stroke={1.5} />
-      </div>
+      <Image
+        alt=""
+        className="mx-auto mb-3.5 size-[72px] object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.22)]"
+        height={72}
+        src={iconSrc}
+        width={72}
+      />
       <h2 className="text-[28px] font-bold tracking-[-0.02em] text-zinc-900 dark:text-white/92">
         {title}
       </h2>
