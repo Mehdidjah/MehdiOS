@@ -611,7 +611,7 @@ export function BrowserFrame({
         description: 'Open MehdiOS source and related project work.',
         url: 'https://github.com/Mehdidjah',
       },
-      ...projects.slice(0, 2).map((project) => ({
+      ...projects.map((project) => ({
         id: String(project.id),
         label: project.title,
         subtitle: getHostname(project.live_url),
@@ -1106,8 +1106,10 @@ export function BrowserFrame({
                   </h2>
                   <div className="grid gap-2 sm:grid-cols-2">
                     {shortcuts
-                      .filter((shortcut) => shortcut.id !== 'apple')
-                      .slice(0, 3)
+                      .filter(
+                        (shortcut) =>
+                          shortcut.id !== 'apple' && shortcut.id !== 'github'
+                      )
                       .map((shortcut) => (
                         <button
                           key={`continue-${shortcut.id}`}
