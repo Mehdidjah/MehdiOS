@@ -1,7 +1,6 @@
 'use client'
 
 import { useGSAP } from '@gsap/react'
-import { IconMinus, IconX } from '@tabler/icons-react'
 import gsap from 'gsap'
 import { Draggable } from 'gsap/Draggable'
 import { useEffect, useRef, useState } from 'react'
@@ -11,6 +10,7 @@ import { closeFolder, minimizeFolder } from '@/app/features/window-slice'
 import { Calculator } from '../calculator'
 import { useClickOutside } from '@/app/hooks/use-click-outside'
 import { setActiveApp, setZIndex } from '@/app/features/settings'
+import { MacTrafficLights } from './mac-traffic-lights'
 
 export function CalculatorFrame({
   frameName,
@@ -32,7 +32,8 @@ export function CalculatorFrame({
 
   const { contextSafe } = useGSAP(() => {
     const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1920
-    const screenHeight = typeof window !== 'undefined' ? window.innerHeight : 1080
+    const screenHeight =
+      typeof window !== 'undefined' ? window.innerHeight : 1080
     const calcWidth = 280
     const calcHeight = 400
     const position_x = Math.max(0, Math.floor((screenWidth - calcWidth) / 2))
@@ -132,32 +133,17 @@ export function CalculatorFrame({
         setIsFocused(true)
       }}
       ref={frame}
-      className={`absolute rounded-[21.33px] bg-light-background shadow-2xl dark:bg-dark-foreground ${isFocused ? 'brightness-100' : 'brightness-90'} ${status === 'minimize' ? 'hidden' : ''}`}
+      className={`bg-light-background dark:bg-dark-foreground absolute rounded-[21.33px] shadow-2xl ${isFocused ? 'brightness-100' : 'brightness-90'} ${status === 'minimize' ? 'hidden' : ''}`}
     >
       <div className="relative h-full">
         <div ref={frameHeader} className="cursor-custom-auto!">
-          <div className="group flex items-center p-3">
-            <button
-              onClick={onClose}
-              className="cursor-custom-auto! p-1"
-              type="button"
-            >
-              <div className="size-3 rounded-full bg-rose-500">
-                <IconX className="size-full text-black opacity-0 group-hover:opacity-100" />
-              </div>
-            </button>
-            <button
-              onClick={onMinimize}
-              className="cursor-custom-auto! p-1"
-              type="button"
-            >
-              <div className="size-3 rounded-full bg-yellow-500">
-                <IconMinus className="size-full text-black opacity-0 group-hover:opacity-100" />
-              </div>
-            </button>
-            <button className="cursor-custom-auto! p-1" type="button">
-              <div className="size-3 rounded-full bg-gray-500"></div>
-            </button>
+          <div className="flex items-center p-4">
+            <MacTrafficLights
+              appName={frameName}
+              isActive={isFocused}
+              onClose={onClose}
+              onMinimize={onMinimize}
+            />
           </div>
         </div>
         <div className="h-full max-h-[calc(100%-44px)] overflow-y-auto p-3 pt-0">

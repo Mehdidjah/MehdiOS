@@ -2,13 +2,10 @@
 
 import { useGSAP } from '@gsap/react'
 import {
-  IconBracketsAngle,
   IconChevronLeft,
   IconChevronRight,
   IconLayoutBoard,
   IconListDetails,
-  IconMinus,
-  IconX,
 } from '@tabler/icons-react'
 import gsap from 'gsap'
 import { Draggable } from 'gsap/Draggable'
@@ -554,10 +551,10 @@ export function WindowFrame({
           }`}
         >
           <div
-            className={`group flex items-center ${
+            className={`flex items-center ${
               isIntegratedFrame
                 ? ''
-                : `p-3 ${
+                : `p-4 ${
                     isNotesFrame
                       ? 'bg-[#252734]'
                       : enableSidebar
@@ -575,38 +572,16 @@ export function WindowFrame({
                 onZoom={onFullScreen}
               />
             ) : (
-              <>
-                <button
-                  onClick={onClose}
-                  className="cursor-custom-auto! p-1"
-                  type="button"
-                >
-                  <div className="size-3 rounded-full bg-rose-500">
-                    <IconX className="size-full text-black opacity-0 group-hover:opacity-100" />
-                  </div>
-                </button>
-                <button
-                  onClick={onMinimize}
-                  className="cursor-custom-auto! p-1"
-                  type="button"
-                >
-                  <div className="size-3 rounded-full bg-yellow-500">
-                    <IconMinus className="size-full text-black opacity-0 group-hover:opacity-100" />
-                  </div>
-                </button>
-                <button
-                  onClick={onFullScreen}
-                  className="group/fullscreen cursor-custom-auto! relative p-1"
-                  type="button"
-                >
-                  <div className="size-3 rounded-full bg-green-500">
-                    <IconBracketsAngle className="size-full -rotate-45 text-black opacity-0 group-hover:opacity-100" />
-                  </div>
+              <MacTrafficLights
+                appName={frameName}
+                isFullscreen={isFullscreen}
+                onClose={onClose}
+                onMinimize={onMinimize}
+                onZoom={onFullScreen}
+                zoomAccessory={
                   <div
-                    onClick={(e) => {
-                      e.stopPropagation()
-                    }}
                     className="invisible absolute top-7 -left-5 z-1000 transition-all delay-200 group-hover/fullscreen:visible"
+                    onClick={(event) => event.stopPropagation()}
                   >
                     <div className="relative w-56 rounded-md border-2 border-[#e1e1e1] bg-[#f3f3f3] p-2 shadow-xl dark:border-[#3e3e3e] dark:bg-[#181818]">
                       <span className="absolute -top-[9px] left-5 block size-4 rotate-45 rounded-tl border-t-2 border-l-2 border-[#e1e1e1] bg-[#f3f3f3] dark:border-[#3e3e3e] dark:bg-[#181818]" />
@@ -615,46 +590,46 @@ export function WindowFrame({
                       </h2>
                       <div className="grid grid-cols-4 items-center gap-5 p-4">
                         <div
-                          onClick={onLeftScreen}
                           className="border-dark-background dark:border-light-background/80 flex h-5 justify-start rounded-sm border-2 p-px"
+                          onClick={onLeftScreen}
                         >
-                          <div className="bg-dark-background dark:bg-light-background/80 h-full w-1/2 rounded-xs"></div>
+                          <div className="bg-dark-background dark:bg-light-background/80 h-full w-1/2 rounded-xs" />
                         </div>
                         <div
-                          onClick={onRightScreen}
                           className="border-dark-background dark:border-light-background/80 flex h-5 justify-end rounded-sm border-2 p-px"
+                          onClick={onRightScreen}
                         >
-                          <div className="bg-dark-background dark:bg-light-background/80 h-full w-1/2 rounded-xs"></div>
+                          <div className="bg-dark-background dark:bg-light-background/80 h-full w-1/2 rounded-xs" />
                         </div>
                         <div
-                          onClick={onTopScreen}
                           className="border-dark-background dark:border-light-background/80 flex h-5 items-start rounded-sm border-2 p-px"
+                          onClick={onTopScreen}
                         >
-                          <div className="bg-dark-background dark:bg-light-background/80 h-1/2 w-full rounded-xs"></div>
+                          <div className="bg-dark-background dark:bg-light-background/80 h-1/2 w-full rounded-xs" />
                         </div>
                         <div
-                          onClick={onBottomScreen}
                           className="border-dark-background dark:border-light-background/80 flex h-5 items-end rounded-sm border-2 p-px"
+                          onClick={onBottomScreen}
                         >
-                          <div className="bg-dark-background dark:bg-light-background/80 h-1/2 w-full rounded-xs"></div>
+                          <div className="bg-dark-background dark:bg-light-background/80 h-1/2 w-full rounded-xs" />
                         </div>
                       </div>
                       <div className="mb-1 h-px bg-[#bbb] dark:bg-[#5b5b5b]" />
                       <div>
                         <div
-                          onClick={onFullScreen}
                           className="bg-primary flex w-full items-center justify-between rounded-md px-2 py-[2px] text-sm text-white"
+                          onClick={onFullScreen}
                         >
                           <span>
                             {isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
                           </span>
-                          <IconChevronRight stroke={2} className="size-5" />
+                          <IconChevronRight className="size-5" stroke={2} />
                         </div>
                       </div>
                     </div>
                   </div>
-                </button>
-              </>
+                }
+              />
             )}
           </div>
           {!enableSidebar && (
