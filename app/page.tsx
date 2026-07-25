@@ -42,32 +42,30 @@ export default function Home() {
     null
   )
   const { desktop } = useSelector((state) => state.settings)
-  const [ctxPosition, setCtxPosition] = useState<{ x: number; y: number } | null>(
-    null
-  )
+  const [ctxPosition, setCtxPosition] = useState<{
+    x: number
+    y: number
+  } | null>(null)
   const bodyRef = useRef<HTMLDivElement>(null)
   const loaderRef = useRef<HTMLDivElement>(null)
   const dispatch = useDispatch()
 
-  const handleContextMenu = useCallback(
-    (event: MouseEvent<HTMLDivElement>) => {
-      event.preventDefault()
-      event.stopPropagation()
-      
-      const menuWidth = 256
-      const menuHeight = 294
-      const coX =
-        window.innerWidth - event.clientX > menuWidth
-          ? event.clientX
-          : event.clientX - menuWidth
-      const coY =
-        window.innerHeight - event.clientY > menuHeight
-          ? event.clientY
-          : event.clientY - menuHeight
-      setCtxPosition({ x: coX, y: coY })
-    },
-    []
-  )
+  const handleContextMenu = useCallback((event: MouseEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    const menuWidth = 256
+    const menuHeight = 294
+    const coX =
+      window.innerWidth - event.clientX > menuWidth
+        ? event.clientX
+        : event.clientX - menuWidth
+    const coY =
+      window.innerHeight - event.clientY > menuHeight
+        ? event.clientY
+        : event.clientY - menuHeight
+    setCtxPosition({ x: coX, y: coY })
+  }, [])
 
   useEffect(() => {
     const onCloseCtx = (event: globalThis.MouseEvent) => {
@@ -103,9 +101,7 @@ export default function Home() {
   useEffect(() => {
     const onFullscreen = () => {
       dispatch(
-        setScreenMode(
-          document.fullscreenElement ? 'fullscreen' : 'default'
-        )
+        setScreenMode(document.fullscreenElement ? 'fullscreen' : 'default')
       )
     }
 
@@ -144,9 +140,9 @@ export default function Home() {
   return (
     <>
       {screen === 'loading' && (
-        <div className="fixed inset-0 z-9999 flex flex-col items-center justify-center gap-5 bg-black overflow-x-hidden">
-          <FaApple className="text-6xl sm:text-8xl text-white" />
-          <div className="h-[5px] w-36 sm:w-44 rounded-full bg-[#414141]">
+        <div className="fixed inset-0 z-9999 flex flex-col items-center justify-center gap-5 overflow-x-hidden bg-black">
+          <FaApple className="text-6xl text-white sm:text-8xl" />
+          <div className="h-[5px] w-36 rounded-full bg-[#414141] sm:w-44">
             <div ref={loaderRef} className="h-full w-0 rounded-full bg-white" />
           </div>
         </div>
@@ -164,25 +160,27 @@ export default function Home() {
         <div
           ref={bodyRef}
           onContextMenu={handleContextMenu}
-          className="h-[calc(100vh-28px)] overflow-auto"
+          className="h-[calc(100vh-28px)] overflow-hidden"
         >
-          <div
-            className={`flex flex-wrap ${
-              desktop.view === 'vertical'
-                ? 'h-full w-fit flex-col pb-10'
-                : 'h-fit w-full p-2 sm:p-4'
-            }`}
-          >
-            {sortedFolders.map((folder) => (
-              <Folder
-                status={folder.status}
-                onMinimizeRestore={folder.onMinimizeRestore}
-                id={folder.id}
-                name={folder.name}
-                key={folder.name}
-                type={folder.type}
-              />
-            ))}
+          <div className="h-full overflow-auto">
+            <div
+              className={`flex flex-wrap ${
+                desktop.view === 'vertical'
+                  ? 'h-full w-fit flex-col pb-10'
+                  : 'h-fit w-full p-2 sm:p-4'
+              }`}
+            >
+              {sortedFolders.map((folder) => (
+                <Folder
+                  status={folder.status}
+                  onMinimizeRestore={folder.onMinimizeRestore}
+                  id={folder.id}
+                  name={folder.name}
+                  key={folder.name}
+                  type={folder.type}
+                />
+              ))}
+            </div>
           </div>
 
           {ctxPosition && <ContextMenu position={ctxPosition} />}
@@ -228,7 +226,6 @@ export default function Home() {
               frame.id === 'skills' ||
               frame.id === 'trash' ||
               frame.id === 'inotes' ||
-              frame.id === 'settings' ||
               frame.id === 'messages'
 
             return (
@@ -253,14 +250,14 @@ export default function Home() {
       )}
 
       {screen === 'desktop' && screenSize && !isScreenSizeValid && (
-        <div className="fixed inset-0 z-9999 flex flex-col items-center justify-center gap-4 sm:gap-5 bg-black p-4 overflow-x-hidden">
-          <h1 className="text-base sm:text-lg md:text-2xl font-medium text-white text-center">
+        <div className="fixed inset-0 z-9999 flex flex-col items-center justify-center gap-4 overflow-x-hidden bg-black p-4 sm:gap-5">
+          <h1 className="text-center text-base font-medium text-white sm:text-lg md:text-2xl">
             Screen size too small
           </h1>
-          <h2 className="text-xs sm:text-sm md:text-xl font-medium text-rose-400 text-center">
+          <h2 className="text-center text-xs font-medium text-rose-400 sm:text-sm md:text-xl">
             Minimum: {MIN_SCREEN_WIDTH}x{MIN_SCREEN_HEIGHT}px
           </h2>
-          <h2 className="text-xs sm:text-sm md:text-xl font-medium text-gray-400 text-center">
+          <h2 className="text-center text-xs font-medium text-gray-400 sm:text-sm md:text-xl">
             Current: {screenSize.w}x{screenSize.h}px
           </h2>
         </div>

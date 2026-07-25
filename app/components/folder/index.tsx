@@ -13,7 +13,7 @@ import { Alert } from '../alert'
 import { FolderRename } from './folder-rename'
 import { useClickOutside } from '@/app/hooks/use-click-outside'
 import { addToTrash } from '@/app/features/trash'
-import { setZIndex } from '@/app/features/settings'
+import { setActiveApp, setZIndex } from '@/app/features/settings'
 
 export function Folder({
   id,
@@ -95,6 +95,15 @@ export function Folder({
     if (status === 'minimize' && onMinimizeRestore) {
       onMinimizeRestore()
     }
+    dispatch(
+      setActiveApp({
+        id,
+        name:
+          id === 'projects' || id === 'skills' || id === 'trash'
+            ? 'Finder'
+            : name,
+      })
+    )
   }
 
   useClickOutside(() => {
@@ -112,7 +121,7 @@ export function Folder({
         onContextMenu={handleContextMenu}
         onDoubleClick={onOpenFolder}
         ref={folderRef}
-        className={`flex w-28 cursor-custom-auto! flex-col items-center border p-4 ${ctxPosition || mode === 'rename' || isSelected ? 'border-[#18779fe0] bg-[#18779f63]' : 'border-transparent'}`}
+        className={`cursor-custom-auto! flex w-28 flex-col items-center border p-4 ${ctxPosition || mode === 'rename' || isSelected ? 'border-[#18779fe0] bg-[#18779f63]' : 'border-transparent'}`}
       >
         <RandomFolder type={type} id={id} />
         {mode === 'rename' ? (

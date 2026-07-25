@@ -1,7 +1,11 @@
 'use client'
 
-import { setZIndex } from '@/app/features/settings'
-import { minimizeFolder, openFolder, FolderControler } from '@/app/features/window-slice'
+import { setActiveApp, setZIndex } from '@/app/features/settings'
+import {
+  minimizeFolder,
+  openFolder,
+  FolderControler,
+} from '@/app/features/window-slice'
 import { useDispatch, useSelector } from '@/app/store'
 import { newIconSrc } from '@/app/utils/icon-paths'
 import acrobat from '@/public/assets/icons/Acrobat.png'
@@ -12,7 +16,8 @@ import { isDesktopDevice } from './dock-magnification'
 import { DockItem } from './dock-item'
 import { LiquidGlassStudio } from '../ui/liquid-glass-studio'
 
-const NEW_STYLE_DOCK_ICON_CLASS = 'object-contain object-center p-[4px] sm:p-[5px]'
+const NEW_STYLE_DOCK_ICON_CLASS =
+  'object-contain object-center p-[4px] sm:p-[5px]'
 
 const getFolderIcon = (type: string, id: string): string | null => {
   if (type === 'folder') {
@@ -48,13 +53,28 @@ interface DockIcon {
 
 const HIDDEN_DOCK_THRESHOLD = 30
 
+const getWindowApp = (folder: FolderControler) => ({
+  id: folder.id,
+  name:
+    folder.id === 'projects' || folder.id === 'skills' || folder.id === 'trash'
+      ? 'Finder'
+      : folder.name,
+})
+
 export default function AppTray() {
   const folders = useSelector((state) => state.windowFrame)
-  const minimizeFolders = folders.filter(
-    (folder) => folder.status !== 'close' && folder.placement === 'desktop'
-  )
   const dispatch = useDispatch()
   const taskbarApps = folders.filter((f) => f.placement === 'taskbar')
+  const finderFolder =
+    folders.find((folder) => folder.id === 'projects') ??
+    folders.find((folder) => folder.id === 'skills') ??
+    folders.find((folder) => folder.id === 'trash')
+  const minimizeFolders = folders.filter(
+    (folder) =>
+      folder.id !== finderFolder?.id &&
+      folder.status !== 'close' &&
+      folder.placement === 'desktop'
+  )
   const { zIndex } = useSelector((state) => state.settings)
 
   const [mouseX, setMouseX] = useState<number | null>(null)
@@ -67,7 +87,9 @@ export default function AppTray() {
 
   useEffect(() => {
     setIsDesktop(isDesktopDevice())
-    const mediaQuery = window.matchMedia('(min-width: 768px) and (pointer: fine)')
+    const mediaQuery = window.matchMedia(
+      '(min-width: 768px) and (pointer: fine)'
+    )
     const handleChange = () => setIsDesktop(mediaQuery.matches)
     mediaQuery.addEventListener('change', handleChange)
     return () => mediaQuery.removeEventListener('change', handleChange)
@@ -122,11 +144,17 @@ export default function AppTray() {
   const handleFolderClick = useCallback(
     (folder: FolderControler) => {
       if (folder.status === 'open') {
-        dispatch(minimizeFolder({ id: folder.id, onRestore: folder.onMinimizeRestore || (() => {}) }))
+        dispatch(
+          minimizeFolder({
+            id: folder.id,
+            onRestore: folder.onMinimizeRestore || (() => {}),
+          })
+        )
       } else {
         dispatch(setZIndex(zIndex + 1))
         dispatch(openFolder(folder.id))
         folder.onMinimizeRestore?.()
+        dispatch(setActiveApp(getWindowApp(folder)))
       }
     },
     [dispatch, zIndex]
@@ -139,6 +167,12 @@ export default function AppTray() {
         type: 'static',
         name: 'Finder',
         iconSrc: newIconSrc.finder,
+        onClick: finderFolder
+          ? () => handleFolderClick(finderFolder)
+          : undefined,
+        showIndicator:
+          finderFolder?.status === 'open' ||
+          finderFolder?.status === 'minimize',
         customClassName: NEW_STYLE_DOCK_ICON_CLASS,
       },
     ]
@@ -154,7 +188,8 @@ export default function AppTray() {
           iconSrc,
           folder,
           onClick: () => handleFolderClick(folder),
-          showIndicator: folder.status === 'open' || folder.status === 'minimize',
+          showIndicator:
+            folder.status === 'open' || folder.status === 'minimize',
           customClassName: isNewStyleIcon(iconSrc)
             ? NEW_STYLE_DOCK_ICON_CLASS
             : undefined,
@@ -178,8 +213,10 @@ export default function AppTray() {
         folder,
         onClick: () => {
           if (folder.status === 'open') return
+          dispatch(setZIndex(zIndex + 1))
           dispatch(openFolder(folder.id))
           folder.onMinimizeRestore?.()
+          dispatch(setActiveApp(getWindowApp(folder)))
         },
         showIndicator: true,
         customClassName:
@@ -191,10 +228,23 @@ export default function AppTray() {
       })
     })
 
-    icons.push({ id: 'github', type: 'link', name: 'Github', iconSrc: null, href: 'https://github.com/Mehdidjah' })
+    icons.push({
+      id: 'github',
+      type: 'link',
+      name: 'Github',
+      iconSrc: null,
+      href: 'https://github.com/Mehdidjah',
+    })
 
     return icons
-  }, [taskbarApps, minimizeFolders, handleFolderClick, dispatch])
+  }, [
+    taskbarApps,
+    minimizeFolders,
+    finderFolder,
+    handleFolderClick,
+    dispatch,
+    zIndex,
+  ])
 
   return (
     <div
@@ -226,29 +276,39 @@ export default function AppTray() {
               className="relative z-10 flex h-full items-end justify-center gap-[3px]"
               style={{ overflow: 'visible' }}
             >
-            {dockIcons.map((icon) => {
-              if (icon.type === 'link' && icon.href) {
+              {dockIcons.map((icon) => {
+                if (icon.type === 'link' && icon.href) {
+                  return (
+                    <DockItem
+                      key={icon.id}
+                      mouseX={isDesktop ? mouseX : null}
+                      iconSrc={null}
+                      name={icon.name}
+                      href={icon.href}
+                      isLink
+                    >
+                      <IconBrandGithub
+                        stroke={1.4}
+                        className="size-8 text-white/95"
+                      />
+                    </DockItem>
+                  )
+                }
+
+                if (!icon.iconSrc) return null
+
                 return (
-                  <DockItem key={icon.id} mouseX={isDesktop ? mouseX : null} iconSrc={null} name={icon.name} href={icon.href} isLink>
-                    <IconBrandGithub stroke={1.4} className="size-8 text-white/95" />
-                  </DockItem>
+                  <DockItem
+                    key={icon.id}
+                    mouseX={isDesktop ? mouseX : null}
+                    iconSrc={icon.iconSrc}
+                    name={icon.name}
+                    onClick={icon.onClick}
+                    showIndicator={icon.showIndicator}
+                    customClassName={icon.customClassName}
+                  />
                 )
-              }
-
-              if (!icon.iconSrc) return null
-
-              return (
-                <DockItem
-                  key={icon.id}
-                  mouseX={isDesktop ? mouseX : null}
-                  iconSrc={icon.iconSrc}
-                  name={icon.name}
-                  onClick={icon.onClick}
-                  showIndicator={icon.showIndicator}
-                  customClassName={icon.customClassName}
-                />
-              )
-            })}
+              })}
             </div>
           </div>
         </LiquidGlassStudio>
