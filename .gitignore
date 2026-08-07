@@ -19,6 +19,7 @@
 # misc
 .DS_Store
 *.pem
+/registry/
 
 # debug
 npm-debug.log*

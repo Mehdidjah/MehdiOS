@@ -23,7 +23,7 @@ import {
   IoColorPaletteOutline,
   IoPowerOutline,
 } from 'react-icons/io5'
-import { BlurFade } from '@/registry/magicui/blur-fade'
+import { BlurFade } from '@/app/components/ui/blur-fade'
 import { LiquidGlassStudio } from '../ui/liquid-glass-studio'
 import { AnimatePresence, motion } from 'framer-motion'
 import { TaskbarClock } from '../taskbar/clock'
